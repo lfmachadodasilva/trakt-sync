@@ -10,6 +10,9 @@ export interface EmbyWebhook {
     Name: string;
     Id: string;
     ProviderIds: Record<string, string>;
+    IndexNumber?: number;
+    ParentIndexNumber?: number;
+    Type: string;
   };
   Server: Record<string, string>;
 }
