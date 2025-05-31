@@ -8,6 +8,10 @@ import { markEmbyItemAsWatched } from "@/clients/emby/markWatched";
 
 const logPrefix = "sync all emby -";
 export async function syncAllEmby(data: SyncData, trakt: TraktWatched) {
+  if (!data.emby) {
+    throw new Error("Emby data is required for syncAllEmby");
+  }
+
   console.log(`${logPrefix} syncing all emby items with trakt...`);
   const emby = await getEmbyAllItems(
     data.emby.baseUrl,
@@ -29,6 +33,10 @@ const syncAllEmbyMovies = async (
   embyMovies: EmbyItemResponse[],
   traktMovies: TraktWatchedResponse[]
 ) => {
+  if (!data.emby) {
+    throw new Error("Emby data is required for syncAllEmbyMovies");
+  }
+
   console.log(`${logPrefix} syncing emby movies with trakt...`);
 
   const trakt = traktMoviesByImdbId(traktMovies);
@@ -91,6 +99,10 @@ const syncAllEmbyShows = async (
   embySeries: EmbyItemResponse[],
   traktShows: TraktWatchedResponse[]
 ) => {
+  if (!data.emby) {
+    throw new Error("Emby data is required for syncAllEmbyShows");
+  }
+
   // TODO - Implement sync logic for Emby series with Trakt watched shows 🚧
   console.debug(
     `${logPrefix} syncing emby series with trakt ... ${data.emby.userId} ${embySeries.length} ${traktShows.length}`

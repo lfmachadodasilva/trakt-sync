@@ -1,6 +1,7 @@
 export interface TraktSyncData {
   clientId: string;
   token: string;
+  redirectUrl: string;
 }
 
 export interface EmbySyncData {
@@ -20,8 +21,8 @@ export interface JellyfinSyncData {
 }
 
 export interface SyncData {
-  trakt: TraktSyncData;
-  emby: EmbySyncData;
-  plex: PlexSyncData;
+  trakt?: TraktSyncData;
+  emby?: EmbySyncData;
+  plex?: PlexSyncData;
   jellyfin?: JellyfinSyncData;
 }

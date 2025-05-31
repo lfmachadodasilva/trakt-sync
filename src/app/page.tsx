@@ -1,7 +1,7 @@
 "use client";
-import { SyncData } from "@/features/models";
 
-import { handleSyncAllAction } from "./actions";
+import { SyncData } from "@/features/models";
+import { syncAll } from "@/features/syncAll";
 
 export default function Home() {
   const embyUserId = "aac3a78d9f184ea480fb1629e76aad57";
@@ -11,6 +11,7 @@ export default function Home() {
     "eb4ede9a384157e9aa60aad8c72c36c0485215659c82ad7b1fe965359a55caf4";
   const traktToken =
     "fb386d3c6fcbf20104a33b0687953e43ade6469dff4123bdd032eb88f7d53d1c";
+  const traktRedirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
   const syncData = {
     emby: {
@@ -21,11 +22,12 @@ export default function Home() {
     trakt: {
       clientId: traktClientId,
       token: traktToken,
+      redirectUrl: traktRedirectUrl,
     },
   } as SyncData;
 
   const handleSyncAll = async () => {
-    await handleSyncAllAction(syncData);
+    await syncAll(syncData);
   };
 
   return (
