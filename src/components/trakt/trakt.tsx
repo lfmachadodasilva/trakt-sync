@@ -13,7 +13,7 @@ export const Trakt = ({ data }: { data: SyncData }) => {
           Client ID:
           <input
             type="text"
-            value={data.trakt?.clientId}
+            defaultValue={data.trakt?.clientId}
             readOnly
             className="border border-gray-300 rounded p-2 w-full"
           />
@@ -22,7 +22,7 @@ export const Trakt = ({ data }: { data: SyncData }) => {
           Client Secrect:
           <input
             type="password"
-            value={data.trakt?.clientSecret}
+            defaultValue={data.trakt?.clientSecret}
             className="border border-gray-300 rounded p-2 w-full"
           />
         </label>
@@ -45,7 +45,7 @@ export const Trakt = ({ data }: { data: SyncData }) => {
           Access token:
           <input
             type="password"
-            value={data.trakt?.accessToken}
+            defaultValue={data.trakt?.accessToken}
             className="border border-gray-300 rounded p-2 w-full"
           />
         </label>
@@ -53,7 +53,7 @@ export const Trakt = ({ data }: { data: SyncData }) => {
           Refresh token:
           <input
             type="password"
-            value={data.trakt?.refreshToken}
+            defaultValue={data.trakt?.refreshToken}
             className="border border-gray-300 rounded p-2 w-full"
           />
         </label>

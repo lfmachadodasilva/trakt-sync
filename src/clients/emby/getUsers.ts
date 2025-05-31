@@ -17,5 +17,8 @@ export const getEmbyUsers = async (
       }
       return res.json();
     })
-    .then((data) => data as EmbyUserResponse[]);
+    .then((data) => data as EmbyUserResponse[])
+    .catch(() => {
+      return [];
+    });
 };
