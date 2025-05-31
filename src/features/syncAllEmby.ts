@@ -11,6 +11,7 @@ import { traktMoviesByImdbId, traktShowsByImdbId } from "@/utils/trakt";
 import { embyGetImdbId, embyItemsByImdbId } from "@/utils/emby";
 import { markEmbyItemAsWatched } from "@/clients/emby/markWatched";
 import { markTraktAsWatched } from "@/clients/trakt/markAsWatched";
+import { stringify } from "@/utils/stringify";
 
 const logPrefix = "sync all emby -";
 export async function syncAllEmby(data: SyncData, trakt: TraktWatched) {
@@ -47,8 +48,6 @@ const syncAllEmbyMovies = async (
 
   const trakt = traktMoviesByImdbId(traktMovies);
   const emby = embyItemsByImdbId(embyMovies);
-
-  //   console.debug(`${logPrefix} emby movies: ${JSON.stringify(emby, null, 2)}`);
 
   const traktRequest: TraktMarkAsWatchedRequest = {};
 
@@ -99,7 +98,7 @@ const syncAllEmbyMovies = async (
         console.info(
           `${logPrefix} marked emby movie ${embyMovie.Id} - ${
             embyMovie.Name
-          } as watched. Response: ${JSON.stringify(res, null, 2)}`
+          } as watched. Response: ${stringify(res)}`
         );
       } catch (err) {
         console.error(
@@ -199,10 +198,8 @@ const syncAllEmbyShows = async (
             embyEpisode.Id
           );
           console.info(
-            `${logPrefix} marked emby S${embySeasonIdx}E${embyEpisodeIdx} as watched. Response: ${JSON.stringify(
-              res,
-              null,
-              2
+            `${logPrefix} marked emby S${embySeasonIdx}E${embyEpisodeIdx} as watched. Response: ${stringify(
+              res
             )}`
           );
         } catch (err) {
@@ -274,11 +271,7 @@ const syncAllEmbyShows = async (
     console.debug(
       `${logPrefix} successfully marked ${
         traktRequest?.shows?.length ?? 0
-      } shows as watched in Trakt. Response: ${JSON.stringify(
-        traktResult,
-        null,
-        2
-      )}`
+      } shows as watched in Trakt. Response: ${stringify(traktResult)}`
     );
   }
 };

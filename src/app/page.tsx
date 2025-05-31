@@ -6,6 +6,7 @@ import { Trakt } from "@/components/trakt/trakt";
 import { getConfig, upsertConfig } from "@/data/config";
 import { SyncData } from "@/features/models";
 import { embyGetImdbId } from "@/utils/emby";
+import { stringify } from "@/utils/stringify";
 
 export default async function Home() {
   let syncData: SyncData;
@@ -69,12 +70,10 @@ export default async function Home() {
         <h2>debug</h2>
         {emby && (
           <textarea
-            defaultValue={JSON.stringify(
+            defaultValue={stringify(
               emby.series.filter(
                 (x) => embyGetImdbId(x.ProviderIds) === "tt0386676"
-              ),
-              null,
-              2
+              )
             )}
             readOnly
             style={{ width: "50%", height: "300px" }}
@@ -82,12 +81,8 @@ export default async function Home() {
         )}
         {trakt && (
           <textarea
-            defaultValue={JSON.stringify(
-              trakt.shows.filter((x) =>
-                x.show.ids.imdb.startsWith("tt0386676")
-              ),
-              null,
-              2
+            defaultValue={stringify(
+              trakt.shows.filter((x) => x.show.ids.imdb.startsWith("tt0386676"))
             )}
             readOnly
             style={{ width: "50%", height: "300px" }}
