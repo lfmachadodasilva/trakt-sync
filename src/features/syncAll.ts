@@ -10,7 +10,10 @@ export async function syncAll(data: SyncData) {
   }
 
   console.log("starting sync all...");
-  const trakt = await getTraktAllWatched(data.trakt.token, data.trakt.clientId);
+  const trakt = await getTraktAllWatched(
+    data.trakt.accessToken,
+    data.trakt.clientId
+  );
   console.log("fetched trakt watched items:", {
     movies: trakt.movies.length,
     shows: trakt.shows.length,

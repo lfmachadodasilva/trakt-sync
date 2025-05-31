@@ -1,10 +1,15 @@
 import { getEmbyAllItems } from "@/clients/emby/getItems";
 import { SyncData } from "./models";
-import { TraktWatched, TraktWatchedResponse } from "@/clients/trakt/models";
+import {
+  TraktMarkAsWatchedRequest,
+  TraktWatched,
+  TraktWatchedResponse,
+} from "@/clients/trakt/models";
 import { EmbyItemResponse } from "@/clients/emby/models";
 import { traktMoviesByImdbId } from "@/utils/trakt";
-import { embyItemsByImdbId } from "@/utils/emby";
+import { embyGetImdbId, embyItemsByImdbId } from "@/utils/emby";
 import { markEmbyItemAsWatched } from "@/clients/emby/markWatched";
+import { markTraktAsWatched } from "@/clients/trakt/markAsWatched";
 
 const logPrefix = "sync all emby -";
 export async function syncAllEmby(data: SyncData, trakt: TraktWatched) {
@@ -44,6 +49,8 @@ const syncAllEmbyMovies = async (
 
   //   console.debug(`${logPrefix} emby movies: ${JSON.stringify(emby, null, 2)}`);
 
+  const traktRequest: TraktMarkAsWatchedRequest = {};
+
   for (const key of Object.keys(emby)) {
     console.log(`${logPrefix} syncing movie with key: ${key}`);
 
@@ -62,6 +69,19 @@ const syncAllEmbyMovies = async (
       console.debug(
         `${logPrefix} trakt movie not found for emby movie ${embyMovie.Id} - ${embyMovie.Name}, but it is marked as watched in emby 🚧`
       );
+      const imdbId = embyGetImdbId(embyMovie.ProviderIds);
+      if (imdbId) {
+        traktRequest.movies ??= [];
+        traktRequest.movies.push({
+          ids: { imdb: imdbId },
+          watched_at: new Date(),
+        });
+      } else {
+        console.warn(
+          `${logPrefix} emby movie ${embyMovie.Id} - ${embyMovie.Name} does not have an IMDB ID, cannot mark as watched in Trakt.`
+        );
+      }
+
       continue;
     }
 
@@ -91,6 +111,33 @@ const syncAllEmbyMovies = async (
     }
 
     console.debug(`${logPrefix} ${key} - ${embyMovie.Name} no action taken.`);
+  }
+
+  if (traktRequest.movies && traktRequest.movies.length > 0) {
+    console.log(
+      `${logPrefix} marking ${traktRequest.movies.length} movies as watched in Trakt...`
+    );
+
+    if (!data.trakt?.clientId || !data.trakt?.accessToken) {
+      console.error(
+        `${logPrefix} Trakt clientId or accessToken is missing, cannot mark movies as watched.`
+      );
+      return;
+    }
+
+    await markTraktAsWatched(
+      traktRequest,
+      data.trakt.clientId,
+      data.trakt.accessToken
+    );
+
+    console.log(
+      `${logPrefix} successfully marked ${
+        traktRequest?.movies?.length ?? 0
+      } movies as watched in Trakt.`
+    );
+  } else {
+    console.log(`${logPrefix} no movies to mark as watched in Trakt.`);
   }
 };
 

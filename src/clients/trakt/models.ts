@@ -35,3 +35,26 @@ export interface TraktAuthResponse {
   scope: string;
   created_at: number;
 }
+
+export interface TraktMarkAsWatchedRequest {
+  movies?: { ids: { imdb: string }; watched_at: Date }[];
+  shows?: {
+    ids: { imdb: string };
+    seasons?: {
+      watched_at: Date;
+      number: number;
+      episodes?: { ids: { imdb: string; watched_at: Date } }[];
+    }[];
+  }[];
+}
+
+export interface TraktMarkAsWatchedResponse {
+  added: {
+    movies: number;
+    episodes: number;
+  };
+  updated: {
+    movies: number;
+    episodes: number;
+  };
+}

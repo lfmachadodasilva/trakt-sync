@@ -36,3 +36,10 @@ export interface EmbyItems {
   movies: EmbyItemResponse[];
   series: EmbyItemResponse[];
 }
+
+export interface EmbyUserResponse {
+  Id: string;
+  Name: string;
+  ServerId: string;
+  Prefix: string;
+}

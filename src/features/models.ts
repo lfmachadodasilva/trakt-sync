@@ -1,6 +1,9 @@
 export interface TraktSyncData {
   clientId: string;
-  token: string;
+  clientSecret: string;
+  accessToken: string;
+  refreshToken: string;
+  code: string;
   redirectUrl: string;
 }
 
