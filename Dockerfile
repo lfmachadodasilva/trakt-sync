@@ -1,29 +1,24 @@
-# Use Node.js Alpine version 23 as the base image
 FROM node:23-alpine
 
-# Set the working directory
 WORKDIR /app
 
-# Install Bun and other dependencies
-RUN apk add --no-cache curl bash && \
-    curl -fsSL https://bun.sh/install | bash && \
-    apk del curl
+ENV NODE_ENV=production
+# Uncomment the following line in case you want to disable telemetry during runtime.
+# ENV NEXT_TELEMETRY_DISABLED=1
 
-# Add Bun to PATH
-ENV PATH="/root/.bun/bin:$PATH"
+COPY .next/standalone ./
+COPY .next/static ./.next/static
 
-# Copy package files and install dependencies
-COPY package.json bun.lock ./
-RUN bun install
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+USER nextjs
 
-# Copy the rest of the application files
-COPY . .
-
-# Build the application
-RUN bun run build
-
-# Expose the application on port 3000
 EXPOSE 3000
+ENV PORT=3000
+
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
+ENV HOSTNAME="0.0.0.0"
 
 # Start the application
-CMD ["bun", "run", "start"]
+CMD ["node", "server.js"]

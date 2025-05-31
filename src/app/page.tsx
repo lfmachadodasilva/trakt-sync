@@ -31,7 +31,13 @@ export default async function Home() {
         redirectUrl: "urn:ietf:wg:oauth:2.0:oob",
       },
     } as SyncData;
-    await upsertConfig(syncData);
+    try {
+      await upsertConfig(syncData);
+    } catch {
+      console.error(
+        "Failed to save default sync data. Please check your database connection."
+      );
+    }
   }
 
   const emby =

@@ -29,7 +29,7 @@ export async function syncAllEmby(data: SyncData, trakt: TraktWatched) {
     series: emby.series.length,
   });
   await Promise.all([
-    // syncAllEmbyMovies(data, emby.movies, trakt.movies),
+    syncAllEmbyMovies(data, emby.movies, trakt.movies),
     syncAllEmbyShows(data, emby.series, trakt.shows),
   ]);
 }
