@@ -10,3 +10,14 @@ export const traktMoviesByImdbId = (
     }
     return acc;
   }, {});
+
+export const traktShowsByImdbId = (
+  traktMovies: TraktWatchedResponse[]
+): Record<string, TraktWatchedResponse> =>
+  traktMovies.reduce<Record<string, TraktWatchedResponse>>((acc, show) => {
+    const imdbId = show.show?.ids?.imdb;
+    if (imdbId) {
+      acc[imdbId] = show;
+    }
+    return acc;
+  }, {});

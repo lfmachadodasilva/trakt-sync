@@ -4,9 +4,10 @@ import {
   TraktMarkAsWatchedRequest,
   TraktWatched,
   TraktWatchedResponse,
+  TraktWatchedSeasonResponse,
 } from "@/clients/trakt/models";
 import { EmbyItemResponse } from "@/clients/emby/models";
-import { traktMoviesByImdbId } from "@/utils/trakt";
+import { traktMoviesByImdbId, traktShowsByImdbId } from "@/utils/trakt";
 import { embyGetImdbId, embyItemsByImdbId } from "@/utils/emby";
 import { markEmbyItemAsWatched } from "@/clients/emby/markWatched";
 import { markTraktAsWatched } from "@/clients/trakt/markAsWatched";
@@ -28,7 +29,7 @@ export async function syncAllEmby(data: SyncData, trakt: TraktWatched) {
     series: emby.series.length,
   });
   await Promise.all([
-    syncAllEmbyMovies(data, emby.movies, trakt.movies),
+    // syncAllEmbyMovies(data, emby.movies, trakt.movies),
     syncAllEmbyShows(data, emby.series, trakt.shows),
   ]);
 }
@@ -150,8 +151,150 @@ const syncAllEmbyShows = async (
     throw new Error("Emby data is required for syncAllEmbyShows");
   }
 
-  // TODO - Implement sync logic for Emby series with Trakt watched shows 🚧
-  console.debug(
-    `${logPrefix} syncing emby series with trakt ... ${data.emby.userId} ${embySeries.length} ${traktShows.length}`
-  );
+  console.log(`${logPrefix} syncing emby tvshows with trakt...`);
+
+  const trakt = traktShowsByImdbId(traktShows);
+  const emby = embyItemsByImdbId(embySeries);
+
+  const traktRequest: TraktMarkAsWatchedRequest = {};
+
+  for (const imdbId of Object.keys(emby)) {
+    const traktShow = trakt[imdbId];
+    const embySerie = emby[imdbId];
+
+    if (!traktShow && !embySerie) {
+      // If either does not exist, log the missing item
+      console.error(`${logPrefix} missing both: ${imdbId}`);
+      continue;
+    }
+
+    console.debug(
+      `${logPrefix} start syncing show: ${JSON.stringify({
+        name: embySerie.Name,
+        imdbId,
+      })}`
+    );
+
+    if (!embySerie.Episodes) {
+      continue; // Skip if no episodes are available
+    }
+    const traktEpisodes = transformTraktEpisodes(traktShow?.seasons);
+
+    for (const embyEpisode of embySerie.Episodes) {
+      const embySeasonIdx = embyEpisode.ParentIndexNumber ?? 0;
+      const embyEpisodeIdx = embyEpisode.IndexNumber ?? 0;
+      const embyEpisodePayed = embyEpisode.UserData?.Played ?? false;
+
+      if (traktEpisodes[embySeasonIdx]?.[embyEpisodeIdx] && !embyEpisodePayed) {
+        // Watched on trakt, but not played in Emby
+        console.debug(
+          `${logPrefix} trakt episode ${imdbId} S${embySeasonIdx}E${embyEpisodeIdx} is watched, but not played in Emby. Marking Emby episode as watched.`
+        );
+
+        try {
+          const res = await markEmbyItemAsWatched(
+            data.emby.baseUrl,
+            data.emby.apiKey,
+            data.emby.userId,
+            embyEpisode.Id
+          );
+          console.info(
+            `${logPrefix} marked emby S${embySeasonIdx}E${embyEpisodeIdx} as watched. Response: ${JSON.stringify(
+              res,
+              null,
+              2
+            )}`
+          );
+        } catch (err) {
+          console.error(
+            `${logPrefix} error marking emby episode ${embyEpisode.Id} - ${
+              embyEpisode.Name
+            } as watched: ${err instanceof Error ? err.message : err}`
+          );
+        }
+        continue;
+      }
+
+      if (embyEpisodePayed && !traktEpisodes[embySeasonIdx]?.[embyEpisodeIdx]) {
+        // Not watched on trakt, but watched in Emby
+        console.debug(
+          `${logPrefix} emby episode ${imdbId} ${embySerie.Name} S${embySeasonIdx}E${embyEpisodeIdx} is played, but not watched on trakt. Marking trakt episode as watched.`
+        );
+        traktRequest.shows ??= [];
+        let tmp1 = traktRequest.shows.find((x) => x.ids.imdb === imdbId);
+        if (!tmp1) {
+          tmp1 = {
+            ids: { imdb: imdbId },
+            seasons: [],
+          };
+          traktRequest.shows.push(tmp1);
+        }
+        let tmp2 = tmp1.seasons?.find((x) => x.number === embySeasonIdx);
+        if (!tmp2) {
+          tmp2 = {
+            number: embySeasonIdx,
+            episodes: [],
+            watched_at: new Date(),
+          };
+          tmp1?.seasons?.push(tmp2);
+        }
+        let tmp3 = tmp2.episodes?.find((x) => x.number === embyEpisodeIdx);
+        if (!tmp3) {
+          tmp3 = {
+            number: embyEpisodeIdx,
+            watched_at: new Date(),
+          };
+          tmp2?.episodes?.push(tmp3);
+        }
+
+        continue;
+      }
+    }
+  }
+
+  if (traktRequest?.shows && traktRequest?.shows?.length > 0) {
+    if (!data.trakt?.clientId || !data.trakt?.accessToken) {
+      console.error(
+        `${logPrefix} Trakt clientId or accessToken is missing, cannot mark shows as watched.`
+      );
+      return;
+    }
+
+    console.debug(
+      `${logPrefix} marking ${traktRequest.shows.length} shows as watched in Trakt...`
+    );
+    const traktResult = await markTraktAsWatched(
+      traktRequest,
+      data.trakt?.clientId,
+      data.trakt?.accessToken
+    );
+    // meh, just ignore not found
+    traktResult.not_found = undefined;
+
+    console.debug(
+      `${logPrefix} successfully marked ${
+        traktRequest?.shows?.length ?? 0
+      } shows as watched in Trakt. Response: ${JSON.stringify(
+        traktResult,
+        null,
+        2
+      )}`
+    );
+  }
+};
+
+const transformTraktEpisodes = (seasons: TraktWatchedSeasonResponse[]) => {
+  const episodeMap: Record<number, Record<number, boolean>> = {};
+
+  seasons?.forEach((season) => {
+    const seasonNumber = season.number;
+    episodeMap[seasonNumber] = {};
+
+    season.episodes.forEach((episode) => {
+      const episodeNumber = episode.number;
+      episodeMap[seasonNumber][episodeNumber] = true;
+    });
+  });
+
+  return episodeMap;
 };

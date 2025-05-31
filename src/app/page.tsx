@@ -1,8 +1,11 @@
+import { getEmbyAllItems } from "@/clients/emby/getItems";
+import { getTraktAllWatched } from "@/clients/trakt/getWatched";
 import { Emby } from "@/components/emby/emby";
 import { RunAll } from "@/components/runAll";
 import { Trakt } from "@/components/trakt/trakt";
 import { getConfig, upsertConfig } from "@/data/config";
 import { SyncData } from "@/features/models";
+import { embyGetImdbId } from "@/utils/emby";
 
 export default async function Home() {
   let syncData: SyncData;
@@ -31,6 +34,20 @@ export default async function Home() {
     await upsertConfig(syncData);
   }
 
+  const emby =
+    syncData.emby &&
+    (await getEmbyAllItems(
+      syncData.emby.baseUrl,
+      syncData.emby.apiKey,
+      syncData.emby.userId
+    ));
+  const trakt =
+    syncData.trakt &&
+    (await getTraktAllWatched(
+      syncData.trakt.accessToken,
+      syncData.trakt.clientId
+    ));
+
   return (
     <div>
       <h1>Welcome to Trakt Sync</h1>
@@ -41,6 +58,36 @@ export default async function Home() {
       <Emby data={syncData} />
       <br></br>
       <RunAll data={syncData} />
+
+      <div className="border-white border-2 p-4 rounded-lg">
+        <h2>debug</h2>
+        {emby && (
+          <textarea
+            defaultValue={JSON.stringify(
+              emby.series.filter(
+                (x) => embyGetImdbId(x.ProviderIds) === "tt0386676"
+              ),
+              null,
+              2
+            )}
+            readOnly
+            style={{ width: "50%", height: "300px" }}
+          />
+        )}
+        {trakt && (
+          <textarea
+            defaultValue={JSON.stringify(
+              trakt.shows.filter((x) =>
+                x.show.ids.imdb.startsWith("tt0386676")
+              ),
+              null,
+              2
+            )}
+            readOnly
+            style={{ width: "50%", height: "300px" }}
+          />
+        )}
+      </div>
     </div>
   );
 }

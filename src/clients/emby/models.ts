@@ -29,7 +29,9 @@ export interface EmbyItemResponse {
   ServerId: string;
   UserData: { Played: boolean };
   ProviderIds: Record<string, string>;
-  Episodes: EmbyItemResponse[];
+  ParentIndexNumber?: number;
+  IndexNumber?: number;
+  Episodes?: EmbyItemResponse[];
 }
 
 export interface EmbyItems {

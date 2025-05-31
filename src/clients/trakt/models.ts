@@ -8,18 +8,20 @@ export interface TraktTypeWatched {
   };
 }
 
+export interface TraktWatchedSeasonResponse {
+  number: number;
+  episodes: {
+    number: number;
+    last_watched_at: Date;
+  }[];
+}
+
 export interface TraktWatchedResponse {
   last_watched_at: Date;
   last_updated_at: Date;
   movie: TraktTypeWatched;
   show: TraktTypeWatched;
-  seasons: {
-    number: number;
-    episodes: {
-      number: number;
-      last_watched_at: Date;
-    }[];
-  }[];
+  seasons: TraktWatchedSeasonResponse[];
 }
 
 export interface TraktWatched {
@@ -43,7 +45,7 @@ export interface TraktMarkAsWatchedRequest {
     seasons?: {
       watched_at: Date;
       number: number;
-      episodes?: { ids: { imdb: string; watched_at: Date } }[];
+      episodes?: { number: number; watched_at: Date }[];
     }[];
   }[];
 }
@@ -57,4 +59,5 @@ export interface TraktMarkAsWatchedResponse {
     movies: number;
     episodes: number;
   };
+  not_found?: object;
 }
