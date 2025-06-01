@@ -68,7 +68,7 @@ func getWatchedGeneric(config *config.ConfigEntity, mediaType string) (*[]TraktW
 
 	url := TraktApiUrl + "/sync/watched/" + mediaType
 
-	response, err := utils.Get[[]TraktWatchedResponse](url, config, addTraktHeaders)
+	response, err := utils.HttpGet[[]TraktWatchedResponse](url, config, addTraktHeaders)
 	if err != nil {
 		return nil, err
 	}

@@ -91,7 +91,7 @@ func FetchEmbyItems(config *config.ConfigEntity, itemType string) ([]EmbyItemRes
 	preUrl := "%s/Users/%s/Items?IncludeItemTypes=%s&Recursive=true&Fields=ProviderIds"
 	url := fmt.Sprintf(preUrl, config.Emby.BaseURL, config.Emby.UserID, itemType)
 
-	items, err := utils.Get[EmbyItemsResponse](url, config, addEmbyHeaders)
+	items, err := utils.HttpGet[EmbyItemsResponse](url, config, addEmbyHeaders)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Emby items: %w", err)
 	}
@@ -124,7 +124,7 @@ func fetchEmbyEpisodes(config *config.ConfigEntity, embyId *string) ([]EmbyItemR
 	preUrl := "%s/Shows/%s/Episodes?&Recursive=true&EnableUserData=true&Fields=ProviderIds&UserId=%s"
 	url := fmt.Sprintf(preUrl, config.Emby.BaseURL, *embyId, config.Emby.UserID)
 
-	items, err := utils.Get[EmbyItemsResponse](url, config, addEmbyHeaders)
+	items, err := utils.HttpGet[EmbyItemsResponse](url, config, addEmbyHeaders)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Emby items: %w", err)
 	}

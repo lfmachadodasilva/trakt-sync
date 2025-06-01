@@ -24,7 +24,7 @@ func FetchEmbyUsers(config *config.ConfigEntity) ([]EmbyUserResponse, error) {
 	// Construct the URL for the GET request
 	url := fmt.Sprintf("%s/Users", config.Emby.BaseURL)
 
-	users, err := utils.Get[[]EmbyUserResponse](url, config, addEmbyHeaders)
+	users, err := utils.HttpGet[[]EmbyUserResponse](url, config, addEmbyHeaders)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Emby users: %w", err)
 	}

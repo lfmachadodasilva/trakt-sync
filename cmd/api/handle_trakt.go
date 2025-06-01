@@ -58,7 +58,18 @@ func HandleTraktCode(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleTraktAuth(w http.ResponseWriter, r *http.Request) {
-	// This function will handle the /trakt/auth endpoint
-	// Implementation goes here
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
+	config, err := config.ReadConfig()
+	if err != nil {
+		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
+		return
+	}
+
+	err = trakt.FetchTraktAuth(&config, r.FormValue("code"))
+	if err != nil {
+		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }
