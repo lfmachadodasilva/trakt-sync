@@ -2,7 +2,7 @@ package emby
 
 import (
 	"fmt"
-	"trakt-sync/internal/models"
+	"trakt-sync/internal/config"
 	"trakt-sync/internal/utils"
 )
 
@@ -14,8 +14,8 @@ type EmbyUserResponse struct {
 	Prefix   string `json:"Prefix"`
 }
 
-// FetchEmbyUsers fetches user information from Emby using the provided models.Config
-func FetchEmbyUsers(config *models.Config) ([]EmbyUserResponse, error) {
+// FetchEmbyUsers fetches user information from Emby using the provided config.Config
+func FetchEmbyUsers(config *config.ConfigEntity) ([]EmbyUserResponse, error) {
 	// Validate the Emby configuration
 	if !config.IsEmbyValid(false) {
 		return nil, fmt.Errorf("Emby configuration is invalid")

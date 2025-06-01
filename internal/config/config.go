@@ -1,15 +1,15 @@
-package database
+package config
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
-	"trakt-sync/internal/models"
+	"trakt-sync/internal/database"
 )
 
-func UpsertConfig(config *models.Config) error {
-	db := GetAndConnect()
+func UpsertConfig(config *ConfigEntity) error {
+	db := database.GetAndConnect()
 
 	if config.Trakt != nil {
 		jsonData, err := json.Marshal(config.Trakt)
@@ -62,55 +62,55 @@ func upsertConfig(db *sql.DB, configType string, configData string) error {
 	return nil
 }
 
-func ReadConfig() (models.Config, error) {
-	db := GetAndConnect()
+func ReadConfig() (ConfigEntity, error) {
+	db := database.GetAndConnect()
 
 	query := `SELECT type, data FROM config`
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Printf("Failed to query configurations: %v", err)
-		return models.Config{}, err
+		return ConfigEntity{}, err
 	}
 
-	config := models.Config{}
+	config := ConfigEntity{}
 
 	for rows.Next() {
 		var configType, configData string
 		if err := rows.Scan(&configType, &configData); err != nil {
 			log.Printf("Failed to scan configuration row: %v", err)
-			return models.Config{}, err
+			return ConfigEntity{}, err
 		}
 
 		switch configType {
 		case "trakt":
 			if err := json.Unmarshal([]byte(configData), &config.Trakt); err != nil {
 				log.Printf("Failed to unmarshal trakt config: %v", err)
-				return models.Config{}, err
+				return ConfigEntity{}, err
 			}
 		case "emby":
 			if err := json.Unmarshal([]byte(configData), &config.Emby); err != nil {
 				log.Printf("Failed to unmarshal emby config: %v", err)
-				return models.Config{}, err
+				return ConfigEntity{}, err
 			}
 		case "plex":
 			if err := json.Unmarshal([]byte(configData), &config.Plex); err != nil {
 				log.Printf("Failed to unmarshal plex config: %v", err)
-				return models.Config{}, err
+				return ConfigEntity{}, err
 			}
 		case "jellyfin":
 			if err := json.Unmarshal([]byte(configData), &config.Jellyfin); err != nil {
 				log.Printf("Failed to unmarshal jellyfin config: %v", err)
-				return models.Config{}, err
+				return ConfigEntity{}, err
 			}
 		default:
 			log.Printf("Unknown config type: %s", configType)
-			return models.Config{}, fmt.Errorf("unknown config type: %s", configType)
+			return ConfigEntity{}, fmt.Errorf("unknown config type: %s", configType)
 		}
 	}
 
 	if err := rows.Err(); err != nil {
 		log.Printf("Error occurred during row iteration: %v", err)
-		return models.Config{}, err
+		return ConfigEntity{}, err
 	}
 
 	return config, nil

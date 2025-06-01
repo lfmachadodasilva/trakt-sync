@@ -3,8 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"trakt-sync/internal/database"
-	"trakt-sync/internal/models"
+	"trakt-sync/internal/config"
 )
 
 func HandleConfig() http.HandlerFunc {
@@ -31,7 +30,7 @@ func HandleConfig() http.HandlerFunc {
 }
 
 func handleGetConfig(w http.ResponseWriter) {
-	config, err := database.ReadConfig()
+	config, err := config.ReadConfig()
 	if err != nil {
 		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
 		return
@@ -49,13 +48,13 @@ func handleGetConfig(w http.ResponseWriter) {
 }
 
 func handlePatchConfig(w http.ResponseWriter, r *http.Request) {
-	var request models.Config
+	var request config.ConfigEntity
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	if err := database.UpsertConfig(&request); err != nil {
+	if err := config.UpsertConfig(&request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

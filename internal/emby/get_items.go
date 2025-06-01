@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"trakt-sync/internal/models"
+	"trakt-sync/internal/config"
 	"trakt-sync/internal/utils"
 )
 
@@ -38,7 +38,7 @@ type EmbyItems struct {
 	Series []EmbyItemResponse
 }
 
-func FetchEmbyItemsFull(config *models.Config) (EmbyItems, error) {
+func FetchEmbyItemsFull(config *config.ConfigEntity) (EmbyItems, error) {
 	var movies []EmbyItemResponse
 	var series []EmbyItemResponse
 	var moviesErr, seriesErr error
@@ -76,7 +76,7 @@ func FetchEmbyItemsFull(config *models.Config) (EmbyItems, error) {
 	}, nil
 }
 
-func FetchEmbyItems(config *models.Config, itemType string) ([]EmbyItemResponse, error) {
+func FetchEmbyItems(config *config.ConfigEntity, itemType string) ([]EmbyItemResponse, error) {
 
 	// Validate the itemType parameter
 	if itemType != "Movie" && itemType != "Series" {
@@ -114,7 +114,7 @@ func FetchEmbyItems(config *models.Config, itemType string) ([]EmbyItemResponse,
 	return items.Items, nil
 }
 
-func fetchEmbyEpisodes(config *models.Config, embyId *string) ([]EmbyItemResponse, error) {
+func fetchEmbyEpisodes(config *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
 
 	// Validate the Emby configuration
 	if !config.IsEmbyValid(false) {
@@ -133,7 +133,7 @@ func fetchEmbyEpisodes(config *models.Config, embyId *string) ([]EmbyItemRespons
 	return items.Items, nil
 }
 
-func addEmbyHeaders(req *http.Request, config *models.Config) {
+func addEmbyHeaders(req *http.Request, config *config.ConfigEntity) {
 	req.Header.Set("X-Emby-Token", config.Emby.APIKey)
 	req.Header.Set("Content-Type", "application/json")
 }

@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"trakt-sync/internal/database"
+	"trakt-sync/internal/config"
 	"trakt-sync/internal/emby"
 )
 
@@ -30,7 +30,7 @@ func HandleEmby() http.HandlerFunc {
 
 func HandleEmbyUsers(w http.ResponseWriter, r *http.Request) {
 
-	config, err := database.ReadConfig()
+	config, err := config.ReadConfig()
 	if err != nil {
 		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
 		return

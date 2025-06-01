@@ -1,4 +1,4 @@
-package models
+package config
 
 import "net/url"
 
@@ -25,14 +25,14 @@ type JellyfinConfig struct {
 	UserID string `json:"user_id,omitempty"`
 }
 
-type Config struct {
+type ConfigEntity struct {
 	Trakt    *TraktConfig    `json:"trakt,omitempty"`
 	Emby     *EmbyConfig     `json:"emby,omitempty"`
 	Plex     *PlexConfig     `json:"plex,omitempty"`
 	Jellyfin *JellyfinConfig `json:"jellyfin,omitempty"`
 }
 
-func (c *Config) IsEmbyValid(ignoreUserId bool) bool {
+func (c *ConfigEntity) IsEmbyValid(ignoreUserId bool) bool {
 	if c.Emby == nil {
 		return false
 	}

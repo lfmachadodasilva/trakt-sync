@@ -3,18 +3,19 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"trakt-sync/internal/config"
 	"trakt-sync/internal/database"
 	"trakt-sync/internal/emby"
 )
 
 func main() {
-	database.InitDatabase() // Initialize the database and create the config table if it does not exist
+	config.InitConfigTable() // Initialize the database and create the config table if it does not exist
 
 	http.HandleFunc("/config", HandleConfig())
 	http.HandleFunc("/emby/", HandleEmby())
 
 	// DEBUG: Fetch Emby items for testing purposes
-	config, err := database.ReadConfig()
+	config, err := config.ReadConfig()
 	if err != nil {
 		fmt.Println("Error reading config:", err)
 		return

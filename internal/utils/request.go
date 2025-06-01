@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"trakt-sync/internal/models"
+	"trakt-sync/internal/config"
 )
 
 // Get performs a GET request and decodes the response into the generic type T.
 // It accepts a function parameter to add headers to the request.
-func Get[T any](url string, config *models.Config, addHeaders func(req *http.Request, config *models.Config)) (*T, error) {
+func Get[T any](url string, config *config.ConfigEntity, addHeaders func(req *http.Request, config *config.ConfigEntity)) (*T, error) {
 	// Construct the HTTP request
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
