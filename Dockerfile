@@ -26,7 +26,7 @@ COPY . .
 
 # Enable CGO and build the Go application
 ENV CGO_ENABLED=1
-RUN go build -o api ./cmd/api/main.go
+RUN go build -o api ./cmd/api/
 
 # Stage 3: Create a minimal runtime image
 FROM alpine:latest
