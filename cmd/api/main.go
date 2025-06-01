@@ -6,6 +6,7 @@ import (
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/database"
 	"trakt-sync/internal/emby"
+	"trakt-sync/internal/trakt"
 )
 
 func main() {
@@ -49,6 +50,12 @@ func main() {
 		return
 	}
 	fmt.Println("Fetched All Emby Items:", items)
+	watched, err := trakt.FetchTraktWatched(&config) // Fetch watched items from Emby
+	if err != nil {
+		fmt.Println("Error fetching watched items:", err)
+		return
+	}
+	fmt.Println("Fetched Watched Items:", watched)
 	// DEBUG END
 
 	// Serve static files from the "static" directory

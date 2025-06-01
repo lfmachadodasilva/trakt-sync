@@ -2,7 +2,6 @@ package emby
 
 import (
 	"fmt"
-	"net/http"
 	"sync"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/utils"
@@ -131,9 +130,4 @@ func fetchEmbyEpisodes(config *config.ConfigEntity, embyId *string) ([]EmbyItemR
 	}
 
 	return items.Items, nil
-}
-
-func addEmbyHeaders(req *http.Request, config *config.ConfigEntity) {
-	req.Header.Set("X-Emby-Token", config.Emby.APIKey)
-	req.Header.Set("Content-Type", "application/json")
 }

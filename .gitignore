@@ -28,6 +28,4 @@ vendor/
 # Debug
 *.log
 
-data
-static
-
+data/
