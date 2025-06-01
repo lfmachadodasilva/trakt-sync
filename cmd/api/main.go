@@ -72,6 +72,10 @@ func main() {
 		}
 	})
 
+	// Serve static files from the "static" directory
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/", fs)
+
 	fmt.Println("Starting server on port 3000...")
 	http.ListenAndServe(":3000", nil)
 }

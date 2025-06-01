@@ -30,4 +30,5 @@ vendor/
 *.log
 
 data/database.db
+static
 
