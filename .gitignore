@@ -29,3 +29,5 @@ vendor/
 # Debug
 *.log
 
+data/database.db
+

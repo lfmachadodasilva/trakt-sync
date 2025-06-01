@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"trakt-sync/internal/database"
 	"trakt-sync/internal/models"
 
@@ -35,7 +36,6 @@ func main() {
 	}
 
 	db := database.Connect()
-
 	configs := map[string]interface{}{
 		"trakt":    config.Trakt,
 		"emby":     config.Emby,
@@ -52,5 +52,26 @@ func main() {
 		database.UpsertConfig(db, key, string(jsonData))
 	}
 
-	fmt.Printf("Config: %+v\n", config)
+	http.HandleFunc("/config", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			configs := map[string]interface{}{
+				"trakt":    config.Trakt,
+				"emby":     config.Emby,
+				"plex":     config.Plex,
+				"jellyfin": config.Jellyfin,
+			}
+			jsonData, err := json.Marshal(configs)
+			if err != nil {
+				http.Error(w, "Failed to marshal configs", http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(jsonData)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	fmt.Println("Starting server on port 3000...")
+	http.ListenAndServe(":3000", nil)
 }
