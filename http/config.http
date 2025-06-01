@@ -11,11 +11,11 @@ Content-Type: application/json
 
 {
   "trakt": {
-    "client_id": "new-client-id",
-    "client_secret": "new-client-secret"
+    "client_id": "eb4ede9a384157e9aa60aad8c72c36c0485215659c82ad7b1fe965359a55caf4",
+    "redirect_url": "urn:ietf:wg:oauth:2.0:oob"
   },
   "emby": {
-    "user_id": "new-user-id",
-    "api_key": "new-api-key"
+    "api_key": "b039ba2b065e4ba1bca2307cce593478",
+    "base_url": "http://192.168.1.13:8096"
   }
 }

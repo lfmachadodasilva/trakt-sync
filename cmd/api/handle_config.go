@@ -10,7 +10,7 @@ import (
 func HandleConfig() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Extract the sub-path after /config/
-		subPath := r.URL.Path[len("/config/"):]
+		subPath := r.URL.Path[len("/config"):]
 
 		switch subPath {
 		case "":

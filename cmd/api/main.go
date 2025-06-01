@@ -11,7 +11,8 @@ func main() {
 
 	database.InitDatabase() // Initialize the database and create the config table if it does not exist
 
-	http.HandleFunc("/config/", HandleConfig())
+	http.HandleFunc("/config", HandleConfig())
+	http.HandleFunc("/emby/", HandleEmby())
 
 	// Serve static files from the "static" directory
 	fs := http.FileServer(http.Dir("./static"))

@@ -1,0 +1,6 @@
+### Base URL
+@baseUrl = http://localhost:3000
+
+### Get Config
+GET {{baseUrl}}/emby/users
+Content-Type: application/json
