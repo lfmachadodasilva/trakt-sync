@@ -1,0 +1,31 @@
+# Golang defaults
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the Go coverage tool
+*.out
+
+# Directories
+vendor/
+
+# Go modules
+/go.sum
+/go.mod
+
+# IDE files
+.idea/
+.vscode/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+*.log
+
