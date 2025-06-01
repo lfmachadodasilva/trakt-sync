@@ -17,7 +17,7 @@ type EmbyUserResponse struct {
 // FetchEmbyUsers fetches user information from Emby using the provided config.Config
 func FetchEmbyUsers(config *config.ConfigEntity) ([]EmbyUserResponse, error) {
 	// Validate the Emby configuration
-	if !config.IsEmbyValid(false) {
+	if !config.Emby.IsValid(false) {
 		return nil, fmt.Errorf("Emby configuration is invalid")
 	}
 

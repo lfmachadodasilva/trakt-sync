@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"trakt-sync/internal/config"
@@ -16,7 +17,7 @@ func HandleTrakt() http.HandlerFunc {
 		case "/code":
 			// Handle the base /trakt endpoint
 			switch r.Method {
-			case http.MethodPost:
+			case http.MethodGet:
 				HandleTraktCode(w, r)
 			default:
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -26,6 +27,14 @@ func HandleTrakt() http.HandlerFunc {
 			switch r.Method {
 			case http.MethodPost:
 				HandleTraktAuth(w, r)
+			default:
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			}
+		case "/auth/refresh":
+			// Handle the base /trakt endpoint
+			switch r.Method {
+			case http.MethodPost:
+				HandleTraktAuthRefresh(w, r)
 			default:
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			}
@@ -64,7 +73,35 @@ func HandleTraktAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = trakt.FetchTraktAuth(&config, r.FormValue("code"))
+	// Define a struct to hold the expected JSON body
+	var requestBody struct {
+		Code string `json:"code"`
+	}
+
+	// Decode the JSON body into the struct
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = trakt.FetchTraktAuth(&config, requestBody.Code)
+	if err != nil {
+		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+}
+
+func HandleTraktAuthRefresh(w http.ResponseWriter, r *http.Request) {
+	config, err := config.ReadConfig()
+	if err != nil {
+		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
+		return
+	}
+
+	err = trakt.FetchTraktAuthRefreshToken(&config)
 	if err != nil {
 		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusInternalServerError)
 		return

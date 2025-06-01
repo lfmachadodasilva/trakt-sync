@@ -83,7 +83,7 @@ func FetchEmbyItems(config *config.ConfigEntity, itemType string) ([]EmbyItemRes
 	}
 
 	// Validate the Emby configuration
-	if !config.IsEmbyValid(false) {
+	if !config.Emby.IsValid(true) {
 		return nil, fmt.Errorf("Emby configuration is invalid")
 	}
 
@@ -116,7 +116,7 @@ func FetchEmbyItems(config *config.ConfigEntity, itemType string) ([]EmbyItemRes
 func fetchEmbyEpisodes(config *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
 
 	// Validate the Emby configuration
-	if !config.IsEmbyValid(false) {
+	if !config.Emby.IsValid(true) {
 		return nil, fmt.Errorf("Emby configuration is invalid")
 	}
 

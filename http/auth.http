@@ -1,0 +1,19 @@
+### Base URL
+@baseUrl = http://localhost:3000
+
+### Get code
+GET {{baseUrl}}/trakt/code
+Content-Type: application/json
+
+### Authenticate with code
+POST {{baseUrl}}/trakt/auth
+Content-Type: application/json
+
+{
+  "code": "e13f91c3"
+}
+
+### Refresh access token
+POST {{baseUrl}}/trakt/auth/refresh
+Content-Type: application/json
+

@@ -1,6 +1,9 @@
 package config
 
-import "net/url"
+import (
+	"net/url"
+	"time"
+)
 
 type TraktConfig struct {
 	ClientID     string `json:"client_id,omitempty"`
@@ -9,6 +12,8 @@ type TraktConfig struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 	Code         string `json:"code,omitempty"`
 	RedirectURL  string `json:"redirect_url,omitempty"`
+	ExpiresIn    int    `json:"expires_in,omitempty"`
+	CreatedAt    int    `json:"created_at,omitempty"`
 }
 
 type EmbyConfig struct {
@@ -32,25 +37,38 @@ type ConfigEntity struct {
 	Jellyfin *JellyfinConfig `json:"jellyfin,omitempty"`
 }
 
-func (c *ConfigEntity) IsEmbyValid(ignoreUserId bool) bool {
-	if c.Emby == nil {
+func (emby *EmbyConfig) IsValid(ignoreUserId bool) bool {
+	if emby == nil {
 		return false
 	}
 
-	if ignoreUserId && c.Emby.UserID == "" {
+	if ignoreUserId && emby.UserID == "" {
 		return false
 	}
 
 	// Validate the Emby base URL
-	if c.Emby.BaseURL == "" || c.Emby.APIKey == "" {
+	if emby.BaseURL == "" || emby.APIKey == "" {
 		return false
 	}
 
 	// Check if the base URL is a valid URL
-	_, err := url.ParseRequestURI(c.Emby.BaseURL)
+	_, err := url.ParseRequestURI(emby.BaseURL)
 	if err != nil {
 		return false
 	}
 
 	return true
+}
+
+// IsAccessTokenValid checks if the access token is still valid
+func (t *TraktConfig) IsAccessTokenValid() bool {
+	if t.AccessToken == "" || t.CreatedAt == 0 || t.ExpiresIn == 0 {
+		return false
+	}
+
+	// Calculate the expiration time
+	expirationTime := time.Unix(int64(t.CreatedAt), 0).Add(time.Duration(t.ExpiresIn) * time.Second)
+
+	// Compare with the current time
+	return time.Now().Before(expirationTime)
 }

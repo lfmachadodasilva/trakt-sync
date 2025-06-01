@@ -20,6 +20,8 @@ func HttpGet[T any](url string, config *config.ConfigEntity, addHeaders func(req
 	if addHeaders != nil {
 		// Add headers to the request using the provided function
 		addHeaders(req, config)
+	} else {
+		req.Header.Set("Content-Type", "application/json")
 	}
 
 	// Execute the HTTP request
@@ -66,6 +68,8 @@ func HttpPost[TReq any, TRes any](url string, config *config.ConfigEntity, body 
 	if addHeaders != nil {
 		// Add headers to the request using the provided function
 		addHeaders(req, config)
+	} else {
+		req.Header.Set("Content-Type", "application/json")
 	}
 
 	// Execute the HTTP request
