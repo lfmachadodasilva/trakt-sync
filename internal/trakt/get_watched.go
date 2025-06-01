@@ -40,9 +40,9 @@ type TraktWatched struct {
 	Shows  []TraktWatchedResponse
 }
 
-// FetchTraktWatched fetches the watched movies and shows from Trakt using the provided config.Config
+// GetWatched fetches the watched movies and shows from Trakt using the provided config.Config
 // Documentation: https://trakt.docs.apiary.io/#reference/sync/get-watched/get-watched
-func FetchTraktWatched(config *config.ConfigEntity) (*TraktWatched, error) {
+func GetWatched(config *config.ConfigEntity) (*TraktWatched, error) {
 
 	movies, err := getWatchedGeneric(config, "movies")
 	if err != nil {

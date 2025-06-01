@@ -27,7 +27,7 @@ type TraktAuthResponse struct {
 	CreatedAt    int    `json:"created_at"`
 }
 
-func FetchTraktAuth(c *config.ConfigEntity, code string) error {
+func Auth(c *config.ConfigEntity, code string) error {
 
 	if code == "" {
 		return fmt.Errorf("Trakt code is not set")
@@ -66,7 +66,7 @@ func FetchTraktAuth(c *config.ConfigEntity, code string) error {
 	return nil
 }
 
-func FetchTraktAuthRefreshToken(c *config.ConfigEntity) error {
+func AuthRefreshAccessToken(c *config.ConfigEntity) error {
 
 	if c.Trakt == nil || c.Trakt.RefreshToken == "" {
 		return fmt.Errorf("Trakt RefreshToken is not set")

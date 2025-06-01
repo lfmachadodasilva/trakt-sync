@@ -84,7 +84,7 @@ func HandleTraktAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = trakt.FetchTraktAuth(&config, requestBody.Code)
+	err = trakt.Auth(&config, requestBody.Code)
 	if err != nil {
 		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -101,7 +101,7 @@ func HandleTraktAuthRefresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = trakt.FetchTraktAuthRefreshToken(&config)
+	err = trakt.AuthRefreshAccessToken(&config)
 	if err != nil {
 		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusInternalServerError)
 		return

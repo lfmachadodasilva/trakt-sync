@@ -37,7 +37,7 @@ type EmbyItems struct {
 	Series []EmbyItemResponse
 }
 
-func FetchEmbyItemsFull(config *config.ConfigEntity) (EmbyItems, error) {
+func GetAllItems(config *config.ConfigEntity) (EmbyItems, error) {
 	var movies []EmbyItemResponse
 	var series []EmbyItemResponse
 	var moviesErr, seriesErr error
@@ -49,13 +49,13 @@ func FetchEmbyItemsFull(config *config.ConfigEntity) (EmbyItems, error) {
 	// Fetch movies in a separate goroutine
 	go func() {
 		defer wg.Done() // Mark this task as done
-		movies, moviesErr = FetchEmbyItems(config, "Movie")
+		movies, moviesErr = GetItemsByType(config, "Movie")
 	}()
 
 	// Fetch series in a separate goroutine
 	go func() {
 		defer wg.Done() // Mark this task as done
-		series, seriesErr = FetchEmbyItems(config, "Series")
+		series, seriesErr = GetItemsByType(config, "Series")
 	}()
 
 	// Wait for both goroutines to finish
@@ -75,7 +75,7 @@ func FetchEmbyItemsFull(config *config.ConfigEntity) (EmbyItems, error) {
 	}, nil
 }
 
-func FetchEmbyItems(config *config.ConfigEntity, itemType string) ([]EmbyItemResponse, error) {
+func GetItemsByType(config *config.ConfigEntity, itemType string) ([]EmbyItemResponse, error) {
 
 	// Validate the itemType parameter
 	if itemType != "Movie" && itemType != "Series" {
@@ -101,7 +101,7 @@ func FetchEmbyItems(config *config.ConfigEntity, itemType string) ([]EmbyItemRes
 		for i := range items.Items {
 			// Fetch episodes for each series item
 			if items.Items[i].Id != "" {
-				episodes, err := fetchEmbyEpisodes(config, &items.Items[i].Id)
+				episodes, err := getEpisodes(config, &items.Items[i].Id)
 				if err != nil {
 					return nil, fmt.Errorf("failed to fetch episodes for series %s: %w", items.Items[i].Name, err)
 				}
@@ -113,7 +113,7 @@ func FetchEmbyItems(config *config.ConfigEntity, itemType string) ([]EmbyItemRes
 	return items.Items, nil
 }
 
-func fetchEmbyEpisodes(config *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
+func getEpisodes(config *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
 
 	// Validate the Emby configuration
 	if !config.Emby.IsValid(true) {
