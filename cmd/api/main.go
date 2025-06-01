@@ -14,6 +14,7 @@ func main() {
 
 	http.HandleFunc("/config", HandleConfig())
 	http.HandleFunc("/emby/", HandleEmby())
+	http.HandleFunc("/trakt/", HandleTrakt())
 
 	// DEBUG: Fetch Emby items for testing purposes
 	config, err := config.ReadConfig()
