@@ -9,13 +9,23 @@ import (
 
 func HandleConfig() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			handleGetConfig(w)
-		case http.MethodPatch:
-			handlePatchConfig(w, r)
+		// Extract the sub-path after /config/
+		subPath := r.URL.Path[len("/config/"):]
+
+		switch subPath {
+		case "":
+			// Handle the base /config endpoint
+			switch r.Method {
+			case http.MethodGet:
+				handleGetConfig(w)
+			case http.MethodPatch:
+				handlePatchConfig(w, r)
+			default:
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			}
 		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			// Handle other sub-paths under /config/
+			http.Error(w, "Endpoint not found", http.StatusNotFound)
 		}
 	}
 }
