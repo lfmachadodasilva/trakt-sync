@@ -37,12 +37,16 @@ type ConfigEntity struct {
 	Jellyfin *JellyfinConfig `json:"jellyfin,omitempty"`
 }
 
-func (emby *EmbyConfig) IsValid(ignoreUserId bool) bool {
+type EmbyOptions struct {
+	IgnoreUserId bool
+}
+
+func (emby *EmbyConfig) IsValid(options *EmbyOptions) bool {
 	if emby == nil {
 		return false
 	}
 
-	if ignoreUserId && emby.UserID == "" {
+	if options.IgnoreUserId && emby.UserID == "" {
 		return false
 	}
 

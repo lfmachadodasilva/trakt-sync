@@ -44,7 +44,13 @@ func Auth(c *config.ConfigEntity, code string) error {
 		GrantType:    "authorization_code",
 	}
 
-	res, err := utils.HttpPost[TraktAuthRequest, TraktAuthResponse](url, c, &authRequest, nil)
+	res, err := utils.HttpPost[TraktAuthRequest, TraktAuthResponse](
+		utils.RequestParams{
+			URL:    url,
+			Config: c,
+		},
+		&authRequest,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to fetch Emby items: %w", err)
 	}
@@ -80,7 +86,13 @@ func AuthRefreshAccessToken(c *config.ConfigEntity) error {
 		ClientSecret: c.Trakt.ClientSecret,
 	}
 
-	_, err := utils.HttpPost[TraktAuthRefreshRequest, struct{}](url, c, &authRequest, nil)
+	_, err := utils.HttpPost[TraktAuthRefreshRequest, struct{}](
+		utils.RequestParams{
+			URL:    url,
+			Config: c,
+		},
+		&authRequest,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to fetch Emby items: %w", err)
 	}

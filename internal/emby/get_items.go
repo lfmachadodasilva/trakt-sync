@@ -75,7 +75,7 @@ func GetAllItems(config *config.ConfigEntity) (EmbyItems, error) {
 	}, nil
 }
 
-func GetItemsByType(config *config.ConfigEntity, itemType string) ([]EmbyItemResponse, error) {
+func GetItemsByType(c *config.ConfigEntity, itemType string) ([]EmbyItemResponse, error) {
 
 	// Validate the itemType parameter
 	if itemType != "Movie" && itemType != "Series" {
@@ -83,15 +83,20 @@ func GetItemsByType(config *config.ConfigEntity, itemType string) ([]EmbyItemRes
 	}
 
 	// Validate the Emby configuration
-	if !config.Emby.IsValid(true) {
+	if !c.Emby.IsValid(&config.EmbyOptions{IgnoreUserId: true}) {
 		return nil, fmt.Errorf("Emby configuration is invalid")
 	}
 
 	// Construct the URL for the GET request
 	preUrl := "%s/Users/%s/Items?IncludeItemTypes=%s&Recursive=true&Fields=ProviderIds"
-	url := fmt.Sprintf(preUrl, config.Emby.BaseURL, config.Emby.UserID, itemType)
+	url := fmt.Sprintf(preUrl, c.Emby.BaseURL, c.Emby.UserID, itemType)
 
-	items, err := utils.HttpGet[EmbyItemsResponse](url, config, addEmbyHeaders)
+	items, err := utils.HttpGet[EmbyItemsResponse](
+		utils.RequestParams{
+			URL:        url,
+			Config:     c,
+			AddHeaders: addEmbyHeaders,
+		})
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Emby items: %w", err)
 	}
@@ -101,7 +106,7 @@ func GetItemsByType(config *config.ConfigEntity, itemType string) ([]EmbyItemRes
 		for i := range items.Items {
 			// Fetch episodes for each series item
 			if items.Items[i].Id != "" {
-				episodes, err := getEpisodes(config, &items.Items[i].Id)
+				episodes, err := getEpisodes(c, &items.Items[i].Id)
 				if err != nil {
 					return nil, fmt.Errorf("failed to fetch episodes for series %s: %w", items.Items[i].Name, err)
 				}
@@ -113,18 +118,24 @@ func GetItemsByType(config *config.ConfigEntity, itemType string) ([]EmbyItemRes
 	return items.Items, nil
 }
 
-func getEpisodes(config *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
+func getEpisodes(c *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
 
 	// Validate the Emby configuration
-	if !config.Emby.IsValid(true) {
+	if !c.Emby.IsValid(&config.EmbyOptions{IgnoreUserId: true}) {
 		return nil, fmt.Errorf("Emby configuration is invalid")
 	}
 
 	// Construct the URL for the GET request
 	preUrl := "%s/Shows/%s/Episodes?&Recursive=true&EnableUserData=true&Fields=ProviderIds&UserId=%s"
-	url := fmt.Sprintf(preUrl, config.Emby.BaseURL, *embyId, config.Emby.UserID)
+	url := fmt.Sprintf(preUrl, c.Emby.BaseURL, *embyId, c.Emby.UserID)
 
-	items, err := utils.HttpGet[EmbyItemsResponse](url, config, addEmbyHeaders)
+	items, err := utils.HttpGet[EmbyItemsResponse](
+		utils.RequestParams{
+			URL:        url,
+			Config:     c,
+			AddHeaders: addEmbyHeaders,
+		},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Emby items: %w", err)
 	}

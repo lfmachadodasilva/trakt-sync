@@ -8,18 +8,25 @@ import (
 	"trakt-sync/internal/config"
 )
 
+// RequestParams represents the parameters for HTTP requests
+type RequestParams struct {
+	URL        string
+	Config     *config.ConfigEntity
+	AddHeaders func(req *http.Request, config *config.ConfigEntity)
+}
+
 // HttpGet performs a GET request and decodes the response into the generic type T.
 // It accepts a function parameter to add headers to the request.
-func HttpGet[T any](url string, config *config.ConfigEntity, addHeaders func(req *http.Request, config *config.ConfigEntity)) (*T, error) {
+func HttpGet[T any](params RequestParams) (*T, error) {
 	// Construct the HTTP request
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, params.URL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GET request to Emby: %w", err)
 	}
 
-	if addHeaders != nil {
+	if params.AddHeaders != nil {
 		// Add headers to the request using the provided function
-		addHeaders(req, config)
+		params.AddHeaders(req, params.Config)
 	} else {
 		req.Header.Set("Content-Type", "application/json")
 	}
@@ -46,7 +53,7 @@ func HttpGet[T any](url string, config *config.ConfigEntity, addHeaders func(req
 	return &result, nil
 }
 
-func HttpPost[TReq any, TRes any](url string, config *config.ConfigEntity, body *TReq, addHeaders func(req *http.Request, config *config.ConfigEntity)) (*TRes, error) {
+func HttpPost[TReq any, TRes any](params RequestParams, body *TReq) (*TRes, error) {
 
 	var reqBody *bytes.Buffer = nil
 
@@ -60,14 +67,14 @@ func HttpPost[TReq any, TRes any](url string, config *config.ConfigEntity, body 
 	}
 
 	// Construct the HTTP request
-	req, err := http.NewRequest(http.MethodPost, url, reqBody)
+	req, err := http.NewRequest(http.MethodPost, params.URL, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	if addHeaders != nil {
+	if params.AddHeaders != nil {
 		// Add headers to the request using the provided function
-		addHeaders(req, config)
+		params.AddHeaders(req, params.Config)
 	} else {
 		req.Header.Set("Content-Type", "application/json")
 	}

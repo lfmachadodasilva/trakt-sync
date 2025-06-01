@@ -15,16 +15,22 @@ type EmbyUserResponse struct {
 }
 
 // FetchEmbyUsers fetches user information from Emby using the provided config.Config
-func FetchEmbyUsers(config *config.ConfigEntity) ([]EmbyUserResponse, error) {
+func FetchEmbyUsers(c *config.ConfigEntity) ([]EmbyUserResponse, error) {
 	// Validate the Emby configuration
-	if !config.Emby.IsValid(false) {
+	if !c.Emby.IsValid(&config.EmbyOptions{}) {
 		return nil, fmt.Errorf("Emby configuration is invalid")
 	}
 
 	// Construct the URL for the GET request
-	url := fmt.Sprintf("%s/Users", config.Emby.BaseURL)
+	url := fmt.Sprintf("%s/Users", c.Emby.BaseURL)
 
-	users, err := utils.HttpGet[[]EmbyUserResponse](url, config, addEmbyHeaders)
+	users, err := utils.HttpGet[[]EmbyUserResponse](
+		utils.RequestParams{
+			URL:        url,
+			Config:     c,
+			AddHeaders: addEmbyHeaders,
+		},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Emby users: %w", err)
 	}
