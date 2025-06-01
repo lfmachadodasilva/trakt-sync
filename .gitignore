@@ -20,7 +20,6 @@ vendor/
 
 # IDE files
 .idea/
-.vscode/
 
 # Misc
 .DS_Store
@@ -29,6 +28,6 @@ vendor/
 # Debug
 *.log
 
-data/database.db
+data
 static
 

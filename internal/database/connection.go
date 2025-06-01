@@ -16,7 +16,7 @@ var (
 	dataFolderPath = "./data"
 )
 
-func Connect() *sql.DB {
+func GetAndConnect() *sql.DB {
 	once.Do(func() {
 		var err error
 		// Ensure the folder exists
@@ -36,16 +36,6 @@ func Connect() *sql.DB {
 		dbInstance, err = sql.Open("sqlite3", databasePath)
 		if err != nil {
 			log.Fatalf("Failed to connect to database: %v", err)
-		}
-
-		// Create the table if it does not exist
-		createTableQuery := `CREATE TABLE IF NOT EXISTS config (
-			type TEXT PRIMARY KEY,
-			data TEXT
-		)`
-		_, err = dbInstance.Exec(createTableQuery)
-		if err != nil {
-			log.Fatalf("Failed to create table: %v", err)
 		}
 	})
 	return dbInstance

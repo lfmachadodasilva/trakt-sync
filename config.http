@@ -4,3 +4,18 @@
 ### Get Config
 GET {{baseUrl}}/config
 Content-Type: application/json
+
+### Patch Config
+PATCH {{baseUrl}}/config
+Content-Type: application/json
+
+{
+  "trakt": {
+    "client_id": "new-client-id",
+    "client_secret": "new-client-secret"
+  },
+  "emby": {
+    "user_id": "new-user-id",
+    "api_key": "new-api-key"
+  }
+}
