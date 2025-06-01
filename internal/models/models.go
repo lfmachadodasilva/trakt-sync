@@ -1,5 +1,7 @@
 package models
 
+import "net/url"
+
 type TraktConfig struct {
 	ClientID     string `json:"client_id,omitempty"`
 	ClientSecret string `json:"client_secret,omitempty"`
@@ -28,4 +30,27 @@ type Config struct {
 	Emby     *EmbyConfig     `json:"emby,omitempty"`
 	Plex     *PlexConfig     `json:"plex,omitempty"`
 	Jellyfin *JellyfinConfig `json:"jellyfin,omitempty"`
+}
+
+func (c *Config) IsEmbyValid(ignoreUserId bool) bool {
+	if c.Emby == nil {
+		return false
+	}
+
+	if ignoreUserId && c.Emby.UserID == "" {
+		return false
+	}
+
+	// Validate the Emby base URL
+	if c.Emby.BaseURL == "" || c.Emby.APIKey == "" {
+		return false
+	}
+
+	// Check if the base URL is a valid URL
+	_, err := url.ParseRequestURI(c.Emby.BaseURL)
+	if err != nil {
+		return false
+	}
+
+	return true
 }

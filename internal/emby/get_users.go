@@ -1,11 +1,9 @@
 package emby
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
 	"trakt-sync/internal/models"
+	"trakt-sync/internal/utils"
 )
 
 // EmbyUserResponse represents the structure of the user response from Emby
@@ -18,51 +16,18 @@ type EmbyUserResponse struct {
 
 // FetchEmbyUsers fetches user information from Emby using the provided models.Config
 func FetchEmbyUsers(config *models.Config) ([]EmbyUserResponse, error) {
-	// Get the Emby base URL from the config
-	baseURL := config.Emby.BaseURL
-
-	// Validate the Emby base URL
-	if config.Emby == nil || config.Emby.BaseURL == "" {
-		return nil, fmt.Errorf("Emby base URL is not configured")
-	}
-
-	// Check if the base URL is a valid URL
-	_, err := url.ParseRequestURI(config.Emby.BaseURL)
-	if err != nil {
-		return nil, fmt.Errorf("Emby base URL is invalid: %v", err)
+	// Validate the Emby configuration
+	if !config.IsEmbyValid(false) {
+		return nil, fmt.Errorf("Emby configuration is invalid")
 	}
 
 	// Construct the URL for the GET request
-	url := fmt.Sprintf("%s/Users", baseURL)
+	url := fmt.Sprintf("%s/Users", config.Emby.BaseURL)
 
-	// Construct the HTTP request
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	users, err := utils.Get[[]EmbyUserResponse](url, config, addEmbyHeaders)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create GET /users request to Emby: %w", err)
+		return nil, fmt.Errorf("failed to fetch Emby users: %w", err)
 	}
 
-	// Add headers to the request
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Emby-Token", config.Emby.APIKey)
-
-	// Execute the HTTP request
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to make GET /users request to Emby: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// Check for non-200 status codes
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("received non-200 response from Emby: %d", resp.StatusCode)
-	}
-
-	// Decode the JSON response
-	var users []EmbyUserResponse
-	if err := json.NewDecoder(resp.Body).Decode(&users); err != nil {
-		return nil, fmt.Errorf("failed to decode Emby response: %w", err)
-	}
-
-	return users, nil
+	return *users, nil
 }
