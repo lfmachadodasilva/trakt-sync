@@ -116,6 +116,14 @@ func GetItemsByType(ctx *context.Context, cfg *config.ConfigEntity, itemType str
 				}
 				items.Items[i].Episodes = episodes
 			}
+
+			// Add cancellation check in every for loop
+			select {
+			case <-(*ctx).Done():
+				return nil, (*ctx).Err() // Exit the loop if the context is canceled
+			default:
+				// Continue processing
+			}
 		}
 	}
 

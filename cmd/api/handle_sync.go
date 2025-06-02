@@ -139,6 +139,14 @@ func syncEmbyMovie(ctx *context.Context, cfg *config.ConfigEntity, request *Sync
 			// Both are in sync, do nothing
 			continue
 		}
+
+		// Add cancellation check in every for loop
+		select {
+		case <-(*ctx).Done():
+			return (*ctx).Err() // Exit the loop if the context is canceled
+		default:
+			// Continue processing
+		}
 	}
 
 	return nil
@@ -168,6 +176,14 @@ func syncEmbyTvShows(ctx *context.Context, cfg *config.ConfigEntity, request *Sy
 					traktImdbMap[imdbId][seasonNumber][episodeNumber] = &show
 				}
 			}
+		}
+
+		// Add cancellation check in every for loop
+		select {
+		case <-(*ctx).Done():
+			return (*ctx).Err() // Exit the loop if the context is canceled
+		default:
+			// Continue processing
 		}
 	}
 
@@ -251,14 +267,25 @@ func syncEmbyTvShows(ctx *context.Context, cfg *config.ConfigEntity, request *Sy
 			} else if traktImdbEpisodeExists && !embyShow.UserData.Played {
 
 				fmt.Printf("%s Marking Emby episode as watched for S%dE%d\n", spacePrefix2, embySeasonNumber, embyEpisodeNumber)
+
+				if err := emby.MarkItemAsWatched(ctx, cfg, embyEpisode.Id); err != nil {
+					return fmt.Errorf("failed to mark Emby episode as watched: %w", err)
+				}
+
 			} else {
 				// Both are in sync, do nothing
 				continue
 			}
+
+			// Add cancellation check in every for loop
+			select {
+			case <-(*ctx).Done():
+				return (*ctx).Err() // Exit the loop if the context is canceled
+			default:
+				// Continue processing
+			}
 		}
 	}
 
-	// This function is a placeholder for syncing TV shows
-	// You can implement the logic to sync TV shows here
 	return nil
 }
