@@ -12,6 +12,16 @@ func main() {
 
 	ctx := context.Background()
 
+	db := database.GetAndConnect(&ctx)
+	if db == nil {
+		fmt.Println("Failed to connect to the database")
+		return
+	}
+
+	// Add the database connection to the context
+	ctx = context.WithValue(ctx, "db", db)
+
+	// Initialize the configuration table
 	config.InitConfigTable(&ctx)
 
 	http.HandleFunc("/config", HandleConfig(&ctx))
@@ -26,6 +36,5 @@ func main() {
 	http.ListenAndServe(":3000", nil)
 
 	// Close the database connection
-	db := database.GetAndConnect(&ctx)
 	defer db.Close()
 }

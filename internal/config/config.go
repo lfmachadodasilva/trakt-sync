@@ -6,11 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"trakt-sync/internal/database"
 )
 
 func UpsertConfig(ctx *context.Context, cfg *ConfigEntity) error {
-	db := database.GetAndConnect(ctx)
+	// Retrieve the database connection from the context
+	db, ok := (*ctx).Value("db").(*sql.DB)
+	if !ok || db == nil {
+		panic("Database connection not found in context")
+	}
 
 	if cfg.Trakt != nil {
 		jsonData, err := json.Marshal(cfg.Trakt)
@@ -64,7 +67,11 @@ func upsertConfig(ctx *context.Context, db *sql.DB, cfgType string, cfgData stri
 }
 
 func ReadConfig(ctx *context.Context) (ConfigEntity, error) {
-	db := database.GetAndConnect(ctx)
+	// Retrieve the database connection from the context
+	db, ok := (*ctx).Value("db").(*sql.DB)
+	if !ok || db == nil {
+		panic("Database connection not found in context")
+	}
 
 	query := `SELECT type, data FROM config`
 	rows, err := db.QueryContext(*ctx, query)

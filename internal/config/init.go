@@ -2,11 +2,15 @@ package config
 
 import (
 	"context"
-	"trakt-sync/internal/database"
+	"database/sql"
 )
 
 func InitConfigTable(ctx *context.Context) {
-	db := database.GetAndConnect(ctx)
+	// Retrieve the database connection from the context
+	db, ok := (*ctx).Value("db").(*sql.DB)
+	if !ok || db == nil {
+		panic("Database connection not found in context")
+	}
 
 	// Create the config table if it does not exist
 	createTableQuery := `CREATE TABLE IF NOT EXISTS config (
