@@ -1,36 +1,44 @@
 package trakt
 
 import (
+	"context"
 	"fmt"
 	"time"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/utils"
 )
 
-type MarkAsWatchedRequest struct {
-	Movies *[]struct {
-		Ids struct {
-			Imdb string `json:"imdb"`
-		} `json:"ids"`
-		WatchedAt time.Time `json:"watched_at"`
-	} `json:"movies,omitempty"`
-
-	Shows *[]struct {
-		Ids struct {
-			Imdb string `json:"imdb"`
-		} `json:"ids"`
-		Seasons *[]struct {
-			WatchedAt time.Time `json:"watched_at"`
-			Number    int       `json:"number"`
-			Episodes  *[]struct {
-				Number    int       `json:"number"`
-				WatchedAt time.Time `json:"watched_at"`
-			} `json:"episodes,omitempty"`
-		} `json:"seasons,omitempty"`
-	} `json:"shows,omitempty"`
+type MarkAsWatchedIds struct {
+	Imdb string `json:"imdb"`
 }
 
-func MarkItemAsWatched(cfg *config.ConfigEntity, request *MarkAsWatchedRequest) error {
+type MarkAsWatchedMovieRequest struct {
+	Ids       MarkAsWatchedIds `json:"ids"`
+	WatchedAt time.Time        `json:"watched_at"`
+}
+
+type MarkAsWatchedShowRequest struct {
+	Ids     MarkAsWatchedIds              `json:"ids"`
+	Seasons []MarkAsWatchedSeasonsRequest `json:"seasons,omitempty"`
+}
+
+type MarkAsWatchedSeasonsRequest struct {
+	WatchedAt time.Time               `json:"watched_at"`
+	Number    int16                   `json:"number"`
+	Episodes  []MarkAsWatchedEpisodes `json:"episodes,omitempty"`
+}
+
+type MarkAsWatchedEpisodes struct {
+	Number    int16     `json:"number"`
+	WatchedAt time.Time `json:"watched_at"`
+}
+
+type MarkAsWatchedRequest struct {
+	Movies []MarkAsWatchedMovieRequest `json:"movies,omitempty"`
+	Shows  []MarkAsWatchedShowRequest  `json:"shows,omitempty"`
+}
+
+func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *MarkAsWatchedRequest) error {
 
 	preUrl := "%s/sync/history"
 	url := fmt.Sprintf(preUrl, TraktApiUrl)
@@ -40,6 +48,7 @@ func MarkItemAsWatched(cfg *config.ConfigEntity, request *MarkAsWatchedRequest) 
 			URL:        url,
 			Config:     cfg,
 			AddHeaders: addTraktHeaders,
+			Context:    ctx,
 		},
 		request,
 	)

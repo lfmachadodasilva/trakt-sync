@@ -1,8 +1,10 @@
 package emby
 
 import (
+	"context"
 	"fmt"
 	"sync"
+	"time"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/utils"
 )
@@ -18,13 +20,14 @@ type EmbyItemResponse struct {
 	Type              string             `json:"Type"`
 	UserData          EmbyUserData       `json:"UserData"`
 	ProviderIds       EmbyProviderIds    `json:"ProviderIds"`
-	IndexNumber       int                `json:"IndexNumber"`
-	ParentIndexNumber int                `json:"ParentIndexNumber"`
+	IndexNumber       int16              `json:"IndexNumber"`
+	ParentIndexNumber int16              `json:"ParentIndexNumber"`
 	Episodes          []EmbyItemResponse `json:"Episodes,omitempty"`
 }
 
 type EmbyUserData struct {
-	Played bool `json:"Played"`
+	Played         bool      `json:"Played"`
+	LastPlayedDate time.Time `json:"LastPlayedDate"`
 }
 
 type EmbyProviderIds struct {
@@ -37,7 +40,7 @@ type EmbyItems struct {
 	Series []EmbyItemResponse
 }
 
-func GetAllItems(config *config.ConfigEntity) (EmbyItems, error) {
+func GetAllItems(ctx *context.Context, cfg *config.ConfigEntity) (EmbyItems, error) {
 	var movies []EmbyItemResponse
 	var series []EmbyItemResponse
 	var moviesErr, seriesErr error
@@ -49,13 +52,13 @@ func GetAllItems(config *config.ConfigEntity) (EmbyItems, error) {
 	// Fetch movies in a separate goroutine
 	go func() {
 		defer wg.Done() // Mark this task as done
-		movies, moviesErr = GetItemsByType(config, "Movie")
+		movies, moviesErr = GetItemsByType(ctx, cfg, "Movie")
 	}()
 
 	// Fetch series in a separate goroutine
 	go func() {
 		defer wg.Done() // Mark this task as done
-		series, seriesErr = GetItemsByType(config, "Series")
+		series, seriesErr = GetItemsByType(ctx, cfg, "Series")
 	}()
 
 	// Wait for both goroutines to finish
@@ -75,7 +78,7 @@ func GetAllItems(config *config.ConfigEntity) (EmbyItems, error) {
 	}, nil
 }
 
-func GetItemsByType(c *config.ConfigEntity, itemType string) ([]EmbyItemResponse, error) {
+func GetItemsByType(ctx *context.Context, cfg *config.ConfigEntity, itemType string) ([]EmbyItemResponse, error) {
 
 	// Validate the itemType parameter
 	if itemType != "Movie" && itemType != "Series" {
@@ -83,19 +86,20 @@ func GetItemsByType(c *config.ConfigEntity, itemType string) ([]EmbyItemResponse
 	}
 
 	// Validate the Emby configuration
-	if !c.Emby.IsValid(&config.EmbyOptions{IgnoreUserId: true}) {
+	if !cfg.Emby.IsValid(&config.EmbyOptions{IgnoreUserId: true}) {
 		return nil, fmt.Errorf("Emby configuration is invalid")
 	}
 
 	// Construct the URL for the GET request
 	preUrl := "%s/Users/%s/Items?IncludeItemTypes=%s&Recursive=true&Fields=ProviderIds"
-	url := fmt.Sprintf(preUrl, c.Emby.BaseURL, c.Emby.UserID, itemType)
+	url := fmt.Sprintf(preUrl, cfg.Emby.BaseURL, cfg.Emby.UserID, itemType)
 
 	items, err := utils.HttpGet[EmbyItemsResponse](
 		utils.RequestParams{
 			URL:        url,
-			Config:     c,
+			Config:     cfg,
 			AddHeaders: addEmbyHeaders,
+			Context:    ctx,
 		})
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Emby items: %w", err)
@@ -106,7 +110,7 @@ func GetItemsByType(c *config.ConfigEntity, itemType string) ([]EmbyItemResponse
 		for i := range items.Items {
 			// Fetch episodes for each series item
 			if items.Items[i].Id != "" {
-				episodes, err := getEpisodes(c, &items.Items[i].Id)
+				episodes, err := getEpisodes(ctx, cfg, &items.Items[i].Id)
 				if err != nil {
 					return nil, fmt.Errorf("failed to fetch episodes for series %s: %w", items.Items[i].Name, err)
 				}
@@ -118,7 +122,7 @@ func GetItemsByType(c *config.ConfigEntity, itemType string) ([]EmbyItemResponse
 	return items.Items, nil
 }
 
-func getEpisodes(cfg *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
+func getEpisodes(ctx *context.Context, cfg *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
 
 	// Validate the Emby configuration
 	if !cfg.Emby.IsValid(&config.EmbyOptions{IgnoreUserId: true}) {
@@ -134,6 +138,7 @@ func getEpisodes(cfg *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, 
 			URL:        url,
 			Config:     cfg,
 			AddHeaders: addEmbyHeaders,
+			Context:    ctx,
 		},
 	)
 	if err != nil {

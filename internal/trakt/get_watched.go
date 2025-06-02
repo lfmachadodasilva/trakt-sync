@@ -1,6 +1,7 @@
 package trakt
 
 import (
+	"context"
 	"fmt"
 	"time"
 	"trakt-sync/internal/config"
@@ -9,30 +10,30 @@ import (
 
 type TraktWatchedItem struct {
 	Title string `json:"title"`
-	Year  int    `json:"year"`
+	Year  int16  `json:"year"`
 	Ids   struct {
-		Trakt int    `json:"trakt"`
-		Slug  string `json:"slug"`
-		Imdb  string `json:"imdb"`
+		Trakt int    `json:"trakt,omitempty"`
+		Slug  string `json:"slug,omitempty"`
+		Imdb  string `json:"imdb,omitempty"`
 	} `json:"ids"`
 }
 
 type TraktWatchedEpisode struct {
-	Number        int       `json:"number"`
-	LastWatchedAt time.Time `json:"last_watched_at"`
+	Number        int16     `json:"number,omitempty"`
+	LastWatchedAt time.Time `json:"last_watched_at,omitempty"`
 }
 
 type TraktWatchedSeason struct {
-	Number   int                   `json:"number"`
-	Episodes []TraktWatchedEpisode `json:"episodes"`
+	Number   int16                 `json:"number,omitempty"`
+	Episodes []TraktWatchedEpisode `json:"episodes,omitempty"`
 }
 
 type TraktWatchedResponse struct {
-	LastWatchedAt time.Time             `json:"last_watched_at"`
-	LastUpdatedAt time.Time             `json:"last_updated_at"`
-	Movie         *TraktWatchedItem     `json:"movie"`
-	Show          *TraktWatchedItem     `json:"show"`
-	Seasons       *[]TraktWatchedSeason `json:"seasons"`
+	LastWatchedAt time.Time            `json:"last_watched_at"`
+	LastUpdatedAt time.Time            `json:"last_updated_at"`
+	Movie         TraktWatchedItem     `json:"movie,omitempty"`
+	Show          TraktWatchedItem     `json:"show,omitempty"`
+	Seasons       []TraktWatchedSeason `json:"seasons,omitempty"`
 }
 
 type TraktWatched struct {
@@ -42,13 +43,13 @@ type TraktWatched struct {
 
 // GetWatched fetches the watched movies and shows from Trakt using the provided config.Config
 // Documentation: https://trakt.docs.apiary.io/#reference/sync/get-watched/get-watched
-func GetWatched(config *config.ConfigEntity) (*TraktWatched, error) {
+func GetWatched(ctx *context.Context, cfg *config.ConfigEntity) (*TraktWatched, error) {
 
-	movies, err := getWatchedGeneric(config, "movies")
+	movies, err := getWatchedGeneric(ctx, cfg, "movies")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch watched movies: %w", err)
 	}
-	shows, err := getWatchedGeneric(config, "shows")
+	shows, err := getWatchedGeneric(ctx, cfg, "shows")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch watched shows: %w", err)
 	}
@@ -59,7 +60,7 @@ func GetWatched(config *config.ConfigEntity) (*TraktWatched, error) {
 	}, nil
 }
 
-func getWatchedGeneric(config *config.ConfigEntity, mediaType string) (*[]TraktWatchedResponse, error) {
+func getWatchedGeneric(ctx *context.Context, cfg *config.ConfigEntity, mediaType string) (*[]TraktWatchedResponse, error) {
 
 	// Validate the itemType parameter
 	if mediaType != "movies" && mediaType != "shows" {
@@ -71,8 +72,9 @@ func getWatchedGeneric(config *config.ConfigEntity, mediaType string) (*[]TraktW
 	response, err := utils.HttpGet[[]TraktWatchedResponse](
 		utils.RequestParams{
 			URL:        url,
-			Config:     config,
+			Config:     cfg,
 			AddHeaders: addTraktHeaders,
+			Context:    ctx,
 		})
 	if err != nil {
 		return nil, err

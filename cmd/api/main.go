@@ -27,6 +27,7 @@ func main() {
 	http.HandleFunc("/config", HandleConfig(&ctx))
 	http.HandleFunc("/emby/", HandleEmby(&ctx))
 	http.HandleFunc("/trakt/", HandleTrakt(&ctx))
+	http.HandleFunc("/sync", HandleSync(&ctx))
 
 	// Serve static files from the "static" directory
 	fs := http.FileServer(http.Dir("./static"))

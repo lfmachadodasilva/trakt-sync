@@ -1,24 +1,26 @@
 package emby
 
 import (
+	"context"
 	"fmt"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/utils"
 )
 
-func MarkItemAsWatched(c *config.ConfigEntity, itemId string) error {
+func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, itemId string) error {
 
-	if !c.Emby.IsValid(&config.EmbyOptions{}) {
+	if !cfg.Emby.IsValid(&config.EmbyOptions{}) {
 		return fmt.Errorf("Emby configuration is invalid")
 	}
 
 	preUrl := "%s/Users/%s/PlayedItems/%s"
-	url := fmt.Sprintf(preUrl, c.Emby.BaseURL, c.Emby.UserID, itemId)
+	url := fmt.Sprintf(preUrl, cfg.Emby.BaseURL, cfg.Emby.UserID, itemId)
 
 	_, err := utils.HttpPost[struct{}, struct{}](
 		utils.RequestParams{
-			URL:    url,
-			Config: c,
+			URL:     url,
+			Config:  cfg,
+			Context: ctx,
 		},
 		&struct{}{},
 	)

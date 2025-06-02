@@ -69,7 +69,7 @@ func HttpPost[TReq any, TRes any](params RequestParams, body *TReq) (*TRes, erro
 	}
 
 	// Construct the HTTP request
-	req, err := http.NewRequestWithContext(*params.Context, http.MethodPost, params.URL, reqBody)
+	req, err := http.NewRequest(http.MethodPost, params.URL, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create POST request: %w", err)
 	}
