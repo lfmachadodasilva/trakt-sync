@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"os"
@@ -16,7 +17,7 @@ var (
 	dataFolderPath = "./data"
 )
 
-func GetAndConnect() *sql.DB {
+func GetAndConnect(ctx *context.Context) *sql.DB {
 	once.Do(func() {
 		var err error
 		// Ensure the folder exists

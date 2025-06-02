@@ -30,7 +30,7 @@ type MarkAsWatchedRequest struct {
 	} `json:"shows,omitempty"`
 }
 
-func MarkItemAsWatched(c *config.ConfigEntity, request *MarkAsWatchedRequest) error {
+func MarkItemAsWatched(cfg *config.ConfigEntity, request *MarkAsWatchedRequest) error {
 
 	preUrl := "%s/sync/history"
 	url := fmt.Sprintf(preUrl, TraktApiUrl)
@@ -38,7 +38,7 @@ func MarkItemAsWatched(c *config.ConfigEntity, request *MarkAsWatchedRequest) er
 	_, err := utils.HttpPost[MarkAsWatchedRequest, struct{}](
 		utils.RequestParams{
 			URL:        url,
-			Config:     c,
+			Config:     cfg,
 			AddHeaders: addTraktHeaders,
 		},
 		request,

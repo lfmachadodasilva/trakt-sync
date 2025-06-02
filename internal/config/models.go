@@ -41,17 +41,17 @@ type EmbyOptions struct {
 	IgnoreUserId bool
 }
 
+type TraktOptions struct {
+	IgnoreCode         bool
+	IgnoreClientSecret bool
+	IgnoreAccessToken  bool
+}
+
 func (emby *EmbyConfig) IsValid(options *EmbyOptions) bool {
-	if emby == nil {
-		return false
-	}
-
-	if options.IgnoreUserId && emby.UserID == "" {
-		return false
-	}
-
-	// Validate the Emby base URL
-	if emby.BaseURL == "" || emby.APIKey == "" {
+	if emby == nil ||
+		(options.IgnoreUserId && emby.UserID == "") ||
+		emby.BaseURL == "" ||
+		emby.APIKey == "" {
 		return false
 	}
 
@@ -64,9 +64,28 @@ func (emby *EmbyConfig) IsValid(options *EmbyOptions) bool {
 	return true
 }
 
+func (trakt *TraktConfig) IsValid(options *TraktOptions) bool {
+	if trakt == nil ||
+		(options.IgnoreCode && trakt.Code == "") ||
+		(options.IgnoreClientSecret && trakt.ClientSecret == "") ||
+		(options.IgnoreAccessToken && trakt.AccessToken == "") ||
+		trakt.RedirectURL == "" ||
+		trakt.ClientID == "" {
+		return false
+	}
+
+	// Check if the base URL is a valid URL
+	_, err := url.ParseRequestURI(trakt.RedirectURL)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
 // IsAccessTokenValid checks if the access token is still valid
 func (t *TraktConfig) IsAccessTokenValid() bool {
-	if t.AccessToken == "" || t.CreatedAt == 0 || t.ExpiresIn == 0 {
+	if t.CreatedAt == 0 || t.ExpiresIn == 0 {
 		return false
 	}
 

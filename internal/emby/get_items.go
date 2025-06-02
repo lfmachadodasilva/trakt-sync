@@ -118,21 +118,21 @@ func GetItemsByType(c *config.ConfigEntity, itemType string) ([]EmbyItemResponse
 	return items.Items, nil
 }
 
-func getEpisodes(c *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
+func getEpisodes(cfg *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {
 
 	// Validate the Emby configuration
-	if !c.Emby.IsValid(&config.EmbyOptions{IgnoreUserId: true}) {
+	if !cfg.Emby.IsValid(&config.EmbyOptions{IgnoreUserId: true}) {
 		return nil, fmt.Errorf("Emby configuration is invalid")
 	}
 
 	// Construct the URL for the GET request
 	preUrl := "%s/Shows/%s/Episodes?&Recursive=true&EnableUserData=true&Fields=ProviderIds&UserId=%s"
-	url := fmt.Sprintf(preUrl, c.Emby.BaseURL, *embyId, c.Emby.UserID)
+	url := fmt.Sprintf(preUrl, cfg.Emby.BaseURL, *embyId, cfg.Emby.UserID)
 
 	items, err := utils.HttpGet[EmbyItemsResponse](
 		utils.RequestParams{
 			URL:        url,
-			Config:     c,
+			Config:     cfg,
 			AddHeaders: addEmbyHeaders,
 		},
 	)

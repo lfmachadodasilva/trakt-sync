@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 
 // RequestParams represents the parameters for HTTP requests
 type RequestParams struct {
+	Context    *context.Context
 	URL        string
 	Config     *config.ConfigEntity
 	AddHeaders func(req *http.Request, config *config.ConfigEntity)
@@ -19,7 +21,7 @@ type RequestParams struct {
 // It accepts a function parameter to add headers to the request.
 func HttpGet[T any](params RequestParams) (*T, error) {
 	// Construct the HTTP request
-	req, err := http.NewRequest(http.MethodGet, params.URL, nil)
+	req, err := http.NewRequestWithContext(*params.Context, http.MethodGet, params.URL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GET request to Emby: %w", err)
 	}
@@ -67,7 +69,7 @@ func HttpPost[TReq any, TRes any](params RequestParams, body *TReq) (*TRes, erro
 	}
 
 	// Construct the HTTP request
-	req, err := http.NewRequest(http.MethodPost, params.URL, reqBody)
+	req, err := http.NewRequestWithContext(*params.Context, http.MethodPost, params.URL, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create POST request: %w", err)
 	}

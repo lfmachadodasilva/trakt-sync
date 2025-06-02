@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,7 +9,7 @@ import (
 	"trakt-sync/internal/trakt"
 )
 
-func HandleTrakt() http.HandlerFunc {
+func HandleTrakt(ctx *context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Extract the sub-path after /trakt/
 		subPath := r.URL.Path[len("/trakt"):]
@@ -18,7 +19,7 @@ func HandleTrakt() http.HandlerFunc {
 			// Handle the base /trakt endpoint
 			switch r.Method {
 			case http.MethodGet:
-				HandleTraktCode(w, r)
+				HandleTraktCode(ctx, w, r)
 			default:
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			}
@@ -26,7 +27,7 @@ func HandleTrakt() http.HandlerFunc {
 			// Handle the base /trakt endpoint
 			switch r.Method {
 			case http.MethodPost:
-				HandleTraktAuth(w, r)
+				HandleTraktAuth(ctx, w, r)
 			default:
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			}
@@ -34,7 +35,7 @@ func HandleTrakt() http.HandlerFunc {
 			// Handle the base /trakt endpoint
 			switch r.Method {
 			case http.MethodPost:
-				HandleTraktAuthRefresh(w, r)
+				HandleTraktAuthRefresh(ctx, w, r)
 			default:
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			}
@@ -45,29 +46,29 @@ func HandleTrakt() http.HandlerFunc {
 	}
 }
 
-func HandleTraktCode(w http.ResponseWriter, r *http.Request) {
+func HandleTraktCode(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
 
-	config, err := config.ReadConfig()
+	cfg, err := config.ReadConfig(ctx)
 	if err != nil {
 		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
 		return
 	}
 
-	if config.Trakt.ClientID == "" || config.Trakt.RedirectURL == "" {
+	if cfg.Trakt.ClientID == "" || cfg.Trakt.RedirectURL == "" {
 		http.Error(w, "Trakt ClientID or RedirectURL is not set", http.StatusBadRequest)
 		return
 	}
 
 	preUrl := "%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s"
-	url := fmt.Sprintf(preUrl, trakt.TraktApiUrl, config.Trakt.ClientID, config.Trakt.RedirectURL)
+	url := fmt.Sprintf(preUrl, trakt.TraktApiUrl, cfg.Trakt.ClientID, cfg.Trakt.RedirectURL)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(url))
 	w.WriteHeader(http.StatusOK)
 }
 
-func HandleTraktAuth(w http.ResponseWriter, r *http.Request) {
-	config, err := config.ReadConfig()
+func HandleTraktAuth(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
+	cfg, err := config.ReadConfig(ctx)
 	if err != nil {
 		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
 		return
@@ -84,7 +85,7 @@ func HandleTraktAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = trakt.Auth(&config, requestBody.Code)
+	err = trakt.Auth(ctx, &cfg, requestBody.Code)
 	if err != nil {
 		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -94,14 +95,14 @@ func HandleTraktAuth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func HandleTraktAuthRefresh(w http.ResponseWriter, r *http.Request) {
-	config, err := config.ReadConfig()
+func HandleTraktAuthRefresh(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
+	cfg, err := config.ReadConfig(ctx)
 	if err != nil {
 		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
 		return
 	}
 
-	err = trakt.AuthRefreshAccessToken(&config)
+	err = trakt.AuthRefreshAccessToken(ctx, &cfg)
 	if err != nil {
 		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusInternalServerError)
 		return
