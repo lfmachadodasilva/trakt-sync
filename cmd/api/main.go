@@ -22,7 +22,29 @@ func main() {
 	ctx = context.WithValue(ctx, "db", db)
 
 	// Initialize the configuration table
-	config.InitConfigTable(&ctx)
+	cfg := config.InitConfigTable(&ctx)
+
+	if cfg.Cronjob != "" {
+		cronManager := config.NewCronManager()
+		defer cronManager.Stop()
+
+		ctx = context.WithValue(ctx, "cron", cronManager)
+
+		cronManager.Start(context.Background(), cfg.Cronjob, func() {
+			fmt.Println("Running sync job every minute...")
+
+			cfg, err := config.ReadConfig(&ctx)
+			if err != nil {
+				fmt.Println("Failed to read config:", err)
+				return
+			}
+
+			fmt.Printf("Running config: %s\n", cfg.Cronjob)
+
+			// Here you would call the sync function to perform the sync
+			// For example: sync.SyncAll(context.Background())
+		})
+	}
 
 	http.HandleFunc("/config", HandleConfig(&ctx))
 	http.HandleFunc("/emby/", HandleEmby(&ctx))

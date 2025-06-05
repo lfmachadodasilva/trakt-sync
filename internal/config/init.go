@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-func InitConfigTable(ctx *context.Context) {
+func InitConfigTable(ctx *context.Context) *ConfigEntity {
 	// Retrieve the database connection from the context
 	db, ok := (*ctx).Value("db").(*sql.DB)
 	if !ok || db == nil {
@@ -51,4 +51,6 @@ func InitConfigTable(ctx *context.Context) {
 		}
 		UpsertConfig(ctx, &cfg)
 	}
+
+	return cfg
 }

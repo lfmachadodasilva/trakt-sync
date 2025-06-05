@@ -35,6 +35,7 @@ type ConfigEntity struct {
 	Emby     *EmbyConfig     `json:"emby,omitempty"`
 	Plex     *PlexConfig     `json:"plex,omitempty"`
 	Jellyfin *JellyfinConfig `json:"jellyfin,omitempty"`
+	Cronjob  string          `json:"cronjob,omitempty"` // Cron job expression for periodic sync
 }
 
 type EmbyOptions struct {
