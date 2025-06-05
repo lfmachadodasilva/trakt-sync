@@ -9,6 +9,11 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 
+// Automatically enable dark mode by adding the "dark" class to the HTML element
+if (typeof document !== "undefined") {
+  document.documentElement.classList.add("dark");
+}
+
 const elem = document.getElementById("root")!;
 const app = (
   <StrictMode>
