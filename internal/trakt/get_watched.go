@@ -45,11 +45,11 @@ type TraktWatched struct {
 // Documentation: https://trakt.docs.apiary.io/#reference/sync/get-watched/get-watched
 func GetWatched(ctx *context.Context, cfg *config.ConfigEntity) (*TraktWatched, error) {
 
-	movies, err := getWatchedGeneric(ctx, cfg, "movies")
+	movies, err := getWatchedGeneric(ctx, cfg, "movies", false)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch watched movies: %w", err)
 	}
-	shows, err := getWatchedGeneric(ctx, cfg, "shows")
+	shows, err := getWatchedGeneric(ctx, cfg, "shows", false)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch watched shows: %w", err)
 	}
@@ -60,7 +60,7 @@ func GetWatched(ctx *context.Context, cfg *config.ConfigEntity) (*TraktWatched, 
 	}, nil
 }
 
-func getWatchedGeneric(ctx *context.Context, cfg *config.ConfigEntity, mediaType string) (*[]TraktWatchedResponse, error) {
+func getWatchedGeneric(ctx *context.Context, cfg *config.ConfigEntity, mediaType string, isRetry bool) (*[]TraktWatchedResponse, error) {
 
 	// Validate the itemType parameter
 	if mediaType != "movies" && mediaType != "shows" {
@@ -77,6 +77,17 @@ func getWatchedGeneric(ctx *context.Context, cfg *config.ConfigEntity, mediaType
 			Context:    ctx,
 		})
 	if err != nil {
+		if !isRetry && utils.IsAuthError(err) {
+			// If the error is an authentication error, refresh the access token and retry
+			err = AuthRefreshAccessToken(ctx, cfg)
+			if err != nil {
+				return nil, fmt.Errorf("failed to refresh access token: %w", err)
+			}
+			// cfg, err = config.GetConfig(ctx)
+			// Retry the request after refreshing the access token
+			return getWatchedGeneric(ctx, cfg, mediaType, true)
+		}
+
 		return nil, err
 	}
 

@@ -7,6 +7,7 @@ import (
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/emby"
 	"trakt-sync/internal/trakt"
+	"trakt-sync/internal/utils"
 )
 
 var (
@@ -196,39 +197,32 @@ func syncEmbyTvShows(ctx *context.Context, cfg *config.ConfigEntity, request *Sy
 			if !traktImdbEpisodeExists && embyShow.UserData.Played {
 				fmt.Printf("%s Marking Trakt episode as watched for S%dE%d\n", spacePrefix2, embySeasonNumber, embyEpisodeNumber)
 
-				traktFoundShow := false
-				for _, traktSeasonRequest := range request.TraktRequest.Shows {
-					if traktSeasonRequest.Ids.Imdb == imdbId {
-						traktFfoundSeason := false
-						for _, traktSeason := range traktSeasonRequest.Seasons {
-							if traktSeason.Number == embySeasonNumber {
-								traktSeason.Episodes = append(traktSeason.Episodes, trakt.MarkAsWatchedEpisodes{
+				foundShow, found := utils.FindBy(&request.TraktRequest.Shows, func(item trakt.MarkAsWatchedShowRequest) bool {
+					return item.Ids.Imdb == imdbId
+				})
+
+				if found {
+					foundSeason, found := utils.FindBy(&foundShow.Seasons, func(item trakt.MarkAsWatchedSeasonsRequest) bool {
+						return item.Number == embySeasonNumber
+					})
+					if found {
+						foundSeason.Episodes = append(foundSeason.Episodes, trakt.MarkAsWatchedEpisodes{
+							Number:    embyEpisodeNumber,
+							WatchedAt: embyShow.UserData.LastPlayedDate,
+						})
+					} else {
+						foundShow.Seasons = append(foundShow.Seasons, trakt.MarkAsWatchedSeasonsRequest{
+							WatchedAt: embyShow.UserData.LastPlayedDate,
+							Number:    embySeasonNumber,
+							Episodes: []trakt.MarkAsWatchedEpisodes{
+								{
 									Number:    embyEpisodeNumber,
 									WatchedAt: embyShow.UserData.LastPlayedDate,
-								})
-								traktFfoundSeason = true
-								break
-							}
-						}
-
-						if !traktFfoundSeason {
-							traktSeasonRequest.Seasons = append(traktSeasonRequest.Seasons, trakt.MarkAsWatchedSeasonsRequest{
-								WatchedAt: embyShow.UserData.LastPlayedDate,
-								Number:    embySeasonNumber,
-								Episodes: []trakt.MarkAsWatchedEpisodes{
-									{
-										Number:    embyEpisodeNumber,
-										WatchedAt: embyShow.UserData.LastPlayedDate,
-									},
 								},
-							})
-						}
-						traktFoundShow = true
-						break
+							},
+						})
 					}
-				}
-
-				if !traktFoundShow {
+				} else {
 					request.TraktRequest.Shows = append(request.TraktRequest.Shows, trakt.MarkAsWatchedShowRequest{
 						Ids: trakt.MarkAsWatchedIds{
 							Imdb: imdbId,
@@ -247,10 +241,10 @@ func syncEmbyTvShows(ctx *context.Context, cfg *config.ConfigEntity, request *Sy
 						},
 					})
 				}
-
 			} else if traktImdbEpisodeExists && !embyShow.UserData.Played {
 
 				fmt.Printf("%s Marking Emby episode as watched for S%dE%d\n", spacePrefix2, embySeasonNumber, embyEpisodeNumber)
+				emby.MarkItemAsWatched(ctx, cfg, embyEpisode.Id)
 			} else {
 				// Both are in sync, do nothing
 				continue
@@ -258,7 +252,5 @@ func syncEmbyTvShows(ctx *context.Context, cfg *config.ConfigEntity, request *Sy
 		}
 	}
 
-	// This function is a placeholder for syncing TV shows
-	// You can implement the logic to sync TV shows here
 	return nil
 }
