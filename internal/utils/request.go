@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"trakt-sync/internal/config"
 )
@@ -46,13 +47,7 @@ func HttpGet[T any](params RequestParams) (*T, error) {
 		return nil, fmt.Errorf("received non-200 response: %d", resp.StatusCode)
 	}
 
-	// Decode the JSON response into the generic type
-	var result T
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return &result, nil
+	return SerializeBody[T](resp.Body)
 }
 
 func HttpPost[TReq any, TRes any](params RequestParams, body *TReq) (*TRes, error) {
@@ -94,11 +89,36 @@ func HttpPost[TReq any, TRes any](params RequestParams, body *TReq) (*TRes, erro
 		return nil, fmt.Errorf("received non-200 response: %d", resp.StatusCode)
 	}
 
-	// Decode the JSON response into the generic type
-	var result TRes
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+	return SerializeBody[TRes](resp.Body)
+}
+
+// HttpError represents an HTTP error with a status code.
+type HttpError struct {
+	StatusCode int
+	Err        error
+}
+
+// Error implements the error interface for HttpError.
+func (e *HttpError) Error() string {
+	return e.Err.Error()
+}
+
+// Unwrap provides compatibility with errors.Unwrap.
+func (e *HttpError) Unwrap() error {
+	return e.Err
+}
+
+// SerializeBody is a generic function that deserializes the body of an HTTP request into the specified type.
+func SerializeBody[T any](body io.ReadCloser) (*T, error) {
+	defer body.Close()
+
+	var obj T
+	if err := json.NewDecoder(body).Decode(&obj); err != nil {
+		return nil, &HttpError{
+			StatusCode: http.StatusBadRequest,
+			Err:        err,
+		}
 	}
 
-	return &result, nil
+	return &obj, nil
 }

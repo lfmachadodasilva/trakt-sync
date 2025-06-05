@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"trakt-sync/internal/config"
+	"trakt-sync/internal/utils"
 )
 
 func HandleConfig(ctx *context.Context) http.HandlerFunc {
@@ -49,13 +50,13 @@ func handleGetConfig(ctx *context.Context, w http.ResponseWriter) {
 }
 
 func handlePatchConfig(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
-	var request config.ConfigEntity
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	request, err := utils.SerializeBody[config.ConfigEntity](r.Body)
+	if err != nil {
+		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := config.UpsertConfig(ctx, &request); err != nil {
+	if err := config.UpsertConfig(ctx, request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
