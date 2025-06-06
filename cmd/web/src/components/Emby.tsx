@@ -66,12 +66,16 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
       .then(() => {
         console.debug("Configuration saved successfully");
         setSaveStatus("success");
+        cfg.emby = {
+          ...cfg.emby,
+          ...updatedConfig.emby,
+        };
       })
       .catch((error) => {
         console.debug("Failed to save configuration:", error);
         setSaveStatus("error");
       });
-  }, [selectedUserId]);
+  }, [selectedUserId, cfg]);
 
   return (
     <Card className="w-full max-w-sm">

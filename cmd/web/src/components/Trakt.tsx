@@ -3,7 +3,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { useEffect, useRef, useState } from "react";
-import { getTraktCodeUrl, updateConfig } from "@/config/fetch";
+import { getTraktCodeUrl, setTraktCode, updateConfig } from "@/config/fetch";
 import {
   Card,
   CardContent,
@@ -43,7 +43,24 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
     updateConfig(updatedConfig)
       .then(() => {
         console.debug("Configuration saved successfully");
-        setSaveStatus("success");
+        if (
+          updatedConfig.trakt.code &&
+          updatedConfig.trakt.code !== "" &&
+          (!updatedConfig.trakt.access_token ||
+            updatedConfig.trakt.access_token === "")
+        ) {
+          setTraktCode(updatedConfig.trakt.code)
+            .then(() => {
+              console.debug("Trakt code set successfully");
+              setSaveStatus("success");
+            })
+            .catch((error) => {
+              console.debug("Failed to set Trakt code:", error);
+              setSaveStatus("error");
+            });
+        } else {
+          setSaveStatus("success");
+        }
       })
       .catch((error) => {
         console.debug("Failed to save configuration:", error);

@@ -99,3 +99,23 @@ export const getTraktCodeUrl = async (): Promise<string> =>
       reject(error.message);
     }
   });
+
+export const setTraktCode = async (code: string): Promise<void> =>
+  new Promise<void>(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${API_URL}/trakt/auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
+      });
+      if (!response.ok) {
+        reject(`HTTP error! status: ${response.status}`);
+      }
+      resolve();
+    } catch (error) {
+      console.error("Failed to set code:", error);
+      reject(error.message);
+    }
+  });
