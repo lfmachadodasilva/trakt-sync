@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/emby"
@@ -43,11 +44,13 @@ func HandleEmbyUsers(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 	cfg, err := config.ReadConfig(ctx)
 	if err != nil {
 		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
+		fmt.Println("Failed to read configs:", err)
 		return
 	}
 	usr, err := emby.FetchEmbyUsers(cfg)
 	if err != nil {
 		http.Error(w, "Failed to fetch Emby users: "+err.Error(), http.StatusInternalServerError)
+		fmt.Println("Failed to fetch Emby users:", err)
 		return
 	}
 
@@ -56,6 +59,7 @@ func HandleEmbyUsers(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 	jsonData, err := json.Marshal(usr)
 	if err != nil {
 		http.Error(w, "Failed to marshal users", http.StatusInternalServerError)
+		fmt.Println("Failed to marshal users:", err)
 		return
 	}
 
@@ -72,12 +76,14 @@ func HandleEmbyWebhooks(ctx *context.Context, w http.ResponseWriter, r *http.Req
 	webhook, err := utils.SerializeBody[emby.EmbyWebhook](r.Body)
 	if err != nil {
 		http.Error(w, "Failed to parse webhook: "+err.Error(), http.StatusBadRequest)
+		fmt.Println("Failed to parse webhook:", err)
 		return
 	}
 
 	err = emby.ProcessEmbyWebhook(ctx, cfg, webhook)
 	if err != nil {
 		http.Error(w, "Failed to process webhook: "+err.Error(), http.StatusBadGateway)
+		fmt.Println("Failed to process webhook:", err)
 		return
 	}
 }

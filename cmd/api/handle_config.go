@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/utils"
@@ -34,14 +35,16 @@ func HandleConfig(ctx *context.Context) http.HandlerFunc {
 func handleGetConfig(ctx *context.Context, w http.ResponseWriter) {
 	cfg, err := config.ReadConfig(ctx)
 	if err != nil {
-		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
+		http.Error(w, "Failed to read configs", http.StatusBadRequest)
+		fmt.Println("Failed to read configs:", err)
 		return
 	}
 
 	// Marshal the fetched configurations into JSON
 	jsonData, err := json.Marshal(cfg)
 	if err != nil {
-		http.Error(w, "Failed to marshal configs", http.StatusInternalServerError)
+		http.Error(w, "Failed to marshal configs", http.StatusBadRequest)
+		fmt.Println("Failed to marshal configs:", err)
 		return
 	}
 
@@ -52,11 +55,13 @@ func handlePatchConfig(ctx *context.Context, w http.ResponseWriter, r *http.Requ
 	request, err := utils.SerializeBody[config.ConfigEntity](r.Body)
 	if err != nil {
 		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
+		fmt.Println("Invalid request body:", err)
 		return
 	}
 
 	if err := config.UpsertConfig(ctx, request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println("Failed to update config:", err)
 		return
 	}
 

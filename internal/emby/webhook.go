@@ -33,7 +33,7 @@ type EmbyWebhook struct {
 
 func (webhook *EmbyWebhook) GetImdbId() (string, error) {
 
-	imdbId := webhook.Item.ProviderIds["imdb"]
+	imdbId := webhook.Item.ProviderIds["Imdb"]
 	if imdbId == "" {
 		imdbId = webhook.Item.ProviderIds["IMDB"]
 	}

@@ -50,12 +50,14 @@ func HandleTraktCode(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 
 	cfg, err := config.ReadConfig(ctx)
 	if err != nil {
-		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
+		http.Error(w, "Failed to read configs", http.StatusBadRequest)
+		fmt.Println("Failed to read configs:", err)
 		return
 	}
 
 	if cfg.Trakt.ClientID == "" || cfg.Trakt.RedirectURL == "" {
 		http.Error(w, "Trakt ClientID or RedirectURL is not set", http.StatusBadRequest)
+		fmt.Println("Trakt ClientID or RedirectURL is not set")
 		return
 	}
 
@@ -80,12 +82,14 @@ func HandleTraktAuth(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 	// Decode the JSON body into the struct
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
 		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
+		fmt.Println("Invalid request body:", err)
 		return
 	}
 
 	err = trakt.Auth(ctx, cfg, requestBody.Code)
 	if err != nil {
-		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusBadRequest)
+		fmt.Println("Failed to fetch Trakt auth:", err)
 		return
 	}
 
@@ -95,13 +99,15 @@ func HandleTraktAuth(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 func HandleTraktAuthRefresh(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
 	cfg, err := config.ReadConfig(ctx)
 	if err != nil {
-		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
+		http.Error(w, "Failed to read configs", http.StatusBadRequest)
+		fmt.Println("Failed to read configs:", err)
 		return
 	}
 
 	err = trakt.AuthRefreshAccessToken(ctx, cfg)
 	if err != nil {
-		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to fetch Trakt auth: "+err.Error(), http.StatusBadRequest)
+		fmt.Println("Failed to fetch Trakt auth:", err)
 		return
 	}
 

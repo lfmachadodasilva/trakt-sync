@@ -42,9 +42,9 @@ func HttpGet[T any](params RequestParams) (*T, error) {
 	}
 	// defer resp.Body.Close()
 
-	// Check for non-200 status codes
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("received non-200 response: %d", resp.StatusCode)
+	// Check for non-2xx status codes
+	if resp.StatusCode < http.StatusOK && resp.StatusCode >= http.StatusMultipleChoices {
+		return nil, fmt.Errorf("received non-2xx response: %d", resp.StatusCode)
 	}
 
 	return SerializeBody[T](resp.Body)
@@ -85,8 +85,8 @@ func HttpPost[TReq any, TRes any](params RequestParams, body *TReq) (*TRes, erro
 	defer resp.Body.Close()
 
 	// Check for non-200 status codes
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("received non-200 response: %d", resp.StatusCode)
+	if resp.StatusCode < http.StatusOK && resp.StatusCode >= http.StatusMultipleChoices {
+		return nil, fmt.Errorf("received non-2xx response: %d", resp.StatusCode)
 	}
 
 	return SerializeBody[TRes](resp.Body)

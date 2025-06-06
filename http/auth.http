@@ -1,5 +1,5 @@
 ### Base URL
-@baseUrl = http://localhost:3000
+@baseUrl = http://localhost:4000
 
 ### Get code
 GET {{baseUrl}}/trakt/code
@@ -10,7 +10,7 @@ POST {{baseUrl}}/trakt/auth
 Content-Type: application/json
 
 {
-  "code": "e13f91c3"
+  "code": "d87d9d27"
 }
 
 ### Refresh access token

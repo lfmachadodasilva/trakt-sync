@@ -145,3 +145,138 @@ Content-Type: application/json
     "PlaySessionId": "71521974dcf74c70b18d27a7bacff3dc"
   }
 }
+
+
+### Webhook marked as played
+POST {{baseUrl}}/emby/webhooks
+Content-Type: application/json
+
+{
+  "Title": "item.markplayed",
+  "Description": "Friday, 6 June 2025 19:54",
+  "Date": "2025-06-06T19:54:33.1712167Z",
+  "Event": "item.markplayed",
+  "User": {
+    "Name": "luizfelipe",
+    "Id": "aac3a78d9f184ea480fb1629e76aad57"
+  },
+  "Item": {
+    "Name": "The Accountant",
+    "OriginalTitle": "The Accountant",
+    "ServerId": "15596ac9bbc24127b9f01db6f33630c7",
+    "Id": "4916",
+    "DateCreated": "2025-05-05T22:40:06.0000000Z",
+    "Container": "mkv",
+    "SortName": "Accountant",
+    "PremiereDate": "2016-10-13T00:00:00.0000000Z",
+    "ExternalUrls": [
+      {
+        "Name": "IMDb",
+        "Url": "https://www.imdb.com/title/tt2140479"
+      },
+      {
+        "Name": "MovieDb",
+        "Url": "https://www.themoviedb.org/movie/302946"
+      },
+      {
+        "Name": "TheTVDB",
+        "Url": "https://thetvdb.com/dereferrer/movie/940"
+      },
+      {
+        "Name": "Trakt",
+        "Url": "https://trakt.tv/search/tmdb/302946?id_type=movie"
+      }
+    ],
+    "Path": "/data/movies/The Accountant (2016)/The.Accountant.2016.1080p.Bluray.AV1.Opus.7.1-heTOrico.mkv",
+    "OfficialRating": "GB-15",
+    "Overview": "As a math savant uncooks the books for a new client, the Treasury Department closes in on his activities and the body count starts to rise.",
+    "Taglines": [
+      "Calculate your choices."
+    ],
+    "Genres": [
+      "Crime",
+      "Thriller",
+      "Drama"
+    ],
+    "CommunityRating": 7.102,
+    "RunTimeTicks": 76740420000,
+    "Size": 2491030322,
+    "FileName": "The.Accountant.2016.1080p.Bluray.AV1.Opus.7.1-heTOrico.mkv",
+    "Bitrate": 2596837,
+    "ProductionYear": 2016,
+    "RemoteTrailers": [
+      {
+        "Url": "https://www.youtube.com/watch?v=0KHOVlEpMyY"
+      },
+      {
+        "Url": "https://www.youtube.com/watch?v=aNGhnNMSopI"
+      }
+    ],
+    "ProviderIds": {
+      "Tmdb": "302946",
+      "Imdb": "tt2140479",
+      "Tvdb": "940",
+      "Official Website": "http://www.accountantmovie.com/"
+    },
+    "IsFolder": false,
+    "ParentId": "4915",
+    "Type": "Movie",
+    "Studios": [
+      {
+        "Name": "Zero Gravity Management",
+        "Id": 3734
+      },
+      {
+        "Name": "Electric City Entertainment",
+        "Id": 4972
+      },
+      {
+        "Name": "RatPac Entertainment",
+        "Id": 4973
+      },
+      {
+        "Name": "Warner Bros. Pictures",
+        "Id": 74
+      }
+    ],
+    "GenreItems": [
+      {
+        "Name": "Crime",
+        "Id": 95
+      },
+      {
+        "Name": "Thriller",
+        "Id": 31
+      },
+      {
+        "Name": "Drama",
+        "Id": 94
+      }
+    ],
+    "TagItems": [],
+    "UserData": {
+      "PlaybackPositionTicks": 0,
+      "PlayCount": 1,
+      "IsFavorite": false,
+      "LastPlayedDate": "2025-06-06T19:54:33.0000000Z",
+      "Played": true
+    },
+    "PrimaryImageAspectRatio": 0.6666666666666666,
+    "ImageTags": {
+      "Primary": "2aef1d05aa6f853a85cfc456caed0c75",
+      "Logo": "769df03217393fd4ecbb8f669d76f05e",
+      "Thumb": "4a57516d0ad34ad95b5c00d642fae183"
+    },
+    "BackdropImageTags": [
+      "ed0b2120786a049126ed696fd293c246"
+    ],
+    "MediaType": "Video",
+    "Width": 1912,
+    "Height": 800
+  },
+  "Server": {
+    "Name": "luiz-macmini61",
+    "Id": "15596ac9bbc24127b9f01db6f33630c7",
+    "Version": "4.8.11.0"
+  }
+}
