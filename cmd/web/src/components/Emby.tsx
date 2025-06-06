@@ -81,7 +81,7 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
       </CardHeader>
       <CardContent>
         <div key="base-url">
-          <Label className="block mb-2">
+          <Label className="block mb-2 text-left">
             server url
             <Input
               type="text"
@@ -93,7 +93,7 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
           </Label>
         </div>
         <div key="api-key">
-          <Label className="block mb-2">
+          <Label className="block mb-2 text-left">
             api key
             <Input
               type="text"
@@ -105,11 +105,11 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
           </Label>
         </div>
         <div key="user-id">
-          <Label className="block mb-2">
+          <Label className="block mb-2 text-left">
             user id
             <Select value={selectedUserId} onValueChange={handleUserChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="select user" />
+              <SelectTrigger className="w-full mt-1">
+                <SelectValue placeholder="select user" className="" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>

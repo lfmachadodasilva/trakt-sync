@@ -102,35 +102,35 @@ export const Sync = ({ cfg }: { cfg: ConfigEntity }) => {
       </CardHeader>
       <CardContent>
         <div key="base-url">
-          <Label className="block mb-2">
+          <Label className="block mb-2 text-left">
             cron job
             <Input
               readOnly
               type="text"
+              id="cronjob"
+              name="cronjob"
               defaultValue={cfg?.cronjob}
               className="mt-1 block w-full p-2 border border-gray-300 rounded"
-              placeholder="Enter your cron job frequency (e.g., '0 * * * *')"
+              placeholder="Enter your cron job frequency (e.g., '0 0 * * *')"
               ref={cronRef}
               onChange={handleCronChange}
             />
-            <Label className="text-sm text-muted-foreground mt-1">
-              This will run: <strong>{cronText}</strong>
-            </Label>
-            <br></br>
-            <br></br>
-            <Label className="text-sm text-muted-foreground mt-1">
-              This cron job will run based on your defined schedule. Need help?
-              Visit{" "}
-              <a
-                href="https://crontab.guru"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 underline"
-              >
-                crontab.guru
-              </a>
-            </Label>
           </Label>
+          <p className="text-sm text-muted-foreground mt-1 mb-4">
+            This will run: <strong>{cronText}</strong>
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            This cron job will run based on your defined schedule. Need help?
+            Visit{" "}
+            <a
+              href="https://crontab.guru"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline"
+            >
+              crontab.guru
+            </a>
+          </p>
         </div>
         {/* <pre>{JSON.stringify(cfg, null, 2)}</pre> */}
       </CardContent>

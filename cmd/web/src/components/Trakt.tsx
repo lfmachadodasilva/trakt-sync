@@ -51,33 +51,34 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
         <CardDescription>Configure your Trakt settings</CardDescription>
       </CardHeader>
       <CardContent>
-        <div>
-          <Label>client ID</Label>
+        <Label className="block mb-2 text-left">
+          client ID
           <Input
-            className="w-full"
+            className="w-full mt-1 block w-full"
             type="text"
             defaultValue={cfg?.trakt?.client_id}
             autoComplete="off"
             ref={clientIdRef}
             placeholder="enter your client ID"
           />
-        </div>
-        <div>
-          <Label>client Secret</Label>
+        </Label>
+
+        <Label className="block mb-2 text-left">
+          client Secret
           <Input
-            className="w-full"
+            className="w-full mt-1 block w-full"
             // type="password"
             defaultValue={cfg?.trakt?.client_secret}
             autoComplete="off"
             ref={clientSecretRef}
             placeholder="enter your client secret"
           />
-        </div>
-        <div>
-          <Label>code</Label>
+        </Label>
+        <Label className="block mb-2 text-left">
+          code
           <div className="flex items-center gap-2">
             <Input
-              className="w-full"
+              className="w-full mt-1 block w-full"
               // type="password"
               defaultValue={cfg?.trakt?.code}
               ref={codeRef}
@@ -89,7 +90,7 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
               </a>
             </Button>
           </div>
-        </div>
+        </Label>
       </CardContent>
       <CardFooter className="flex justify-end">
         <Button disabled={saveStatus === "loading"} onClick={handleSave}>
