@@ -12,13 +12,16 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useMemo, useRef, useState } from "react";
-import { updateConfig } from "@/config/fetch";
+import { runSync, updateConfig } from "@/config/fetch";
 import { Check, Loader2Icon, X } from "lucide-react";
 import cronstrue from "cronstrue";
 
 export const Sync = ({ cfg }: { cfg: ConfigEntity }) => {
   const cronRef = useRef<HTMLInputElement>(null);
   const [saveStatus, setSaveStatus] = useState<
+    "loading" | "success" | "error"
+  >();
+  const [syncStatus, setSyncStatus] = useState<
     "loading" | "success" | "error"
   >();
 
@@ -53,13 +56,37 @@ export const Sync = ({ cfg }: { cfg: ConfigEntity }) => {
       });
   };
 
+  const handleSync = () => {
+    setSyncStatus("loading");
+    runSync()
+      .then(() => {
+        console.debug("Sync started successfully");
+        setSyncStatus("success");
+      })
+      .catch((error) => {
+        console.debug("Failed to start sync:", error);
+        setSyncStatus("error");
+      });
+  };
+
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>Sync</CardTitle>
         <CardDescription>Configure your sync settings</CardDescription>
         <CardAction>
-          <Button variant="secondary">run sync</Button>
+          <Button
+            variant="secondary"
+            disabled={syncStatus === "loading"}
+            onClick={handleSync}
+          >
+            {syncStatus === "loading" && (
+              <Loader2Icon className="animate-spin" />
+            )}
+            run async
+            {syncStatus === "success" && <Check className="text-green-500" />}
+            {syncStatus === "error" && <X className="text-red-500" />}
+          </Button>
         </CardAction>
       </CardHeader>
       <CardContent>

@@ -35,9 +35,12 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
   >();
 
   useEffect(() => {
-    cfg?.emby?.base_url?.trim() !== "" &&
-      cfg?.emby?.api_key?.trim() !== "" &&
+    if (
+      (cfg?.emby?.base_url?.trim() ?? "") !== "" &&
+      (cfg?.emby?.api_key?.trim() ?? "") !== ""
+    ) {
       getUsers().then(setUsers);
+    }
   }, [cfg?.emby?.base_url, cfg?.emby?.api_key]);
 
   useEffect(() => {

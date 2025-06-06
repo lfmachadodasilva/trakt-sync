@@ -1,27 +1,40 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { APITester } from "./APITester";
 import "./index.css";
 
-import logo from "./logo.svg";
-import reactLogo from "./react.svg";
 import { Trakt } from "./components/Trakt";
 import { Emby } from "./components/Emby";
 import { useEffect, useState } from "react";
 import { getConfig } from "./config/fetch";
-import { Button } from "./components/ui/button";
 import { Sync } from "./components/Sync";
+import { AlertCircleIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 
 export function App() {
   const [cfg, setCfg] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getConfig().then((config) => {
-      setCfg(config);
-    });
+    getConfig()
+      .then((config) => {
+        setCfg(config);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch configuration:", error);
+        setError("Failed to fetch configuration");
+      });
   }, []);
 
   return (
     <div className="container mx-auto p-8 text-center relative z-10 gap-8 flex flex-wrap justify-center items-start">
+      {error && (
+        <Alert variant="destructive" className="text-left w-full ">
+          <AlertCircleIcon />
+          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertDescription>
+            Something went wrong while fetching the configuration. Please check
+            your server logs for more details.
+          </AlertDescription>
+        </Alert>
+      )}
       <Trakt cfg={cfg} />
       <Emby cfg={cfg} />
       <Sync cfg={cfg} />
