@@ -7,5 +7,5 @@ services:
       - "3000:3000"
     volumes:
       - ./data:/app/data
-    container_name: trakt-sync-api
+    container_name: trakt-sync
     restart: unless-stopped
