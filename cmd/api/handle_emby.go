@@ -36,7 +36,7 @@ func HandleEmbyUsers(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
 		return
 	}
-	usr, err := emby.FetchEmbyUsers(&cfg)
+	usr, err := emby.FetchEmbyUsers(cfg)
 	if err != nil {
 		http.Error(w, "Failed to fetch Emby users: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -52,6 +52,4 @@ func HandleEmbyUsers(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
-
-	w.WriteHeader(http.StatusOK)
 }

@@ -46,13 +46,13 @@ func HandleSyncAll(ctx *context.Context, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	traktData, err := trakt.GetWatched(ctx, &cfg)
+	traktData, err := trakt.GetWatched(ctx, cfg)
 	if err != nil {
 		http.Error(w, "Failed to fetch watched data from Trakt: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := syncEmby(ctx, &cfg, traktData); err != nil {
+	if err := syncEmby(ctx, cfg, traktData); err != nil {
 		http.Error(w, "Failed to sync Emby with Trakt data: "+err.Error(), http.StatusInternalServerError)
 		return
 	}

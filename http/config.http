@@ -20,5 +20,6 @@ Content-Type: application/json
   "emby": {
     "api_key": "b039ba2b065e4ba1bca2307cce593478",
     "base_url": "http://192.168.1.13:8096"
-  }
+  },
+  "cronjob": "* * * * *"
 }

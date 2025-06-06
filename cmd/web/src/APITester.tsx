@@ -1,3 +1,7 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { useRef, type FormEvent } from "react";
 
 export function APITester() {
@@ -22,18 +26,49 @@ export function APITester() {
   };
 
   return (
-    <div className="api-tester">
-      <form onSubmit={testEndpoint} className="endpoint-row">
-        <select name="method" className="method">
-          <option value="GET">GET</option>
-          <option value="PUT">PUT</option>
-        </select>
-        <input type="text" name="endpoint" defaultValue="/api/hello" className="url-input" placeholder="/api/hello" />
-        <button type="submit" className="send-button">
+    <div className="mt-8 mx-auto w-full max-w-2xl text-left flex flex-col gap-4">
+      <form
+        onSubmit={testEndpoint}
+        className="flex items-center gap-2 bg-card p-3 rounded-xl font-mono border border-input w-full"
+      >
+        <Select name="method" defaultValue="GET">
+          <SelectTrigger className="w-[100px]">
+            <SelectValue placeholder="Method" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="GET">GET</SelectItem>
+            <SelectItem value="PUT">PUT</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Input
+          type="text"
+          name="endpoint"
+          defaultValue="/api/hello"
+          className={cn(
+            "flex-1 font-mono",
+            "bg-transparent border-0 shadow-none",
+            "focus-visible:ring-0 focus-visible:ring-offset-0",
+          )}
+          placeholder="/api/hello"
+        />
+
+        <Button type="submit" variant="secondary">
           Send
-        </button>
+        </Button>
       </form>
-      <textarea ref={responseInputRef} readOnly placeholder="Response will appear here..." className="response-area" />
+
+      <textarea
+        ref={responseInputRef}
+        readOnly
+        placeholder="Response will appear here..."
+        className={cn(
+          "w-full min-h-[140px] bg-card",
+          "border border-input rounded-xl p-3",
+          "font-mono resize-y",
+          "placeholder:text-muted-foreground",
+        )}
+      />
     </div>
   );
 }

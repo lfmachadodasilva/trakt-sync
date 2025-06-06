@@ -45,7 +45,6 @@ func handleGetConfig(ctx *context.Context, w http.ResponseWriter) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
 }
 
