@@ -58,9 +58,9 @@ func UpsertConfig(ctx *context.Context, cfg *ConfigEntity) error {
 
 		cronManager, ok := (*ctx).Value("cron").(*CronManager)
 		if ok || cronManager != nil {
-			cronManager.UpdateFrequency(ctx, cfg.Cronjob, func() {
-				log.Println("Cron job updated with new configuration")
-			})
+			// cronManager.UpdateFrequency(ctx, cfg.Cronjob, func() {
+			// 	log.Println("Cron job updated with new configuration")
+			// })
 			// TODO reload cron jobs if cron manager is available
 		}
 	}

@@ -22,7 +22,7 @@ type RequestParams struct {
 // It accepts a function parameter to add headers to the request.
 func HttpGet[T any](params RequestParams) (*T, error) {
 	// Construct the HTTP request
-	req, err := http.NewRequestWithContext(*params.Context, http.MethodGet, params.URL, nil)
+	req, err := http.NewRequest(http.MethodGet, params.URL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GET request to Emby: %w", err)
 	}
@@ -40,7 +40,7 @@ func HttpGet[T any](params RequestParams) (*T, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to make GET request: %w", err)
 	}
-	defer resp.Body.Close()
+	// defer resp.Body.Close()
 
 	// Check for non-200 status codes
 	if resp.StatusCode != http.StatusOK {

@@ -55,9 +55,29 @@ func main() {
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
 
-	fmt.Println("🚀 Starting server on port 3000...")
-	http.ListenAndServe(":3000", nil)
+	fmt.Println("🚀 Starting server on port 4000...")
+	http.ListenAndServe(":4000", corsMiddleware(http.DefaultServeMux))
 
 	// Close the database connection
 	defer db.Close()
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Allow all origins (you can restrict this to specific domains)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		// Allow specific HTTP methods
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		// Allow specific headers
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		// Handle preflight requests
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Pass the request to the next handler
+		next.ServeHTTP(w, r)
+	})
 }
