@@ -28,7 +28,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: lfmachadodasilva/track-sync
+          images: lfmachadodasilva/trakt-sync
 
       - name: Build and push Docker image
         id: push
@@ -38,13 +38,13 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            lfmachadodasilva/track-sync:latest
-            lfmachadodasilva/track-sync:${{ github.ref_name }}
+            lfmachadodasilva/trakt-sync:latest
+            lfmachadodasilva/trakt-sync:${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: index.docker.io/lfmachadodasilva/track-sync
+          subject-name: index.docker.io/lfmachadodasilva/trakt-sync
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
