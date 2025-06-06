@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/emby"
+	"trakt-sync/internal/utils"
 )
 
 func HandleEmby(ctx *context.Context) http.HandlerFunc {
@@ -63,5 +64,21 @@ func HandleEmbyUsers(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 }
 
 func HandleEmbyWebhooks(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
+	cfg, err := config.ReadConfig(ctx)
+	if err != nil {
+		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
+		return
+	}
+
+	webhook, err := utils.SerializeBody[emby.EmbyWebhook](r.Body)
+	if err != nil {
+		http.Error(w, "Failed to parse webhook: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = emby.ProcessEmbyWebhook(ctx, cfg, webhook)
+	if err != nil {
+		http.Error(w, "Failed to process webhook: "+err.Error(), http.StatusBadGateway)
+		return
+	}
 }
