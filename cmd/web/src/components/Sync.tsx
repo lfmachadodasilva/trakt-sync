@@ -11,7 +11,7 @@ import {
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { runSync, updateConfig } from "@/config/fetch";
 import { Check, Loader2Icon, X } from "lucide-react";
 import cronstrue from "cronstrue";
@@ -24,18 +24,29 @@ export const Sync = ({ cfg }: { cfg: ConfigEntity }) => {
   const [syncStatus, setSyncStatus] = useState<
     "loading" | "success" | "error"
   >();
+  const [cronText, setCronText] = useState<string>(null);
 
-  const cronText = useMemo(() => {
-    if (!cronRef.current?.value || cronRef.current.value.trim() === "") {
+  useEffect(() => {
+    setCronText(getCronjobText(cfg?.cronjob));
+    cronRef.current.value = cfg?.cronjob || "";
+  }, [cfg?.cronjob]);
+
+  const getCronjobText = (cron: string): string => {
+    if (!cron || cron.trim() === "") {
       return "No cron expression provided";
     }
     try {
-      return cronstrue.toString(cronRef.current?.value || "");
+      return cronstrue.toString(cron);
     } catch (error) {
-      console.error("Invalid cron expression:", error);
+      console.debug("Invalid cron expression:", error);
       return "Invalid cron expression";
     }
-  }, [cronRef.current, cfg?.cronjob]);
+  };
+
+  const handleCronChange = () => {
+    const cronValue = cronRef.current?.value || "";
+    setCronText(getCronjobText(cronValue));
+  };
 
   const handleSave = () => {
     const cronValue = cronRef.current?.value || "";
@@ -94,15 +105,18 @@ export const Sync = ({ cfg }: { cfg: ConfigEntity }) => {
           <Label className="block mb-2">
             cron job
             <Input
+              readOnly
               type="text"
               defaultValue={cfg?.cronjob}
               className="mt-1 block w-full p-2 border border-gray-300 rounded"
               placeholder="Enter your cron job frequency (e.g., '0 * * * *')"
               ref={cronRef}
+              onChange={handleCronChange}
             />
             <Label className="text-sm text-muted-foreground mt-1">
-              This will run: {cronText}
+              This will run: <strong>{cronText}</strong>
             </Label>
+            <br></br>
             <br></br>
             <Label className="text-sm text-muted-foreground mt-1">
               This cron job will run based on your defined schedule. Need help?
