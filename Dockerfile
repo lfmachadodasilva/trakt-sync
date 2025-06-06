@@ -49,5 +49,8 @@ VOLUME /app/data
 # Expose the port for the API
 EXPOSE 3000
 
+# Set the NODE_ENV environment variable to production
+ENV NODE_ENV=production
+
 # Command to run the API
 CMD ["./api"]

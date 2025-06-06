@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/database"
 )
@@ -55,8 +56,14 @@ func main() {
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
 
-	fmt.Println("🚀 Starting server on port 4000...")
-	http.ListenAndServe(":4000", corsMiddleware(http.DefaultServeMux))
+	// Determine the port based on the environment
+	port := "4000"
+	if os.Getenv("NODE_ENV") == "production" {
+		port = "3000"
+	}
+
+	fmt.Printf("🚀 Starting server on port %s...\n", port)
+	http.ListenAndServe(":"+port, corsMiddleware(http.DefaultServeMux))
 
 	// Close the database connection
 	defer db.Close()

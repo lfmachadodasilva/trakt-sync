@@ -1,5 +1,5 @@
 import type { ConfigEntity, EmbyUser } from "@/config/models";
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import {
