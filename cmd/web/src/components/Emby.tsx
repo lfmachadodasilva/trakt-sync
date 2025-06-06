@@ -33,13 +33,21 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
   const [saveStatus, setSaveStatus] = useState<
     "loading" | "success" | "error"
   >();
+  const [resetStatus, setResetStatus] = useState<
+    "loading" | "success" | "error"
+  >();
 
   useEffect(() => {
     if (
       (cfg?.emby?.base_url?.trim() ?? "") !== "" &&
       (cfg?.emby?.api_key?.trim() ?? "") !== ""
     ) {
-      getUsers().then(setUsers);
+      getUsers()
+        .then(setUsers)
+        .catch((error) => {
+          console.debug("Failed to fetch users:", error);
+          setUsers([]);
+        });
     }
   }, [cfg?.emby?.base_url, cfg?.emby?.api_key]);
 
@@ -50,6 +58,20 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
   }, [cfg?.emby?.user_id]);
 
   const handleUserChange = (value: string) => setSelectedUserId(value);
+
+  const handleReset = () => {
+    setResetStatus("loading");
+    updateConfig({ ...cfg, emby: {} } as ConfigEntity)
+      .then(() => {
+        console.debug("Configuration saved successfully");
+        setResetStatus("success");
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.debug("Failed to save configuration:", error);
+        setResetStatus("error");
+      });
+  };
 
   const handleSave = useCallback(() => {
     const updatedConfig: ConfigEntity = {
@@ -130,7 +152,19 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
           </Label>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-end gap-4">
+        <Button
+          variant="secondary"
+          disabled={resetStatus === "loading"}
+          onClick={handleReset}
+        >
+          {resetStatus === "loading" && (
+            <Loader2Icon className="animate-spin" />
+          )}
+          reset
+          {resetStatus === "success" && <Check className="text-green-500" />}
+          {resetStatus === "error" && <X className="text-red-500" />}
+        </Button>
         <Button disabled={saveStatus === "loading"} onClick={handleSave}>
           {saveStatus === "loading" && <Loader2Icon className="animate-spin" />}
           save

@@ -21,13 +21,43 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
   const [saveStatus, setSaveStatus] = useState<
     "loading" | "success" | "error"
   >();
+  const [resetStatus, setResetStatus] = useState<
+    "loading" | "success" | "error"
+  >();
   const [codeUrl, setCodeUrl] = useState<string>();
 
   useEffect(() => {
-    getTraktCodeUrl().then((url) => {
-      setCodeUrl(url);
-    });
+    getTraktCodeUrl()
+      .then((url) => {
+        setCodeUrl(url);
+      })
+      .catch((error) => {
+        console.debug("Failed to fetch Trakt code URL:", error);
+        setCodeUrl("");
+      });
   });
+
+  const handleReset = () => {
+    setResetStatus("loading");
+    updateConfig({
+      ...cfg,
+      trakt: {
+        ...cfg.trakt,
+        access_token: null,
+        refresh_token: null,
+        code: null,
+      },
+    } as ConfigEntity)
+      .then(() => {
+        console.debug("Configuration saved successfully");
+        setResetStatus("success");
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.debug("Failed to save configuration:", error);
+        setResetStatus("error");
+      });
+  };
 
   const handleSave = () => {
     const updatedConfig: ConfigEntity = {
@@ -116,7 +146,19 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
           </div>
         </Label>
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-end gap-4">
+        <Button
+          variant="secondary"
+          disabled={resetStatus === "loading"}
+          onClick={handleReset}
+        >
+          {resetStatus === "loading" && (
+            <Loader2Icon className="animate-spin" />
+          )}
+          reset
+          {resetStatus === "success" && <Check className="text-green-500" />}
+          {resetStatus === "error" && <X className="text-red-500" />}
+        </Button>
         <Button disabled={saveStatus === "loading"} onClick={handleSave}>
           {saveStatus === "loading" && <Loader2Icon className="animate-spin" />}
           save
