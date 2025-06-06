@@ -2,8 +2,8 @@ import type { ConfigEntity } from "@/config/models";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import { useRef, useState } from "react";
-import { updateConfig } from "@/config/fetch";
+import { useEffect, useRef, useState } from "react";
+import { getTraktCodeUrl, updateConfig } from "@/config/fetch";
 import {
   Card,
   CardContent,
@@ -21,6 +21,13 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
   const [saveStatus, setSaveStatus] = useState<
     "loading" | "success" | "error"
   >();
+  const [codeUrl, setCodeUrl] = useState<string>();
+
+  useEffect(() => {
+    getTraktCodeUrl().then((url) => {
+      setCodeUrl(url);
+    });
+  });
 
   const handleSave = () => {
     const updatedConfig: ConfigEntity = {
@@ -85,7 +92,7 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
               placeholder="enter your code"
             />
             <Button asChild className="btn btn-primary">
-              <a href={cfg?.trakt?.redirect_url} target="_blank">
+              <a href={codeUrl} target="_blank">
                 get code
               </a>
             </Button>

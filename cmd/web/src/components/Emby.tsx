@@ -54,7 +54,7 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
   const handleSave = useCallback(() => {
     const updatedConfig: ConfigEntity = {
       emby: {
-        ...cfg.emby,
+        ...(cfg?.emby ?? {}),
         base_url: baseUrlRef.current?.value || "",
         api_key: apiKeyRef.current?.value || "",
         user_id: selectedUserId,

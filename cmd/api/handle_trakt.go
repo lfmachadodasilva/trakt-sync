@@ -62,9 +62,7 @@ func HandleTraktCode(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 	preUrl := "%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s"
 	url := fmt.Sprintf(preUrl, trakt.TraktApiUrl, cfg.Trakt.ClientID, cfg.Trakt.RedirectURL)
 
-	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(url))
-	w.WriteHeader(http.StatusOK)
 }
 
 func HandleTraktAuth(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
@@ -91,7 +89,6 @@ func HandleTraktAuth(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -108,6 +105,5 @@ func HandleTraktAuthRefresh(ctx *context.Context, w http.ResponseWriter, r *http
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }

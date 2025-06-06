@@ -42,6 +42,7 @@ COPY --from=builder /app/api .
 
 # Copy the built React static files from the web-builder stage
 COPY --from=web-builder /web/dist ./static
+COPY --from=web-builder /web/src/logo.svg ./static
 
 # Expose the data volume
 VOLUME /app/data

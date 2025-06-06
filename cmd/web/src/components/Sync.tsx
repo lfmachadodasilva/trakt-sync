@@ -105,7 +105,6 @@ export const Sync = ({ cfg }: { cfg: ConfigEntity }) => {
           <Label className="block mb-2 text-left">
             cron job
             <Input
-              readOnly
               type="text"
               id="cronjob"
               name="cronjob"

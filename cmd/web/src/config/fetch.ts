@@ -13,7 +13,7 @@ export const getConfig = async (): Promise<ConfigEntity> =>
         },
       });
       if (!response.ok) {
-        reject(new Error(`HTTP error! status: ${response.status}`));
+        reject(`HTTP error! status: ${response.status}`);
       }
       resolve(await response.json());
     } catch (error) {
@@ -33,7 +33,7 @@ export const updateConfig = async (config: ConfigEntity): Promise<void> =>
         body: JSON.stringify(config),
       });
       if (!response.ok) {
-        reject(new Error(`HTTP error! status: ${response.status}`));
+        reject(`HTTP error! status: ${response.status}`);
       }
       resolve();
     } catch (error) {
@@ -52,7 +52,7 @@ export const getUsers = async (): Promise<EmbyUser[]> =>
         },
       });
       if (!response.ok) {
-        reject(new Error(`HTTP error! status: ${response.status}`));
+        reject(`HTTP error! status: ${response.status}`);
       }
       resolve(await response.json());
     } catch (error) {
@@ -71,13 +71,31 @@ export const runSync = async (): Promise<void> =>
         },
       });
       if (!response.ok) {
-        reject();
-        // throw new Error(`HTTP error! status: ${response.status}`);
+        reject(`HTTP error! status: ${response.status}`);
       }
       resolve();
     } catch (error) {
       //   console.error("Failed to run sync:", error);
       //   throw error;
-      reject();
+      reject(error.message);
+    }
+  });
+
+export const getTraktCodeUrl = async (): Promise<string> =>
+  new Promise<string>(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${API_URL}/trakt/code`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        reject(`HTTP error! status: ${response.status}`);
+      }
+      resolve(await response.text());
+    } catch (error) {
+      console.error("Failed to get code URL:", error);
+      reject(error.message);
     }
   });
