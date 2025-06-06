@@ -44,4 +44,6 @@ export interface TraktOptions {
 export interface EmbyUser {
   Id: string;
   Name: string;
+  Prefix: string;
+  ServerId: string;
 }

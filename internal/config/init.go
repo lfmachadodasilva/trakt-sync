@@ -40,7 +40,7 @@ func InitConfigTable(ctx *context.Context) *ConfigEntity {
 			Emby: &EmbyConfig{
 				// UserID:  uuid.New().String(),
 				// APIKey:  uuid.New().String(),
-				BaseURL: "http://192.169.1.13:8096",
+				BaseURL: "http://localhost:8096",
 			},
 			// Plex: &models.PlexConfig{
 			// 	UserID: uuid.New().String(),
@@ -48,6 +48,7 @@ func InitConfigTable(ctx *context.Context) *ConfigEntity {
 			// Jellyfin: &models.JellyfinConfig{
 			// 	UserID: uuid.New().String(),
 			// },
+			Cronjob: "0 0 * * *", // Default cronjob to run daily at midnight
 		}
 		UpsertConfig(ctx, &cfg)
 	}

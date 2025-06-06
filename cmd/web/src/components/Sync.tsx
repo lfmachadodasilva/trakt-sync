@@ -16,13 +16,16 @@ import { updateConfig } from "@/config/fetch";
 import { Check, Loader2Icon, X } from "lucide-react";
 import cronstrue from "cronstrue";
 
-export const Actions = ({ cfg }: { cfg: ConfigEntity }) => {
+export const Sync = ({ cfg }: { cfg: ConfigEntity }) => {
   const cronRef = useRef<HTMLInputElement>(null);
   const [saveStatus, setSaveStatus] = useState<
     "loading" | "success" | "error"
   >();
 
   const cronText = useMemo(() => {
+    if (!cronRef.current?.value || cronRef.current.value.trim() === "") {
+      return "No cron expression provided";
+    }
     try {
       return cronstrue.toString(cronRef.current?.value || "");
     } catch (error) {
@@ -56,7 +59,7 @@ export const Actions = ({ cfg }: { cfg: ConfigEntity }) => {
         <CardTitle>Sync</CardTitle>
         <CardDescription>Configure your sync settings</CardDescription>
         <CardAction>
-          <Button variant="secondary">sync</Button>
+          <Button variant="secondary">run sync</Button>
         </CardAction>
       </CardHeader>
       <CardContent>

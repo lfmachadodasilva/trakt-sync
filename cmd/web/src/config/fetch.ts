@@ -1,8 +1,11 @@
 import type { ConfigEntity, EmbyUser } from "./models";
 
+const API_URL =
+  process.env.NODE_ENV === "development" ? "http://localhost:4000" : "";
+
 export const getConfig = async (): Promise<ConfigEntity> => {
   try {
-    const response = await fetch("http://localhost:4000/config", {
+    const response = await fetch(`${API_URL}/config`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -20,7 +23,7 @@ export const getConfig = async (): Promise<ConfigEntity> => {
 
 export const updateConfig = async (config: ConfigEntity): Promise<void> => {
   try {
-    const response = await fetch("http://localhost:4000/config", {
+    const response = await fetch(`${API_URL}/config`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +41,7 @@ export const updateConfig = async (config: ConfigEntity): Promise<void> => {
 
 export const getUsers = async (): Promise<EmbyUser[]> => {
   try {
-    const response = await fetch("http://localhost:4000/emby/users", {
+    const response = await fetch(`${API_URL}/emby/users`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

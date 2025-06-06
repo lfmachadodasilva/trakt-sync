@@ -12,15 +12,18 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
+import { Loader2Icon, Check, X } from "lucide-react";
 
 export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
   const clientIdRef = useRef<HTMLInputElement>(null);
   const clientSecretRef = useRef<HTMLInputElement>(null);
   const codeRef = useRef<HTMLInputElement>(null);
+  const [saveStatus, setSaveStatus] = useState<
+    "loading" | "success" | "error"
+  >();
 
-  const handleSave = async () => {
+  const handleSave = () => {
     const updatedConfig: ConfigEntity = {
-      ...cfg,
       trakt: {
         ...cfg.trakt,
         client_id: clientIdRef.current?.value || "",
@@ -29,11 +32,16 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
       },
     };
 
-    try {
-      await updateConfig(updatedConfig);
-    } catch (error) {
-      console.error("Failed to save configuration:", error);
-    }
+    setSaveStatus("loading");
+    updateConfig(updatedConfig)
+      .then(() => {
+        console.debug("Configuration saved successfully");
+        setSaveStatus("success");
+      })
+      .catch((error) => {
+        console.debug("Failed to save configuration:", error);
+        setSaveStatus("error");
+      });
   };
 
   return (
@@ -58,7 +66,7 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
           <Label>client Secret</Label>
           <Input
             className="w-full"
-            type="password"
+            // type="password"
             defaultValue={cfg?.trakt?.client_secret}
             autoComplete="off"
             ref={clientSecretRef}
@@ -70,7 +78,7 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
           <div className="flex items-center gap-2">
             <Input
               className="w-full"
-              type="password"
+              // type="password"
               defaultValue={cfg?.trakt?.code}
               ref={codeRef}
               placeholder="enter your code"
@@ -84,7 +92,12 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">
-        <Button onClick={handleSave}>save</Button>
+        <Button disabled={saveStatus === "loading"} onClick={handleSave}>
+          {saveStatus === "loading" && <Loader2Icon className="animate-spin" />}
+          save
+          {saveStatus === "success" && <Check className="text-green-500" />}
+          {saveStatus === "error" && <X className="text-red-500" />}
+        </Button>
       </CardFooter>
     </Card>
   );

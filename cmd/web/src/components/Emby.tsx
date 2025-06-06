@@ -1,5 +1,5 @@
 import type { ConfigEntity, EmbyUser } from "@/config/models";
-import { useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import {
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { getUsers } from "@/config/fetch";
+import { getUsers, updateConfig } from "@/config/fetch";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -21,15 +21,54 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
+import { Check, Loader2Icon, X } from "lucide-react";
 
 export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
   const baseUrlRef = useRef<HTMLInputElement>(null);
   const apiKeyRef = useRef<HTMLInputElement>(null);
   const [users, setUsers] = useState<EmbyUser[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>(
+    cfg?.emby?.user_id || ""
+  );
+  const [saveStatus, setSaveStatus] = useState<
+    "loading" | "success" | "error"
+  >();
 
   useEffect(() => {
-    getUsers().then(setUsers);
-  }, []);
+    cfg?.emby?.base_url?.trim() !== "" &&
+      cfg?.emby?.api_key?.trim() !== "" &&
+      getUsers().then(setUsers);
+  }, [cfg?.emby?.base_url, cfg?.emby?.api_key]);
+
+  useEffect(() => {
+    if (cfg?.emby?.user_id) {
+      setSelectedUserId(cfg.emby.user_id);
+    }
+  }, [cfg?.emby?.user_id]);
+
+  const handleUserChange = (value: string) => setSelectedUserId(value);
+
+  const handleSave = useCallback(() => {
+    const updatedConfig: ConfigEntity = {
+      emby: {
+        ...cfg.emby,
+        base_url: baseUrlRef.current?.value || "",
+        api_key: apiKeyRef.current?.value || "",
+        user_id: selectedUserId,
+      },
+    };
+
+    setSaveStatus("loading");
+    updateConfig(updatedConfig)
+      .then(() => {
+        console.debug("Configuration saved successfully");
+        setSaveStatus("success");
+      })
+      .catch((error) => {
+        console.debug("Failed to save configuration:", error);
+        setSaveStatus("error");
+      });
+  }, [selectedUserId]);
 
   return (
     <Card className="w-full max-w-sm">
@@ -65,13 +104,13 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
         <div key="user-id">
           <Label className="block mb-2">
             user id
-            <Select defaultValue={cfg?.emby?.user_id || ""}>
+            <Select value={selectedUserId} onValueChange={handleUserChange}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="select user" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Fruits</SelectLabel>
+                  <SelectLabel>Users</SelectLabel>
 
                   {users.map((user) => (
                     <SelectItem key={user.Id} value={user.Id}>
@@ -85,7 +124,12 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">
-        <Button>save</Button>
+        <Button disabled={saveStatus === "loading"} onClick={handleSave}>
+          {saveStatus === "loading" && <Loader2Icon className="animate-spin" />}
+          save
+          {saveStatus === "success" && <Check className="text-green-500" />}
+          {saveStatus === "error" && <X className="text-red-500" />}
+        </Button>
       </CardFooter>
     </Card>
   );
