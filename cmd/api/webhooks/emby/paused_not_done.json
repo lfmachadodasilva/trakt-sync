@@ -1,18 +1,7 @@
-### Base URL
-@baseUrl = http://localhost:4000
-
-### Get users
-GET {{baseUrl}}/emby/users
-Content-Type: application/json
-
-### Webhook paused 90% done
-POST {{baseUrl}}/emby/webhooks
-Content-Type: application/json
-
 {
-  "Title": "luizfelipe has paused The Accountant on Chrome",
-  "Description": "Friday, 6 June 2025 19:45",
-  "Date": "2025-06-06T19:45:35.1750827Z",
+  "Title": "luizfelipe has paused The Accountant on Chrome macOS",
+  "Description": "Friday, 6 June 2025 19:21",
+  "Date": "2025-06-06T19:21:05.5917403Z",
   "Event": "playback.pause",
   "User": {
     "Name": "luizfelipe",
@@ -48,14 +37,8 @@ Content-Type: application/json
     "Path": "/data/movies/The Accountant (2016)/The.Accountant.2016.1080p.Bluray.AV1.Opus.7.1-heTOrico.mkv",
     "OfficialRating": "GB-15",
     "Overview": "As a math savant uncooks the books for a new client, the Treasury Department closes in on his activities and the body count starts to rise.",
-    "Taglines": [
-      "Calculate your choices."
-    ],
-    "Genres": [
-      "Crime",
-      "Thriller",
-      "Drama"
-    ],
+    "Taglines": ["Calculate your choices."],
+    "Genres": ["Crime", "Thriller", "Drama"],
     "CommunityRating": 7.102,
     "RunTimeTicks": 76740420000,
     "Size": 2491030322,
@@ -118,9 +101,7 @@ Content-Type: application/json
       "Logo": "769df03217393fd4ecbb8f669d76f05e",
       "Thumb": "4a57516d0ad34ad95b5c00d642fae183"
     },
-    "BackdropImageTags": [
-      "ed0b2120786a049126ed696fd293c246"
-    ],
+    "BackdropImageTags": ["ed0b2120786a049126ed696fd293c246"],
     "MediaType": "Video",
     "Width": 1912,
     "Height": 800
@@ -131,17 +112,17 @@ Content-Type: application/json
     "Version": "4.8.11.0"
   },
   "Session": {
-    "RemoteEndPoint": "192.168.1.13",
+    "RemoteEndPoint": "192.168.1.176",
     "Client": "Emby Web",
-    "DeviceName": "Chrome",
-    "DeviceId": "f6ccbd4a-d7ff-47b1-bd75-241df19341da",
+    "DeviceName": "Chrome macOS",
+    "DeviceId": "d7b99f3c-2a68-4a72-944c-955b9261ca7e",
     "ApplicationVersion": "4.8.11.0",
-    "Id": "3d178584c2ac0b8ebdd2a7d771f5d594"
+    "Id": "4c7be753a7494c7dd49ca2ded8b51fd6"
   },
   "PlaybackInfo": {
-    "PositionTicks": 73354842180,
+    "PositionTicks": 8873335240,
     "PlaylistIndex": 0,
     "PlaylistLength": 1,
-    "PlaySessionId": "71521974dcf74c70b18d27a7bacff3dc"
+    "PlaySessionId": "877a2058010a43798449a538f20c1cb8"
   }
 }

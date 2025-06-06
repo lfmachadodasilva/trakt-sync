@@ -3,29 +3,32 @@ package emby
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/trakt"
 )
 
 type EmbyWebhook struct {
-	Title string    `json:"title"`
-	Date  time.Time `json:"date"`
-	Event string    `json:"event"`
+	Title string    `json:"Title"`
+	Date  time.Time `json:"Date"`
+	Event string    `json:"Event"`
 	User  struct {
-		Name string `json:"name"`
-		Id   string `json:"id"`
-	} `json:"user"`
+		Name string `json:"Name"`
+		Id   string `json:"Id"`
+	} `json:"User"`
 	Item struct {
-		Name              string            `json:"name"`
-		Id                string            `json:"id"`
-		ProviderIds       map[string]string `json:"provider_ids"`
-		IndexNumber       *int              `json:"index_number,omitempty"`
-		ParentIndexNumber *int              `json:"parent_index_number,omitempty"`
-		Type              string            `json:"type"`
-	} `json:"item"`
-	Server map[string]string `json:"server"`
+		Name              string            `json:"Name"`
+		Id                string            `json:"Id"`
+		ProviderIds       map[string]string `json:"ProviderIds"`
+		IndexNumber       *int              `json:"IndexNumber,omitempty"`
+		ParentIndexNumber *int              `json:"ParentIndexNumber,omitempty"`
+		Type              string            `json:"Type"`
+		RunTimeTicks      int64             `json:"RunTimeTicks"`
+	} `json:"Item"`
+	Server       map[string]string `json:"Server"`
+	PlaybackInfo struct {
+		PositionTicks int64 `json:"PositionTicks"`
+	} `json:"PlaybackInfo"`
 }
 
 func (webhook *EmbyWebhook) GetImdbId() (string, error) {
@@ -49,7 +52,16 @@ func ProcessEmbyWebhook(ctx *context.Context, cfg *config.ConfigEntity, webhook 
 		return nil
 	}
 
-	shouldProcess := strings.Contains(webhook.Title, "has finished playing")
+	var perc int = 0 // Calculate the percentage of playback completion
+	if webhook.Item.RunTimeTicks > 0 && webhook.PlaybackInfo.PositionTicks > 0 {
+		perc = int((webhook.PlaybackInfo.PositionTicks * 100) / webhook.Item.RunTimeTicks)
+	}
+
+	shouldProcess :=
+		// if the event is playback.stop or playback.pause and the percentage is greater than 90
+		((webhook.Event == "playback.stop" || webhook.Event == "playback.pause") && perc > 90) ||
+			// or if the event is item.markplayed
+			webhook.Event == "item.markplayed"
 
 	if !shouldProcess {
 		fmt.Println("Ignoring webhook event:", webhook.Event, "with title:", webhook.Title)
