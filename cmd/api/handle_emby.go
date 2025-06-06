@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/emby"
+	"trakt-sync/internal/utils"
 )
 
 func HandleEmby(ctx *context.Context) http.HandlerFunc {
@@ -15,10 +16,18 @@ func HandleEmby(ctx *context.Context) http.HandlerFunc {
 
 		switch subPath {
 		case "/users":
-			// Handle the base /emby endpoint
+			// Handle the base /emby/users endpoint
 			switch r.Method {
 			case http.MethodGet:
 				HandleEmbyUsers(ctx, w, r)
+			default:
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			}
+		case "/webhooks":
+			// Handle the base /emby/webhooks endpoint
+			switch r.Method {
+			case http.MethodPost:
+				HandleEmbyWebhooks(ctx, w, r)
 			default:
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			}
@@ -52,4 +61,24 @@ func HandleEmbyUsers(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
+}
+
+func HandleEmbyWebhooks(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
+	cfg, err := config.ReadConfig(ctx)
+	if err != nil {
+		http.Error(w, "Failed to read configs", http.StatusInternalServerError)
+		return
+	}
+
+	webhook, err := utils.SerializeBody[emby.EmbyWebhook](r.Body)
+	if err != nil {
+		http.Error(w, "Failed to parse webhook: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = emby.ProcessEmbyWebhook(ctx, cfg, webhook)
+	if err != nil {
+		http.Error(w, "Failed to process webhook: "+err.Error(), http.StatusBadGateway)
+		return
+	}
 }
