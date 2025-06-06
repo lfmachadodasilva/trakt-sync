@@ -15,10 +15,18 @@ func HandleEmby(ctx *context.Context) http.HandlerFunc {
 
 		switch subPath {
 		case "/users":
-			// Handle the base /emby endpoint
+			// Handle the base /emby/users endpoint
 			switch r.Method {
 			case http.MethodGet:
 				HandleEmbyUsers(ctx, w, r)
+			default:
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			}
+		case "/webhooks":
+			// Handle the base /emby/webhooks endpoint
+			switch r.Method {
+			case http.MethodPost:
+				HandleEmbyWebhooks(ctx, w, r)
 			default:
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			}
@@ -52,4 +60,8 @@ func HandleEmbyUsers(ctx *context.Context, w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
+}
+
+func HandleEmbyWebhooks(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "Not implemented", http.StatusNotImplemented)
 }
