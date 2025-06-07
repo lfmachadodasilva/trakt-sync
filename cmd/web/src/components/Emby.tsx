@@ -23,7 +23,13 @@ import {
 } from "./ui/card";
 import { Check, Loader2Icon, X } from "lucide-react";
 
-export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
+export const Emby = ({
+  cfg,
+  refreshConfig,
+}: {
+  cfg: ConfigEntity;
+  refreshConfig: () => void;
+}) => {
   const baseUrlRef = useRef<HTMLInputElement>(null);
   const apiKeyRef = useRef<HTMLInputElement>(null);
   const [users, setUsers] = useState<EmbyUser[]>([]);
@@ -92,6 +98,7 @@ export const Emby = ({ cfg }: { cfg: ConfigEntity }) => {
           ...cfg.emby,
           ...updatedConfig.emby,
         };
+        refreshConfig();
       })
       .catch((error) => {
         console.debug("Failed to save configuration:", error);

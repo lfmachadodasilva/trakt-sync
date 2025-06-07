@@ -16,7 +16,13 @@ import { runSync, updateConfig } from "@/config/fetch";
 import { Check, Loader2Icon, X } from "lucide-react";
 import cronstrue from "cronstrue";
 
-export const Sync = ({ cfg }: { cfg: ConfigEntity }) => {
+export const Sync = ({
+  cfg,
+  refreshConfig,
+}: {
+  cfg: ConfigEntity;
+  refreshConfig: () => void;
+}) => {
   const cronRef = useRef<HTMLInputElement>(null);
   const [saveStatus, setSaveStatus] = useState<
     "loading" | "success" | "error"
@@ -60,6 +66,7 @@ export const Sync = ({ cfg }: { cfg: ConfigEntity }) => {
       .then(() => {
         console.debug("Configuration saved successfully");
         setSaveStatus("success");
+        refreshConfig();
       })
       .catch((error) => {
         console.debug("Failed to save configuration:", error);

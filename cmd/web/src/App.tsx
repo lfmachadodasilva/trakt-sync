@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 export function App() {
   const [cfg, setCfg] = useState(null);
   const [error, setError] = useState<string | null>(null);
+  const [refreshConfig, setRefreshConfig] = useState(false);
 
   useEffect(() => {
     getConfig()
@@ -21,7 +22,11 @@ export function App() {
         console.error("Failed to fetch configuration:", error);
         setError("Failed to fetch configuration");
       });
-  }, []);
+  }, [refreshConfig]);
+
+  const runRefresh = () => {
+    setRefreshConfig((prev) => !prev);
+  };
 
   return (
     <div className="container mx-auto p-8 text-center relative z-10 gap-8 flex flex-wrap justify-center items-start">
@@ -35,9 +40,9 @@ export function App() {
           </AlertDescription>
         </Alert>
       )}
-      <Trakt cfg={cfg} />
-      <Emby cfg={cfg} />
-      <Sync cfg={cfg} />
+      <Trakt cfg={cfg} refreshConfig={runRefresh} />
+      <Emby cfg={cfg} refreshConfig={runRefresh} />
+      <Sync cfg={cfg} refreshConfig={runRefresh} />
     </div>
     // <div className="container mx-auto p-8 text-center relative z-10">
     //   <div className="flex justify-center items-center gap-8 mb-8">

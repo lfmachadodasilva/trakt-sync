@@ -14,7 +14,13 @@ import {
 } from "./ui/card";
 import { Loader2Icon, Check, X } from "lucide-react";
 
-export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
+export const Trakt = ({
+  cfg,
+  refreshConfig,
+}: {
+  cfg: ConfigEntity;
+  refreshConfig: () => void;
+}) => {
   const clientIdRef = useRef<HTMLInputElement>(null);
   const clientSecretRef = useRef<HTMLInputElement>(null);
   const codeRef = useRef<HTMLInputElement>(null);
@@ -51,7 +57,7 @@ export const Trakt = ({ cfg }: { cfg: ConfigEntity }) => {
       .then(() => {
         console.debug("Configuration saved successfully");
         setResetStatus("success");
-        window.location.reload();
+        refreshConfig();
       })
       .catch((error) => {
         console.debug("Failed to save configuration:", error);
