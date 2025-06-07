@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"trakt-sync/internal/ctxutils"
 )
 
 func UpsertConfig(ctx *context.Context, cfg *ConfigEntity) error {
 	// Retrieve the database connection from the context
-	db, ok := (*ctx).Value("db").(*sql.DB)
+	db, ok := (*ctx).Value(ctxutils.ContextDbKey).(*sql.DB)
 	if !ok || db == nil {
 		panic("Database connection not found in context")
 	}
@@ -81,7 +82,7 @@ func upsertConfig(ctx *context.Context, db *sql.DB, cfgType string, cfgData stri
 
 func ReadConfig(ctx *context.Context) (*ConfigEntity, error) {
 	// Retrieve the database connection from the context
-	db, ok := (*ctx).Value("db").(*sql.DB)
+	db, ok := (*ctx).Value(ctxutils.ContextDbKey).(*sql.DB)
 	if !ok || db == nil {
 		panic("Database connection not found in context")
 	}

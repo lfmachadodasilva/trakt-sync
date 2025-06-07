@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"trakt-sync/internal/ctxutils"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -39,7 +40,7 @@ func TestConfigGetEndpoint(t *testing.T) {
 	}
 
 	// Create a context with the test database
-	ctx := context.WithValue(context.Background(), "db", db)
+	ctx := context.WithValue(context.Background(), ctxutils.ContextDbKey, db)
 
 	// Create a test HTTP server
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

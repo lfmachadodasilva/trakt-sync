@@ -3,11 +3,12 @@ package config
 import (
 	"context"
 	"database/sql"
+	"trakt-sync/internal/ctxutils"
 )
 
 func InitConfigTable(ctx *context.Context) *ConfigEntity {
 	// Retrieve the database connection from the context
-	db, ok := (*ctx).Value("db").(*sql.DB)
+	db, ok := (*ctx).Value(ctxutils.ContextDbKey).(*sql.DB)
 	if !ok || db == nil {
 		panic("Database connection not found in context")
 	}

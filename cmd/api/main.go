@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"trakt-sync/internal/config"
+	"trakt-sync/internal/ctxutils"
 	"trakt-sync/internal/database"
 )
 
@@ -20,7 +21,7 @@ func main() {
 	}
 
 	// Add the database connection to the context
-	ctx = context.WithValue(ctx, "db", db)
+	ctx = context.WithValue(ctx, ctxutils.ContextDbKey, db)
 
 	// Initialize the configuration table
 	cfg := config.InitConfigTable(&ctx)
