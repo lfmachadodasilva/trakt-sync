@@ -21,7 +21,14 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Check, Loader2Icon, X } from "lucide-react";
+import {
+  Check,
+  ListRestart,
+  Loader2Icon,
+  RefreshCcw,
+  Save,
+  X,
+} from "lucide-react";
 
 export const Emby = ({
   cfg,
@@ -33,6 +40,7 @@ export const Emby = ({
   const baseUrlRef = useRef<HTMLInputElement>(null);
   const apiKeyRef = useRef<HTMLInputElement>(null);
   const [users, setUsers] = useState<EmbyUser[]>([]);
+  const [refetchUsers, setRefreshUsers] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string>(
     cfg?.emby?.user_id || ""
   );
@@ -61,9 +69,20 @@ export const Emby = ({
     if (cfg?.emby?.user_id) {
       setSelectedUserId(cfg.emby.user_id);
     }
-  }, [cfg?.emby?.user_id]);
+  }, [cfg?.emby?.user_id, refetchUsers]);
+  useEffect(() => {
+    if (users.length > 0 && (!selectedUserId || selectedUserId === "")) {
+      setSelectedUserId(users[0].Id);
+    }
+  }, [users]);
 
   const handleUserChange = (value: string) => setSelectedUserId(value);
+
+  const handleRefetchUsers = useCallback(() => {
+    handleSave().then(() => {
+      setRefreshUsers((prev) => !prev);
+    });
+  }, []);
 
   const handleReset = () => {
     setResetStatus("loading");
@@ -71,15 +90,15 @@ export const Emby = ({
       .then(() => {
         console.debug("Configuration saved successfully");
         setResetStatus("success");
-        window.location.reload();
+        refreshConfig();
       })
       .catch((error) => {
-        console.debug("Failed to save configuration:", error);
+        console.error("Failed to save configuration:", error);
         setResetStatus("error");
       });
   };
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const updatedConfig: ConfigEntity = {
       emby: {
         ...(cfg?.emby ?? {}),
@@ -90,18 +109,13 @@ export const Emby = ({
     };
 
     setSaveStatus("loading");
-    updateConfig(updatedConfig)
+    return await updateConfig(updatedConfig)
       .then(() => {
-        console.debug("Configuration saved successfully");
         setSaveStatus("success");
-        cfg.emby = {
-          ...cfg.emby,
-          ...updatedConfig.emby,
-        };
         refreshConfig();
       })
       .catch((error) => {
-        console.debug("Failed to save configuration:", error);
+        console.error("Failed to save configuration:", error);
         setSaveStatus("error");
       });
   }, [selectedUserId, cfg]);
@@ -109,8 +123,8 @@ export const Emby = ({
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Emby Configuration</CardTitle>
-        <CardDescription>Configure your Emby server settings</CardDescription>
+        <CardTitle>emby configuration</CardTitle>
+        <CardDescription>configure your emby server settings</CardDescription>
       </CardHeader>
       <CardContent>
         <div key="base-url">
@@ -139,41 +153,50 @@ export const Emby = ({
         </div>
         <div key="user-id">
           <Label className="block mb-2 text-left">
-            user id
-            <Select value={selectedUserId} onValueChange={handleUserChange}>
-              <SelectTrigger className="w-full mt-1">
-                <SelectValue placeholder="select user" className="" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Users</SelectLabel>
-
-                  {users.map((user) => (
-                    <SelectItem key={user.Id} value={user.Id}>
-                      {user.Name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            user
+            <div className="flex items-center gap-2">
+              <Select value={selectedUserId} onValueChange={handleUserChange}>
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="select user" className="" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>users</SelectLabel>
+                    {users.map((user) => (
+                      <SelectItem key={user.Id} value={user.Id}>
+                        {user.Name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Button className="btn btn-primary" onClick={handleRefetchUsers}>
+                <RefreshCcw />
+              </Button>
+            </div>
           </Label>
         </div>
       </CardContent>
       <CardFooter className="flex justify-end gap-4">
+        {/* <Button variant="outline">
+          <TestTubeDiagonal /> test
+        </Button> */}
         <Button
-          variant="secondary"
+          variant="outline"
           disabled={resetStatus === "loading"}
           onClick={handleReset}
         >
           {resetStatus === "loading" && (
             <Loader2Icon className="animate-spin" />
           )}
+          <ListRestart />
           reset
           {resetStatus === "success" && <Check className="text-green-500" />}
           {resetStatus === "error" && <X className="text-red-500" />}
         </Button>
         <Button disabled={saveStatus === "loading"} onClick={handleSave}>
           {saveStatus === "loading" && <Loader2Icon className="animate-spin" />}
+          <Save />
           save
           {saveStatus === "success" && <Check className="text-green-500" />}
           {saveStatus === "error" && <X className="text-red-500" />}

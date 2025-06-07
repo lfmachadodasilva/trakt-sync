@@ -13,7 +13,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { runSync, updateConfig } from "@/config/fetch";
-import { Check, Loader2Icon, X } from "lucide-react";
+import { Check, Loader2Icon, Save, X } from "lucide-react";
 import cronstrue from "cronstrue";
 
 export const Sync = ({
@@ -90,8 +90,8 @@ export const Sync = ({
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Sync</CardTitle>
-        <CardDescription>Configure your sync settings</CardDescription>
+        <CardTitle>sync</CardTitle>
+        <CardDescription>configure your sync settings</CardDescription>
         <CardAction>
           <Button
             variant="secondary"
@@ -122,12 +122,12 @@ export const Sync = ({
               onChange={handleCronChange}
             />
           </Label>
-          <p className="text-sm text-muted-foreground mt-1 mb-4">
-            This will run: <strong>{cronText}</strong>
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            This cron job will run based on your defined schedule. Need help?
-            Visit{" "}
+          <CardDescription className="mt-1 mb-4">
+            this will run: <strong>{cronText}</strong>
+          </CardDescription>
+          <CardDescription className="text-left">
+            this cron job will run based on your defined schedule. need help?
+            visit{" "}
             <a
               href="https://crontab.guru"
               target="_blank"
@@ -136,13 +136,14 @@ export const Sync = ({
             >
               crontab.guru
             </a>
-          </p>
+          </CardDescription>
         </div>
         {/* <pre>{JSON.stringify(cfg, null, 2)}</pre> */}
       </CardContent>
       <CardFooter className="flex justify-end">
         <Button disabled={saveStatus === "loading"} onClick={handleSave}>
           {saveStatus === "loading" && <Loader2Icon className="animate-spin" />}
+          <Save />
           save
           {saveStatus === "success" && <Check className="text-green-500" />}
           {saveStatus === "error" && <X className="text-red-500" />}

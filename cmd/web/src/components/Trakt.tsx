@@ -12,7 +12,14 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Loader2Icon, Check, X } from "lucide-react";
+import {
+  Loader2Icon,
+  Check,
+  X,
+  SquareArrowOutUpRight,
+  Save,
+  ListRestart,
+} from "lucide-react";
 
 export const Trakt = ({
   cfg,
@@ -107,8 +114,8 @@ export const Trakt = ({
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Trakt Configuration</CardTitle>
-        <CardDescription>Configure your Trakt settings</CardDescription>
+        <CardTitle>trakt Configuration</CardTitle>
+        <CardDescription>configure your trakt settings</CardDescription>
       </CardHeader>
       <CardContent>
         <Label className="block mb-2 text-left">
@@ -146,27 +153,41 @@ export const Trakt = ({
             />
             <Button asChild className="btn btn-primary">
               <a href={codeUrl} target="_blank">
-                get code
+                <SquareArrowOutUpRight />
               </a>
             </Button>
           </div>
         </Label>
+        <CardDescription className="text-left">
+          create a new application on trakt in{" "}
+          <a
+            href="https://trakt.tv/oauth/applications"
+            target="_blank"
+            className="underline"
+          >
+            here
+          </a>
+          . remember to set the redirect URL to{" "}
+          <code>urn:ietf:wg:oauth:2.0:oob</code>
+        </CardDescription>
       </CardContent>
       <CardFooter className="flex justify-end gap-4">
         <Button
-          variant="secondary"
+          variant="outline"
           disabled={resetStatus === "loading"}
           onClick={handleReset}
         >
           {resetStatus === "loading" && (
             <Loader2Icon className="animate-spin" />
           )}
+          <ListRestart />
           reset
           {resetStatus === "success" && <Check className="text-green-500" />}
           {resetStatus === "error" && <X className="text-red-500" />}
         </Button>
         <Button disabled={saveStatus === "loading"} onClick={handleSave}>
           {saveStatus === "loading" && <Loader2Icon className="animate-spin" />}
+          <Save />
           save
           {saveStatus === "success" && <Check className="text-green-500" />}
           {saveStatus === "error" && <X className="text-red-500" />}
