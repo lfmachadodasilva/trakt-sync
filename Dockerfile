@@ -28,6 +28,12 @@ COPY . .
 ENV CGO_ENABLED=1
 RUN go build -o api ./cmd/api/
 
+# Stage 3: Run tests
+FROM builder AS tester
+
+# Run tests
+RUN go test -v ./...
+
 # Stage 3: Create a minimal runtime image
 FROM alpine:latest
 
