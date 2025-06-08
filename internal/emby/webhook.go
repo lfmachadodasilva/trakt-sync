@@ -58,8 +58,8 @@ func ProcessEmbyWebhook(ctx *context.Context, cfg *config.ConfigEntity, webhook 
 	}
 
 	shouldProcess :=
-		// if the event is playback.stop or playback.pause and the percentage is greater than 90
-		((webhook.Event == "playback.stop" || webhook.Event == "playback.pause") && perc > 90) ||
+		// if the event is playback.stop and the percentage is greater than 90
+		((webhook.Event == "playback.stop") && perc > 90) ||
 			// or if the event is item.markplayed
 			webhook.Event == "item.markplayed"
 
