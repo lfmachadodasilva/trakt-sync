@@ -25,7 +25,7 @@ func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, itemId st
 		&struct{}{},
 	)
 	if err != nil {
-		return fmt.Errorf("failed to mark item as watched: %w", err)
+		return fmt.Errorf("failed to mark emby item as watched: %w", err)
 	}
 
 	return nil

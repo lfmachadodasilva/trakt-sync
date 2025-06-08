@@ -2,7 +2,7 @@
   "Title": "luizfelipe has paused The Accountant on Chrome macOS",
   "Description": "Friday, 6 June 2025 19:21",
   "Date": "2025-06-06T19:21:05.5917403Z",
-  "Event": "playback.pause",
+  "Event": "playback.stop",
   "User": {
     "Name": "luizfelipe",
     "Id": "aac3a78d9f184ea480fb1629e76aad57"
@@ -120,7 +120,7 @@
     "Id": "4c7be753a7494c7dd49ca2ded8b51fd6"
   },
   "PlaybackInfo": {
-    "PositionTicks": 8873335240,
+    "PositionTicks": 69833782200,
     "PlaylistIndex": 0,
     "PlaylistLength": 1,
     "PlaySessionId": "877a2058010a43798449a538f20c1cb8"

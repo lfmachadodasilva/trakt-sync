@@ -53,7 +53,7 @@ func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *
 		request,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to mark item as watched: %w", err)
+		return fmt.Errorf("failed to mark trakt item as watched: %w", err)
 	}
 
 	return nil
