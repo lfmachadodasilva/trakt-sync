@@ -23,6 +23,7 @@ type EmbyItemResponse struct {
 	IndexNumber       int16              `json:"IndexNumber"`
 	ParentIndexNumber int16              `json:"ParentIndexNumber"`
 	Episodes          []EmbyItemResponse `json:"Episodes,omitempty"`
+	ParentId          string             `json:"ParentId,omitempty"`
 }
 
 type EmbyUserData struct {
@@ -133,6 +134,32 @@ func GetItemsByType(ctx *context.Context, cfg *config.ConfigEntity, itemType str
 	}
 
 	return items.Items, nil
+}
+
+func GetItem(ctx *context.Context, cfg *config.ConfigEntity, embyId string) (*EmbyItemResponse, error) {
+
+	// Validate the Emby configuration
+	if !cfg.Emby.IsValid(&config.EmbyOptions{IgnoreUserId: true}) {
+		return nil, fmt.Errorf("Emby configuration is invalid")
+	}
+
+	// Construct the URL for the GET request
+	preUrl := "%s/Users/%s/Items/%s?Fields=ProviderIds"
+	url := fmt.Sprintf(preUrl, cfg.Emby.BaseURL, cfg.Emby.UserID, embyId)
+
+	item, err := utils.HttpGet[EmbyItemResponse](
+		utils.RequestParams{
+			URL:        url,
+			Config:     cfg,
+			AddHeaders: addEmbyHeaders,
+			Context:    ctx,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch Emby item: %w", err)
+	}
+
+	return item, nil
 }
 
 func getEpisodes(ctx *context.Context, cfg *config.ConfigEntity, embyId *string) ([]EmbyItemResponse, error) {

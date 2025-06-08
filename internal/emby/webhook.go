@@ -6,7 +6,6 @@ import (
 	"time"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/trakt"
-	"trakt-sync/internal/utils"
 )
 
 type EmbyWebhook struct {
@@ -73,7 +72,7 @@ func ProcessEmbyWebhook(ctx *context.Context, cfg *config.ConfigEntity, webhook 
 	if err := processEmbyMovie(ctx, cfg, webhook); err != nil {
 		return fmt.Errorf("failed to process Emby movie: %w", err)
 	}
-	if err := processEmbySeries(ctx, cfg, webhook); err != nil {
+	if err := processEmbyEpisode(ctx, cfg, webhook); err != nil {
 		return fmt.Errorf("failed to process Emby series: %w", err)
 	}
 
@@ -109,22 +108,36 @@ func processEmbyMovie(ctx *context.Context, cfg *config.ConfigEntity, webhook *E
 	return nil
 }
 
-func processEmbySeries(ctx *context.Context, cfg *config.ConfigEntity, webhook *EmbyWebhook) error {
+func processEmbyEpisode(ctx *context.Context, cfg *config.ConfigEntity, webhook *EmbyWebhook) error {
 	if webhook.Item.Type != "Episode" {
 		return nil
 	}
 
-	items, err := GetItemsByType(ctx, cfg, "Series")
+	// Check if the series name matches the webhook item series name
+	itemEpisode, err := GetItem(ctx, cfg, webhook.Item.Id)
 	if err != nil {
-		return fmt.Errorf("failed to get Emby series items: %w", err)
+		return fmt.Errorf("failed to get Emby episode item: %w", err)
 	}
-	item, exist := utils.FindBy(&items, func(item EmbyItemResponse) bool {
-		return item.Name == webhook.Item.SeriesName
-	})
-	if !exist {
-		return fmt.Errorf("Emby series item not found: %s", webhook.Item.Name)
+	if itemEpisode.Type != "Episode" {
+		return fmt.Errorf("item is not an episode: %s", itemEpisode.Name)
 	}
-	imdbId, err := item.GetImdbId()
+	// Check if the series name matches the webhook item series name
+	itemSeason, err := GetItem(ctx, cfg, itemEpisode.ParentId)
+	if err != nil {
+		return fmt.Errorf("failed to get Emby season item: %w", err)
+	}
+	if itemSeason.Type != "Season" {
+		return fmt.Errorf("item is not a season: %s", itemSeason.Name)
+	}
+	// Check if the series name matches the webhook item series name
+	itemSerie, err := GetItem(ctx, cfg, itemSeason.ParentId)
+	if err != nil {
+		return fmt.Errorf("failed to get Emby series item: %w", err)
+	}
+	if itemSerie.Type != "Series" {
+		return fmt.Errorf("item is not a series: %s", itemSerie.Name)
+	}
+	imdbId, err := itemSerie.GetImdbId()
 	if err != nil {
 		return err
 	}

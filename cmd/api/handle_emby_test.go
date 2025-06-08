@@ -305,22 +305,60 @@ func TestEmbyShowWebhook(t *testing.T) {
 
 					return response, nil
 				})
-			httpmock.RegisterResponder("GET", cfg.Emby.BaseURL+"/Users/"+cfg.Emby.UserID+"/Items?IncludeItemTypes=Series&Recursive=true&Fields=ProviderIds",
+			httpmock.RegisterResponder("GET", cfg.Emby.BaseURL+"/Users/"+cfg.Emby.UserID+"/Items/"+webhook.Item.Id+"?Fields=ProviderIds",
 				func(req *http.Request) (*http.Response, error) {
 
 					response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
 
-					jsonData, err := json.Marshal(emby.EmbyItemsResponse{
-						Items: []emby.EmbyItemResponse{
-							{
-								Name: webhook.Item.SeriesName,
-								ProviderIds: emby.EmbyProviderIds{
-									Imdb: imdbSerie,
-									IMDB: imdbSerie,
-								},
-								Episodes: []emby.EmbyItemResponse{},
-							},
+					jsonData, err := json.Marshal(emby.EmbyItemResponse{
+						ProviderIds: emby.EmbyProviderIds{
+							Imdb: imdbSerie,
+							IMDB: imdbSerie,
 						},
+						ParentId: "SeasonId",
+						Type:     "Episode",
+					})
+					if err != nil {
+						t.Fatalf("Failed to marshal configs: %v", err)
+					}
+
+					response.Body = io.NopCloser(bytes.NewBuffer(jsonData))
+
+					return response, nil
+				})
+			httpmock.RegisterResponder("GET", cfg.Emby.BaseURL+"/Users/"+cfg.Emby.UserID+"/Items/"+"SeasonId"+"?Fields=ProviderIds",
+				func(req *http.Request) (*http.Response, error) {
+
+					response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
+
+					jsonData, err := json.Marshal(emby.EmbyItemResponse{
+						ProviderIds: emby.EmbyProviderIds{
+							Imdb: imdbSerie,
+							IMDB: imdbSerie,
+						},
+						ParentId: "SerieId",
+						Type:     "Season",
+					})
+					if err != nil {
+						t.Fatalf("Failed to marshal configs: %v", err)
+					}
+
+					response.Body = io.NopCloser(bytes.NewBuffer(jsonData))
+
+					return response, nil
+				})
+			httpmock.RegisterResponder("GET", cfg.Emby.BaseURL+"/Users/"+cfg.Emby.UserID+"/Items/"+"SerieId"+"?Fields=ProviderIds",
+				func(req *http.Request) (*http.Response, error) {
+
+					response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
+
+					jsonData, err := json.Marshal(emby.EmbyItemResponse{
+						ProviderIds: emby.EmbyProviderIds{
+							Imdb: imdbSerie,
+							IMDB: imdbSerie,
+						},
+						ParentId: "Serie",
+						Type:     "Series",
 					})
 					if err != nil {
 						t.Fatalf("Failed to marshal configs: %v", err)
