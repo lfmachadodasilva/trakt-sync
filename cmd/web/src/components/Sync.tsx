@@ -132,7 +132,7 @@ export const Sync = ({
               href="https://crontab.guru"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-500 underline"
+              className="underline"
             >
               crontab.guru
             </a>

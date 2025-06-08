@@ -149,6 +149,20 @@ export const Emby = ({
               placeholder="enter your emby api key"
               ref={apiKeyRef}
             />
+            {cfg?.emby?.base_url && (
+              <CardDescription className="text-left">
+                You can find your API key in the{" "}
+                <a
+                  href={`${cfg.emby.base_url}/web/index.html#!/apikeys`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  advanced settings
+                </a>{" "}
+                of your emby server.
+              </CardDescription>
+            )}
           </Label>
         </div>
         <div key="user-id">

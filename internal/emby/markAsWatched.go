@@ -18,9 +18,10 @@ func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, itemId st
 
 	_, err := utils.HttpPost[struct{}, struct{}](
 		utils.RequestParams{
-			URL:     url,
-			Config:  cfg,
-			Context: ctx,
+			URL:        url,
+			Config:     cfg,
+			Context:    ctx,
+			AddHeaders: addEmbyHeaders,
 		},
 		&struct{}{},
 	)
