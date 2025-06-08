@@ -108,7 +108,7 @@ func processEmbyMovie(ctx *context.Context, cfg *config.ConfigEntity, webhook *E
 }
 
 func processEmbySeries(ctx *context.Context, cfg *config.ConfigEntity, webhook *EmbyWebhook) error {
-	if webhook.Item.Type != "Series" {
+	if webhook.Item.Type != "Episode" {
 		return nil
 	}
 
