@@ -2,6 +2,8 @@ name: trakt-sync build
 
 on:
   push:
+    branches:
+      - "*"
     tags:
       - "v*"
 
@@ -36,15 +38,16 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          push: true
+          push: ${{ startsWith(github.ref, 'refs/tags/v') }}
           tags: |
             lfmachadodasilva/trakt-sync:latest
             lfmachadodasilva/trakt-sync:${{ github.ref_name }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Generate artifact attestation
+      - name: Generate artifact attestation (only for tags)
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: index.docker.io/lfmachadodasilva/trakt-sync
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
