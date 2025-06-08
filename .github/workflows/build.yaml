@@ -38,6 +38,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          cache-from: type=registry,ref=lfmachadodasilva/trakt-sync:latest
+          cache-to: type=inline
           push: ${{ startsWith(github.ref, 'refs/tags/v') }}
           tags: |
             lfmachadodasilva/trakt-sync:latest
