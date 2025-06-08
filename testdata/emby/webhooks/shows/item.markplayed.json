@@ -1,9 +1,12 @@
 {
   "Title": "item.markplayed",
-  "Description": "Sunday, 8 June 2025 12:09",
-  "Date": "2025-06-08T12:09:26.2863845Z",
+  "Description": "Sunday, 8 June 2025 16:44",
+  "Date": "2025-06-08T16:44:13.8364255Z",
   "Event": "item.markplayed",
-  "User": { "Name": "luizfelipe", "Id": "aac3a78d9f184ea480fb1629e76aad57" },
+  "User": {
+    "Name": "luizfelipe",
+    "Id": "aac3a78d9f184ea480fb1629e76aad57"
+  },
   "Item": {
     "Name": "The Bird Always Knows",
     "ServerId": "15596ac9bbc24127b9f01db6f33630c7",
@@ -13,12 +16,18 @@
     "SortName": "Bird Always Knows",
     "PremiereDate": "2025-06-01T00:00:00.0000000Z",
     "ExternalUrls": [
-      { "Name": "IMDb", "Url": "https://www.imdb.com/title/tt33480030" },
+      {
+        "Name": "IMDb",
+        "Url": "https://www.imdb.com/title/tt33480030"
+      },
       {
         "Name": "TheTVDB",
         "Url": "https://thetvdb.com/?tab=episode&id=10803213"
       },
-      { "Name": "Trakt", "Url": "https://trakt.tv/search/imdb/tt33480030" }
+      {
+        "Name": "Trakt",
+        "Url": "https://trakt.tv/search/imdb/tt33480030"
+      }
     ],
     "Path": "/data/tvshows/The Walking Dead - Dead City/Season 2/The Walking Dead Dead City S02E05 The Bird Always Knows 1080p AMZN WEB-DL DDP5 1 H 264-NTb[EZTVx.to].mkv",
     "Overview": "Negan makes some big moves, while Maggie takes matters into her own hands.",
@@ -32,7 +41,10 @@
     "IndexNumber": 5,
     "ParentIndexNumber": 2,
     "RemoteTrailers": [],
-    "ProviderIds": { "Tvdb": "10803213", "IMDB": "tt33480030" },
+    "ProviderIds": {
+      "Tvdb": "10803213",
+      "IMDB": "tt33480030"
+    },
     "IsFolder": false,
     "ParentId": "6334",
     "Type": "Episode",
@@ -46,7 +58,7 @@
       "PlaybackPositionTicks": 0,
       "PlayCount": 1,
       "IsFavorite": false,
-      "LastPlayedDate": "2025-06-08T12:09:26.0000000Z",
+      "LastPlayedDate": "2025-06-08T16:44:13.0000000Z",
       "Played": true
     },
     "SeriesName": "The Walking Dead: Dead City",
@@ -55,7 +67,9 @@
     "PrimaryImageAspectRatio": 1.7777777777777777,
     "SeriesPrimaryImageTag": "4ec9df196d707b68c82b63034ca0de15",
     "SeasonName": "Season 2",
-    "ImageTags": { "Primary": "da2504315208a80490d099a6a814937e" },
+    "ImageTags": {
+      "Primary": "da2504315208a80490d099a6a814937e"
+    },
     "BackdropImageTags": [],
     "ParentLogoImageTag": "2020b3c2b872dc3a6c3d0c595acc7461",
     "ParentThumbItemId": "6333",

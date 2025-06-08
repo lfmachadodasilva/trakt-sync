@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -140,7 +141,22 @@ func TestEmbyMovieWebhook(t *testing.T) {
 						t.Fatalf("Expected IMDB ID '%s', got '%s'", imdb, request.Movies[0].Ids.Imdb)
 					}
 
+					jsonData, err := json.Marshal(trakt.MarkAsWatchedResponse{
+						Added: struct {
+							Movies   int16 `json:"movies,omitempty"`
+							Episodes int16 `json:"episodes,omitempty"`
+						}{
+							Movies:   1,
+							Episodes: 0,
+						},
+					})
+					if err != nil {
+						t.Fatalf("Failed to marshal configs: %v", err)
+					}
+
 					response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
+					response.Body = io.NopCloser(bytes.NewBuffer(jsonData))
+
 					return response, nil
 				})
 
@@ -172,7 +188,7 @@ func TestEmbyShowWebhook(t *testing.T) {
 	}{
 		{
 			name:            "MarkPlayed_MarkShowAsWatchedOnTrakt",
-			webhookFile:     "./../../testdata/emby/webhooks/shows/mark_played.json",
+			webhookFile:     "./../../testdata/emby/webhooks/shows/item.markplayed.json",
 			expectedStatus:  http.StatusOK,
 			expectTraktCall: true,
 		},
@@ -242,6 +258,8 @@ func TestEmbyShowWebhook(t *testing.T) {
 			// Track if Trakt API call was made
 			var traktCallMade bool = false
 
+			var imdbSerie string = "tt7777" // Example IMDB ID for the series
+
 			// Register mock responder
 			httpmock.RegisterResponder("POST", trakt.TraktApiUrl+"/sync/history",
 				func(req *http.Request) (*http.Response, error) {
@@ -258,9 +276,8 @@ func TestEmbyShowWebhook(t *testing.T) {
 					if len(request.Shows) != 1 {
 						t.Fatalf("Expected 1 show in request, got %d", len(request.Shows))
 					}
-					imdb, err := webhook.GetImdbId()
-					if err != nil || request.Shows[0].Ids.Imdb != imdb {
-						t.Fatalf("Expected IMDB ID '%s', got '%s'", imdb, request.Shows[0].Ids.Imdb)
+					if err != nil || request.Shows[0].Ids.Imdb != imdbSerie {
+						t.Fatalf("Expected IMDB ID '%s', got '%s'", imdbSerie, request.Shows[0].Ids.Imdb)
 					}
 
 					if request.Shows[0].Seasons[0].Number != int16(*webhook.Item.ParentIndexNumber) {
@@ -270,7 +287,47 @@ func TestEmbyShowWebhook(t *testing.T) {
 						t.Fatalf("Expected episode number %d, got %d", *webhook.Item.IndexNumber, request.Shows[0].Seasons[0].Episodes[0].Number)
 					}
 
+					jsonData, err := json.Marshal(trakt.MarkAsWatchedResponse{
+						Added: struct {
+							Movies   int16 `json:"movies,omitempty"`
+							Episodes int16 `json:"episodes,omitempty"`
+						}{
+							Movies:   0,
+							Episodes: 1,
+						},
+					})
+					if err != nil {
+						t.Fatalf("Failed to marshal configs: %v", err)
+					}
+
 					response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
+					response.Body = io.NopCloser(bytes.NewBuffer(jsonData))
+
+					return response, nil
+				})
+			httpmock.RegisterResponder("GET", cfg.Emby.BaseURL+"/Users/"+cfg.Emby.UserID+"/Items?IncludeItemTypes=Series&Recursive=true&Fields=ProviderIds",
+				func(req *http.Request) (*http.Response, error) {
+
+					response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
+
+					jsonData, err := json.Marshal(emby.EmbyItemsResponse{
+						Items: []emby.EmbyItemResponse{
+							{
+								Name: webhook.Item.SeriesName,
+								ProviderIds: emby.EmbyProviderIds{
+									Imdb: imdbSerie,
+									IMDB: imdbSerie,
+								},
+								Episodes: []emby.EmbyItemResponse{},
+							},
+						},
+					})
+					if err != nil {
+						t.Fatalf("Failed to marshal configs: %v", err)
+					}
+
+					response.Body = io.NopCloser(bytes.NewBuffer(jsonData))
+
 					return response, nil
 				})
 

@@ -215,8 +215,7 @@ func syncEmbyTvShows(ctx *context.Context, cfg *config.ConfigEntity, request *Sy
 						})
 					} else {
 						foundShow.Seasons = append(foundShow.Seasons, trakt.MarkAsWatchedSeasonsRequest{
-							WatchedAt: embyShow.UserData.LastPlayedDate,
-							Number:    embySeasonNumber,
+							Number: embySeasonNumber,
 							Episodes: []trakt.MarkAsWatchedEpisodes{
 								{
 									Number:    embyEpisodeNumber,
@@ -232,8 +231,7 @@ func syncEmbyTvShows(ctx *context.Context, cfg *config.ConfigEntity, request *Sy
 						},
 						Seasons: []trakt.MarkAsWatchedSeasonsRequest{
 							{
-								WatchedAt: embyShow.UserData.LastPlayedDate,
-								Number:    embySeasonNumber,
+								Number: embySeasonNumber,
 								Episodes: []trakt.MarkAsWatchedEpisodes{
 									{
 										Number:    embyEpisodeNumber,

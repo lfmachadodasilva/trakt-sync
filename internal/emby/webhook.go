@@ -6,6 +6,7 @@ import (
 	"time"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/trakt"
+	"trakt-sync/internal/utils"
 )
 
 type EmbyWebhook struct {
@@ -24,6 +25,7 @@ type EmbyWebhook struct {
 		ParentIndexNumber *int              `json:"ParentIndexNumber,omitempty"`
 		Type              string            `json:"Type"`
 		RunTimeTicks      int64             `json:"RunTimeTicks"`
+		SeriesName        string            `json:"SeriesName,omitempty"`
 	} `json:"Item"`
 	Server       map[string]string `json:"Server"`
 	PlaybackInfo struct {
@@ -112,7 +114,17 @@ func processEmbySeries(ctx *context.Context, cfg *config.ConfigEntity, webhook *
 		return nil
 	}
 
-	imdbId, err := webhook.GetImdbId()
+	items, err := GetItemsByType(ctx, cfg, "Series")
+	if err != nil {
+		return fmt.Errorf("failed to get Emby series items: %w", err)
+	}
+	item, exist := utils.FindBy(&items, func(item EmbyItemResponse) bool {
+		return item.Name == webhook.Item.SeriesName
+	})
+	if !exist {
+		return fmt.Errorf("Emby series item not found: %s", webhook.Item.Name)
+	}
+	imdbId, err := item.GetImdbId()
 	if err != nil {
 		return err
 	}
@@ -126,8 +138,7 @@ func processEmbySeries(ctx *context.Context, cfg *config.ConfigEntity, webhook *
 				},
 				Seasons: []trakt.MarkAsWatchedSeasonsRequest{
 					{
-						WatchedAt: webhook.Date,
-						Number:    int16(*webhook.Item.ParentIndexNumber),
+						Number: int16(*webhook.Item.ParentIndexNumber),
 						Episodes: []trakt.MarkAsWatchedEpisodes{
 							{
 								Number:    int16(*webhook.Item.IndexNumber),

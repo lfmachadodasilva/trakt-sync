@@ -40,6 +40,19 @@ type EmbyItems struct {
 	Series []EmbyItemResponse
 }
 
+func (item *EmbyItemResponse) GetImdbId() (string, error) {
+
+	imdbId := item.ProviderIds.Imdb
+	if imdbId == "" {
+		imdbId = item.ProviderIds.IMDB
+	}
+
+	if imdbId == "" {
+		return "", fmt.Errorf("no IMDb ID found for item: %s", item.Name)
+	}
+	return imdbId, nil
+}
+
 func GetAllItems(ctx *context.Context, cfg *config.ConfigEntity) (EmbyItems, error) {
 	var movies []EmbyItemResponse
 	var series []EmbyItemResponse

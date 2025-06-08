@@ -38,12 +38,19 @@ type MarkAsWatchedRequest struct {
 	Shows  []MarkAsWatchedShowRequest  `json:"shows,omitempty"`
 }
 
+type MarkAsWatchedResponse struct {
+	Added struct {
+		Movies   int16 `json:"movies,omitempty"`
+		Episodes int16 `json:"episodes,omitempty"`
+	} `json:"added,omitempty"`
+}
+
 func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *MarkAsWatchedRequest, isRetry bool) error {
 
 	preUrl := "%s/sync/history"
 	url := fmt.Sprintf(preUrl, TraktApiUrl)
 
-	_, err := utils.HttpPost[MarkAsWatchedRequest, struct{}](
+	response, err := utils.HttpPost[MarkAsWatchedRequest, MarkAsWatchedResponse](
 		utils.RequestParams{
 			URL:        url,
 			Config:     cfg,
@@ -63,6 +70,8 @@ func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *
 			// Retry the request after refreshing the access token
 			return MarkItemAsWatched(ctx, cfg, request, true)
 		}
+	} else if response.Added.Movies == 0 && response.Added.Episodes == 0 {
+		return fmt.Errorf("no items were added to the watch history, check if the request is valid")
 	}
 
 	return err
