@@ -60,6 +60,8 @@ func TestEmbyMovieWebhook(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// t.Parallel()
 
+			ctx := context.Background()
+
 			// Create a temporary SQLite database file
 			tempDBFile := "./TestEmbyWebhook_" + tc.name + ".db"
 			db, err := sql.Open("sqlite3", tempDBFile)
@@ -70,43 +72,11 @@ func TestEmbyMovieWebhook(t *testing.T) {
 				db.Close()
 				os.Remove(tempDBFile)
 			}()
-
-			// Read webhook data from file
-			webhookBytes, err := os.ReadFile(tc.webhookFile)
-			if err != nil {
-				t.Fatalf("Failed to read webhook test file: %v", err)
-			}
-			// Unmarshal webhook data
-			var webhook emby.EmbyWebhook
-			if err := json.Unmarshal(webhookBytes, &webhook); err != nil {
-				t.Fatalf("Failed to unmarshal webhook data: %v", err)
-			}
-
 			// Initialize context and database
-			ctx := context.Background()
-			ctx = context.WithValue(ctx, ctxutils.ContextDbKey, db)
-			config.InitConfigTable(&ctx)
+			testInitDatabase(t, &ctx, db)
 
-			// Mock configuration
-			cfg := config.ConfigEntity{
-				Emby: &config.EmbyConfig{
-					BaseURL: "http://localhost:8096",
-					APIKey:  "test-api-key",
-					UserID:  "aac3a78d9f184ea480fb1629e76aad57",
-				},
-				Trakt: &config.TraktConfig{
-					ClientID:     "test-client-id",
-					ClientSecret: "test-client-secret",
-					AccessToken:  "test-access-token",
-					RefreshToken: "test-refresh-token",
-					Code:         "test-code",
-				},
-			}
-			err = config.UpsertConfig(&ctx, &cfg)
-			if err != nil {
-				t.Fatalf("Failed to write config: %v", err)
-			}
-
+			// Read webhook data from file and unmarshal it
+			webhook, webhookBytes := unmarshalWebhook(t, tc.webhookFile)
 			req := httptest.NewRequest(http.MethodPost, "/emby/webhooks", bytes.NewReader(webhookBytes))
 			req.Header.Set("Content-Type", "application/json")
 
@@ -198,6 +168,8 @@ func TestEmbyShowWebhook(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// t.Parallel()
 
+			ctx := context.Background()
+
 			// Create a temporary SQLite database file
 			tempDBFile := "./TestEmbyWebhook_" + tc.name + ".db"
 			db, err := sql.Open("sqlite3", tempDBFile)
@@ -208,43 +180,10 @@ func TestEmbyShowWebhook(t *testing.T) {
 				db.Close()
 				os.Remove(tempDBFile)
 			}()
+			cfg := testInitDatabase(t, &ctx, db)
 
-			// Read webhook data from file
-			webhookBytes, err := os.ReadFile(tc.webhookFile)
-			if err != nil {
-				t.Fatalf("Failed to read webhook test file: %v", err)
-			}
-			// Unmarshal webhook data
-			var webhook emby.EmbyWebhook
-			if err := json.Unmarshal(webhookBytes, &webhook); err != nil {
-				t.Fatalf("Failed to unmarshal webhook data: %v", err)
-			}
-
-			// Initialize context and database
-			ctx := context.Background()
-			ctx = context.WithValue(ctx, ctxutils.ContextDbKey, db)
-			config.InitConfigTable(&ctx)
-
-			// Mock configuration
-			cfg := config.ConfigEntity{
-				Emby: &config.EmbyConfig{
-					BaseURL: "http://localhost:8096",
-					APIKey:  "test-api-key",
-					UserID:  "aac3a78d9f184ea480fb1629e76aad57",
-				},
-				Trakt: &config.TraktConfig{
-					ClientID:     "test-client-id",
-					ClientSecret: "test-client-secret",
-					AccessToken:  "test-access-token",
-					RefreshToken: "test-refresh-token",
-					Code:         "test-code",
-				},
-			}
-			err = config.UpsertConfig(&ctx, &cfg)
-			if err != nil {
-				t.Fatalf("Failed to write config: %v", err)
-			}
-
+			// Read webhook data from file and unmarshal it
+			webhook, webhookBytes := unmarshalWebhook(t, tc.webhookFile)
 			req := httptest.NewRequest(http.MethodPost, "/emby/webhooks", bytes.NewReader(webhookBytes))
 			req.Header.Set("Content-Type", "application/json")
 
@@ -305,69 +244,29 @@ func TestEmbyShowWebhook(t *testing.T) {
 
 					return response, nil
 				})
-			httpmock.RegisterResponder("GET", cfg.Emby.BaseURL+"/Users/"+cfg.Emby.UserID+"/Items/"+webhook.Item.Id+"?Fields=ProviderIds",
-				func(req *http.Request) (*http.Response, error) {
 
-					response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
-
-					jsonData, err := json.Marshal(emby.EmbyItemResponse{
-						ProviderIds: emby.EmbyProviderIds{
-							Imdb: imdbSerie,
-							IMDB: imdbSerie,
-						},
-						ParentId: "SeasonId",
-						Type:     "Episode",
+			var funcRegisterGetItem = func(itemId string, parentItemId string, itemType string, imdbId string) {
+				httpmock.RegisterResponder("GET", cfg.Emby.BaseURL+"/Users/"+cfg.Emby.UserID+"/Items/"+itemId+"?Fields=ProviderIds",
+					func(req *http.Request) (*http.Response, error) {
+						response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
+						jsonData, err := json.Marshal(emby.EmbyItemResponse{
+							ProviderIds: emby.EmbyProviderIds{
+								Imdb: imdbId,
+								IMDB: imdbId,
+							},
+							ParentId: parentItemId,
+							Type:     itemType,
+						})
+						if err != nil {
+							t.Fatalf("Failed to marshal configs: %v", err)
+						}
+						response.Body = io.NopCloser(bytes.NewBuffer(jsonData))
+						return response, nil
 					})
-					if err != nil {
-						t.Fatalf("Failed to marshal configs: %v", err)
-					}
-
-					response.Body = io.NopCloser(bytes.NewBuffer(jsonData))
-
-					return response, nil
-				})
-			httpmock.RegisterResponder("GET", cfg.Emby.BaseURL+"/Users/"+cfg.Emby.UserID+"/Items/"+"SeasonId"+"?Fields=ProviderIds",
-				func(req *http.Request) (*http.Response, error) {
-
-					response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
-
-					jsonData, err := json.Marshal(emby.EmbyItemResponse{
-						ProviderIds: emby.EmbyProviderIds{
-							Imdb: imdbSerie,
-							IMDB: imdbSerie,
-						},
-						ParentId: "SerieId",
-						Type:     "Season",
-					})
-					if err != nil {
-						t.Fatalf("Failed to marshal configs: %v", err)
-					}
-
-					response.Body = io.NopCloser(bytes.NewBuffer(jsonData))
-
-					return response, nil
-				})
-			httpmock.RegisterResponder("GET", cfg.Emby.BaseURL+"/Users/"+cfg.Emby.UserID+"/Items/"+"SerieId"+"?Fields=ProviderIds",
-				func(req *http.Request) (*http.Response, error) {
-
-					response := httpmock.NewStringResponse(http.StatusOK, `{"message": "Success"}`)
-
-					jsonData, err := json.Marshal(emby.EmbyItemResponse{
-						ProviderIds: emby.EmbyProviderIds{
-							Imdb: imdbSerie,
-							IMDB: imdbSerie,
-						},
-						ParentId: "Serie",
-						Type:     "Series",
-					})
-					if err != nil {
-						t.Fatalf("Failed to marshal configs: %v", err)
-					}
-
-					response.Body = io.NopCloser(bytes.NewBuffer(jsonData))
-
-					return response, nil
-				})
+			}
+			funcRegisterGetItem(webhook.Item.Id, "SeasonId", "Episode", imdbSerie)
+			funcRegisterGetItem("SeasonId", "SerieId", "Season", imdbSerie)
+			funcRegisterGetItem("SerieId", "Serie", "Series", imdbSerie)
 
 			// Call the handler
 			HandleEmbyWebhooks(&ctx, resp, req)
@@ -385,4 +284,47 @@ func TestEmbyShowWebhook(t *testing.T) {
 			}
 		})
 	}
+}
+
+func unmarshalWebhook(t *testing.T, filePath string) (*emby.EmbyWebhook, []byte) {
+	// Read webhook data from file
+	webhookBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatalf("Failed to read webhook test file: %v", err)
+	}
+	// Unmarshal webhook data
+	var webhook emby.EmbyWebhook
+	if err := json.Unmarshal(webhookBytes, &webhook); err != nil {
+		t.Fatalf("Failed to unmarshal webhook data: %v", err)
+	}
+
+	return &webhook, webhookBytes
+}
+
+func testInitDatabase(t *testing.T, ctx *context.Context, db *sql.DB) *config.ConfigEntity {
+	// Initialize context and database
+	*ctx = context.WithValue(*ctx, ctxutils.ContextDbKey, db)
+	config.InitConfigTable(ctx)
+
+	// Mock configuration
+	cfg := config.ConfigEntity{
+		Emby: &config.EmbyConfig{
+			BaseURL: "http://localhost:8096",
+			APIKey:  "test-api-key",
+			UserID:  "aac3a78d9f184ea480fb1629e76aad57",
+		},
+		Trakt: &config.TraktConfig{
+			ClientID:     "test-client-id",
+			ClientSecret: "test-client-secret",
+			AccessToken:  "test-access-token",
+			RefreshToken: "test-refresh-token",
+			Code:         "test-code",
+		},
+	}
+	err := config.UpsertConfig(ctx, &cfg)
+	if err != nil {
+		t.Fatalf("Failed to write config: %v", err)
+	}
+
+	return &cfg
 }
