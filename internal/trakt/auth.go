@@ -71,7 +71,7 @@ func Auth(ctx *context.Context, cfg *config.ConfigEntity, code string) error {
 		},
 	})
 	if err2 != nil {
-		return fmt.Errorf("failed to upsert config: %w", err2)
+		return err2
 	}
 
 	return nil

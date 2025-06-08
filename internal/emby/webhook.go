@@ -85,7 +85,7 @@ func processEmbyMovie(ctx *context.Context, cfg *config.ConfigEntity, webhook *E
 
 	imdbId, err := webhook.GetImdbId()
 	if err != nil {
-		return fmt.Errorf("failed to get IMDb ID for Emby movie: %w", err)
+		return err
 	}
 
 	fmt.Printf("Processing Emby movie: %s with IMDb ID: %s\n", webhook.Item.Name, imdbId)
@@ -100,7 +100,7 @@ func processEmbyMovie(ctx *context.Context, cfg *config.ConfigEntity, webhook *E
 		},
 	}
 	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest); err != nil {
-		return fmt.Errorf("failed to mark Emby movie as watched in Trakt: %w", err)
+		return err
 	}
 	fmt.Printf("Marked Emby movie: %s as watched in Trakt with IMDB: %s\n", webhook.Item.Name, imdbId)
 
@@ -114,7 +114,7 @@ func processEmbySeries(ctx *context.Context, cfg *config.ConfigEntity, webhook *
 
 	imdbId, err := webhook.GetImdbId()
 	if err != nil {
-		return fmt.Errorf("failed to get IMDb ID for Emby series: %w", err)
+		return err
 	}
 
 	fmt.Printf("Processing Emby series: %s with IMDb ID: %s\n", webhook.Item.Name, imdbId)
@@ -140,7 +140,7 @@ func processEmbySeries(ctx *context.Context, cfg *config.ConfigEntity, webhook *
 		},
 	}
 	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest); err != nil {
-		return fmt.Errorf("failed to mark Emby series as watched in Trakt: %w", err)
+		return err
 	}
 	fmt.Printf("Marked Emby series: %s as watched in Trakt with IMDB: %s\n", webhook.Item.Name, imdbId)
 
