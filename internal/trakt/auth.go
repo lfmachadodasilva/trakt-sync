@@ -101,14 +101,14 @@ func AuthRefreshAccessToken(ctx *context.Context, cfg *config.ConfigEntity) erro
 		&authRequest,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to fetch Emby items: %w", err)
+		return fmt.Errorf("failed to refresh trakt access token: %w", err)
 	}
 
 	// After revoking the token, we need to clear the access token and refresh token
 	cfg.Trakt.AccessToken = response.AccessToken
 	err2 := config.UpsertConfig(ctx, cfg)
 	if err2 != nil {
-		return fmt.Errorf("failed to upsert config: %w", err2)
+		return fmt.Errorf("failed to upsert config by refreshing token: %w", err2)
 	}
 
 	return nil

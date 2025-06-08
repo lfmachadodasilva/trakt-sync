@@ -99,7 +99,7 @@ func processEmbyMovie(ctx *context.Context, cfg *config.ConfigEntity, webhook *E
 			},
 		},
 	}
-	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest); err != nil {
+	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest, false); err != nil {
 		return err
 	}
 	fmt.Printf("Marked Emby movie: %s as watched in Trakt with IMDB: %s\n", webhook.Item.Name, imdbId)
@@ -139,7 +139,7 @@ func processEmbySeries(ctx *context.Context, cfg *config.ConfigEntity, webhook *
 			},
 		},
 	}
-	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest); err != nil {
+	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest, false); err != nil {
 		return err
 	}
 	fmt.Printf("Marked Emby series: %s as watched in Trakt with IMDB: %s\n", webhook.Item.Name, imdbId)

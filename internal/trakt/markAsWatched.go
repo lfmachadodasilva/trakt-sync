@@ -38,7 +38,7 @@ type MarkAsWatchedRequest struct {
 	Shows  []MarkAsWatchedShowRequest  `json:"shows,omitempty"`
 }
 
-func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *MarkAsWatchedRequest) error {
+func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *MarkAsWatchedRequest, isRetry bool) error {
 
 	preUrl := "%s/sync/history"
 	url := fmt.Sprintf(preUrl, TraktApiUrl)
@@ -53,8 +53,17 @@ func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *
 		request,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to mark trakt item as watched: %w", err)
+		if !isRetry && utils.IsAuthError(err) {
+			// If the error is an authentication error, refresh the access token and retry
+			err = AuthRefreshAccessToken(ctx, cfg)
+			if err != nil {
+				return err
+			}
+			// cfg, err = config.GetConfig(ctx)
+			// Retry the request after refreshing the access token
+			return MarkItemAsWatched(ctx, cfg, request, true)
+		}
 	}
 
-	return nil
+	return err
 }
