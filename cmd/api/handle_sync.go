@@ -88,7 +88,7 @@ func syncEmby(ctx *context.Context, cfg *config.ConfigEntity, traktData *trakt.T
 		return fmt.Errorf("failed to sync Emby shows: %w", err)
 	}
 
-	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest); err != nil {
+	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest, false); err != nil {
 		return fmt.Errorf("failed to mark items as watched in Trakt: %w", err)
 	}
 
