@@ -43,12 +43,14 @@ func InitConfigTable(ctx *context.Context) *ConfigEntity {
 				// APIKey:  uuid.New().String(),
 				BaseURL: "http://localhost:8096",
 			},
-			// Plex: &models.PlexConfig{
-			// 	UserID: uuid.New().String(),
-			// },
-			// Jellyfin: &models.JellyfinConfig{
-			// 	UserID: uuid.New().String(),
-			// },
+			Plex: &PlexConfig{
+				BaseURL: "http://localhost:32400",
+				// APIKey:  "your-plex-api-key",
+			},
+			Jellyfin: &JellyfinConfig{
+				BaseURL: "http://localhost:8920",
+				// APIKey:  "your-jellyfin-api-key",
+			},
 			Cronjob: "0 0 * * *", // Default cronjob to run daily at midnight
 		}
 		UpsertConfig(ctx, &cfg)

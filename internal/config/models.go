@@ -23,11 +23,13 @@ type EmbyConfig struct {
 }
 
 type PlexConfig struct {
-	UserID string `json:"user_id,omitempty"`
+	APIKey  string `json:"api_key,omitempty"`
+	BaseURL string `json:"base_url,omitempty"`
 }
 
 type JellyfinConfig struct {
-	UserID string `json:"user_id,omitempty"`
+	APIKey  string `json:"api_key,omitempty"`
+	BaseURL string `json:"base_url,omitempty"`
 }
 
 type ConfigEntity struct {
