@@ -11,7 +11,7 @@ import (
 	"github.com/LukeHagar/plexgo"
 )
 
-func InitPlex(ctx context.Context, cfg *config.ConfigEntity) (context.Context, error) {
+func InitPlex(ctx *context.Context, cfg *config.ConfigEntity) (context.Context, error) {
 	if ctx == nil || cfg == nil {
 		return nil, fmt.Errorf("context or config cannot be nil")
 	}
@@ -44,9 +44,9 @@ func InitPlex(ctx context.Context, cfg *config.ConfigEntity) (context.Context, e
 	)
 
 	// Store the Plex client in the context for later use
-	ctx = context.WithValue(ctx, ctxutils.ContextPlexKey, s)
+	ctxReturn := context.WithValue(*ctx, ctxutils.ContextPlexSdkKey, s)
 
-	return ctx, nil
+	return ctxReturn, nil
 }
 
 func parseURLComponents(tmp string) (protocol string, ip string, port string, err error) {

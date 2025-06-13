@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"trakt-sync/internal/config"
 	"trakt-sync/internal/emby"
+	"trakt-sync/internal/plex"
 	"trakt-sync/internal/trakt"
 	"trakt-sync/internal/utils"
 )
@@ -47,16 +49,28 @@ func HandleSyncAll(ctx *context.Context, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	ctxCopy, err := plex.InitPlex(ctx, cfg)
+	if err != nil {
+		fmt.Println("Failed to initialize Plex:", err)
+	}
+	ctx = &ctxCopy
+
 	traktData, err := trakt.GetWatched(ctx, cfg)
 	if err != nil {
 		http.Error(w, "Failed to fetch watched data from Trakt: "+err.Error(), http.StatusBadRequest)
-		fmt.Println("Failed to fetch watched data from Trakt:", err)
+		log.Println("Failed to fetch watched data from Trakt:", err)
 		return
 	}
 
-	if err := syncEmby(ctx, cfg, traktData); err != nil {
-		http.Error(w, "Failed to sync Emby with Trakt data: "+err.Error(), http.StatusBadRequest)
-		fmt.Println("Failed to sync Emby with Trakt data:", err)
+	// if err := syncEmby(ctx, cfg, traktData); err != nil {
+	// 	http.Error(w, "Failed to sync Emby with Trakt data: "+err.Error(), http.StatusBadRequest)
+	// 	fmt.Println("Failed to sync Emby with Trakt data:", err)
+	// 	return
+	// }
+
+	if err := syncPlex(ctx, cfg, traktData); err != nil {
+		http.Error(w, "Failed to sync Plex with Trakt data: "+err.Error(), http.StatusBadRequest)
+		log.Println("Failed to sync Plex with Trakt data:", err)
 		return
 	}
 
@@ -99,6 +113,7 @@ type SyncRequest struct {
 	TraktItems   *[]trakt.TraktWatchedResponse
 	TraktRequest *trakt.MarkAsWatchedRequest
 	EmbyItems    *[]emby.EmbyItemResponse
+	PlexItems    *plex.PlexItemsResponse
 }
 
 func syncEmbyMovie(ctx *context.Context, cfg *config.ConfigEntity, request *SyncRequest) error {
@@ -250,6 +265,75 @@ func syncEmbyTvShows(ctx *context.Context, cfg *config.ConfigEntity, request *Sy
 				// Both are in sync, do nothing
 				continue
 			}
+		}
+	}
+
+	return nil
+}
+
+func syncPlex(ctx *context.Context, cfg *config.ConfigEntity, traktData *trakt.TraktWatched) error {
+
+	plexItems, err := plex.GetAllItems(ctx, cfg)
+	if err != nil {
+		return fmt.Errorf("failed to fetch plex items: %w", err)
+	}
+
+	if plexItems != nil {
+		// Process Plex items
+	}
+
+	request := &SyncRequest{}
+
+	if err := syncPlexMovies(ctx, &SyncRequest{
+		TraktItems:   &traktData.Movies,
+		TraktRequest: request.TraktRequest,
+		PlexItems:    plexItems,
+	}); err != nil {
+		return fmt.Errorf("failed to sync Plex movies")
+	}
+
+	return nil
+}
+
+func syncPlexMovies(ctx *context.Context, request *SyncRequest) error {
+
+	if request.PlexItems == nil || request.PlexItems.Movies == nil || len(request.PlexItems.Movies) == 0 {
+		fmt.Println("No Plex movies to process")
+		return nil
+	}
+
+	// Create a map with IMDb IDs as keys and TraktWatchedItem as values
+	imdbMap := make(map[string]*trakt.TraktWatchedItem)
+
+	// Iterate over TraktItems (movies) and populate the map
+	for _, movie := range *request.TraktItems {
+		if movie.Movie.Ids.Imdb != "" {
+			imdbMap[movie.Movie.Ids.Imdb] = &movie.Movie
+		}
+	}
+
+	fmt.Println("== Processing Plex items for movies ==")
+	for _, plexMovie := range request.PlexItems.Movies {
+
+		_, traktExists := imdbMap[plexMovie.ImdbId]
+
+		fmt.Println(spacePrefix1, "Processing Plex movie:", plexMovie.Title, "with IMDb ID:", plexMovie.ImdbId)
+		if !traktExists && plexMovie.Watched {
+			fmt.Println(spacePrefix2, "Adding new movie to Trakt request")
+			request.TraktRequest.Movies = append(request.TraktRequest.Movies, trakt.MarkAsWatchedMovieRequest{
+				Ids: trakt.MarkAsWatchedIds{
+					Imdb: plexMovie.ImdbId,
+				},
+				WatchedAt: plexMovie.WatchedTime,
+			})
+		} else if traktExists && !plexMovie.Watched {
+			fmt.Println(spacePrefix2, "Marking Plex movie as watched")
+			if err := plex.MarkAsWatched(ctx, plexMovie.Id); err != nil {
+				// return fmt.Errorf("failed to mark Plex item as watched: %w", err)
+			}
+		} else {
+			// Both are in sync, do nothing
+			continue
 		}
 	}
 
