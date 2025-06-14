@@ -84,7 +84,6 @@ func GetMovies(ctx *context.Context, cfg *config.ConfigEntity, sdk *plexgo.PlexA
 	// This function should implement the logic to fetch movies from Plex
 	var movies []PlexMovieResponse
 	for _, movie := range responseMovies.Object.MediaContainer.Metadata {
-
 		var imdbId string
 		for _, guid := range movie.Guids {
 			if strings.HasPrefix(guid.ID, "imdb://") {
@@ -128,57 +127,3 @@ func GetTvShows(ctx *context.Context, cfg *config.ConfigEntity, sdk *plexgo.Plex
 	// This function should implement the logic to fetch TV shows from Plex
 	return tvShows, nil
 }
-
-// s := plexgo.New(
-// 	plexgo.WithSecurity("RkqDGvTGbFHn86YfUFia"),
-// 	plexgo.WithIP("192.168.1.13"),
-// 	plexgo.WithProtocol("http"),
-// )
-
-// res, err := s.Server.GetServerCapabilities(ctx)
-// if err != nil {
-// 	log.Fatal(err)
-// }
-// if res.Object != nil {
-// 	// handle response
-// }
-
-// responseAllLibraries, err := s.Library.GetAllLibraries(ctx)
-// if err != nil {
-// 	log.Fatal(err)
-// }
-// if responseAllLibraries.Object != nil {
-// 	// handle response
-// }
-
-// responseTvshows, err := s.Library.GetLibrarySectionsAll(ctx, operations.GetLibrarySectionsAllRequest{
-// 	SectionKey:           2,
-// 	Type:                 operations.GetLibrarySectionsAllQueryParamTypeTvShow,
-// 	IncludeMeta:          operations.GetLibrarySectionsAllQueryParamIncludeMetaEnable.ToPointer(),
-// 	IncludeGuids:         operations.QueryParamIncludeGuidsEnable.ToPointer(),
-// 	IncludeAdvanced:      operations.IncludeAdvancedEnable.ToPointer(),
-// 	IncludeCollections:   operations.QueryParamIncludeCollectionsEnable.ToPointer(),
-// 	IncludeExternalMedia: operations.QueryParamIncludeExternalMediaEnable.ToPointer(),
-// })
-// if err != nil {
-// 	log.Fatal(err)
-// }
-// if responseTvshows.Object != nil {
-// 	// handle response
-// }
-
-// requestSeasons, err := s.Library.GetMetadataChildren(ctx, 70, plexgo.String("Stream"))
-// if err != nil {
-// 	log.Fatal(err)
-// }
-// if requestSeasons.Object != nil {
-// 	// handle response
-// }
-
-// requestEpisodes, err := s.Library.GetMetadataChildren(ctx, 71, plexgo.String("Stream"))
-// if err != nil {
-// 	log.Fatal(err)
-// }
-// if requestEpisodes.Object != nil {
-// 	// handle response
-// }

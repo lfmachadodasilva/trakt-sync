@@ -284,7 +284,7 @@ func syncPlex(ctx *context.Context, cfg *config.ConfigEntity, traktData *trakt.T
 
 	request := &SyncRequest{}
 
-	if err := syncPlexMovies(ctx, &SyncRequest{
+	if err := syncPlexMovies(ctx, cfg, &SyncRequest{
 		TraktItems:   &traktData.Movies,
 		TraktRequest: request.TraktRequest,
 		PlexItems:    plexItems,
@@ -295,7 +295,7 @@ func syncPlex(ctx *context.Context, cfg *config.ConfigEntity, traktData *trakt.T
 	return nil
 }
 
-func syncPlexMovies(ctx *context.Context, request *SyncRequest) error {
+func syncPlexMovies(ctx *context.Context, cfg *config.ConfigEntity, request *SyncRequest) error {
 
 	if request.PlexItems == nil || request.PlexItems.Movies == nil || len(request.PlexItems.Movies) == 0 {
 		fmt.Println("No Plex movies to process")
@@ -328,8 +328,8 @@ func syncPlexMovies(ctx *context.Context, request *SyncRequest) error {
 			})
 		} else if traktExists && !plexMovie.Watched {
 			fmt.Println(spacePrefix2, "Marking Plex movie as watched")
-			if err := plex.MarkAsWatched(ctx, plexMovie.Id); err != nil {
-				// return fmt.Errorf("failed to mark Plex item as watched: %w", err)
+			if err := plex.MarkAsWatched(ctx, cfg, plexMovie.Id); err != nil {
+				fmt.Println(spacePrefix2, "Failed to mark Plex movie as watched:", err)
 			}
 		} else {
 			// Both are in sync, do nothing

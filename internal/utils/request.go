@@ -12,10 +12,11 @@ import (
 
 // RequestParams represents the parameters for HTTP requests
 type RequestParams struct {
-	Context    *context.Context
-	URL        string
-	Config     *config.ConfigEntity
-	AddHeaders func(req *http.Request, config *config.ConfigEntity)
+	Context        *context.Context
+	URL            string
+	Config         *config.ConfigEntity
+	AddHeaders     func(req *http.Request, config *config.ConfigEntity)
+	IgnoreResponse bool // If true, the response body will not be read
 }
 
 // HttpGet performs a GET request and decodes the response into the generic type T.
@@ -45,6 +46,12 @@ func HttpGet[T any](params RequestParams) (*T, error) {
 	// Check for non-2xx status codes
 	if resp.StatusCode < http.StatusOK && resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, fmt.Errorf("received non-2xx response: %d", resp.StatusCode)
+	}
+
+	if params.IgnoreResponse {
+		// If IgnoreResponse is true, we do not read the response body
+		defer resp.Body.Close()
+		return nil, nil
 	}
 
 	return SerializeBody[T](resp.Body)
