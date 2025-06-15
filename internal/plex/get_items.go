@@ -134,13 +134,50 @@ func GetTvShows(ctx *context.Context, cfg *config.ConfigEntity, sdk *plexgo.Plex
 	if err != nil {
 		log.Fatal(err)
 	}
-	if responseShows.Object != nil {
-		log.Printf("Plex response shows: %+v\n", responseShows.Object)
-	} else {
-		log.Println("Plex response shows is nil")
-	}
 
 	var tvShows []PlexTvshowResponse
-	// This function should implement the logic to fetch TV shows from Plex
+
+	for _, show := range responseShows.Object.MediaContainer.Metadata {
+		var imdbId string
+		for _, guid := range show.Guids {
+			if strings.HasPrefix(guid.ID, "imdb://") {
+				// extract the imdb id from the guid
+				imdbId = strings.TrimPrefix(guid.ID, "imdb://")
+				break
+			}
+		}
+		if imdbId == "" {
+			fmt.Printf("no imdb id found for plex tv show: %s\n", show.Title)
+			continue
+		}
+		// var episodes []PlexEpisodeResponse
+		// for _, episode := range show.Children {
+		// 	var watched bool = false
+		// 	if episode.ViewCount != nil && *episode.ViewCount > 0 {
+		// 		watched = true
+		// 	}
+		// 	var watchedTime time.Time
+		// 	if episode.LastViewedAt != nil {
+		// 		watchedTime = time.Unix(int64(*episode.LastViewedAt), 0)
+		// 	} else {
+		// 		watchedTime = time.Time{}
+		// 	}
+		// 	episodes = append(episodes, PlexEpisodeResponse{
+		// 		Id:          episode.RatingKey,
+		// 		Title:       episode.Title,
+		// 		Season:      episode.ParentIndex,
+		// 		Episode:     episode.Index,
+		// 		Watched:     watched,
+		// 		WatchedTime: watchedTime,
+		// 	})
+		// }
+		// tvShows = append(tvShows, PlexTvshowResponse{
+		// 	Id:       show.RatingKey,
+		// 	Title:    show.Title,
+		// 	ImdbId:   imdbId,
+		// 	Episodes: episodes,
+		// })
+	}
+
 	return tvShows, nil
 }

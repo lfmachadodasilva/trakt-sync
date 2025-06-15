@@ -41,7 +41,7 @@ type MarkAsWatchedResponse struct {
 	Added struct {
 		Movies   int16 `json:"movies,omitempty"`
 		Episodes int16 `json:"episodes,omitempty"`
-	} `json:"added,omitempty"`
+	} `json:"added"`
 }
 
 type MarkAsWatchedMap struct {
