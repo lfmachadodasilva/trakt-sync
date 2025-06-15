@@ -37,26 +37,26 @@ type TraktWatchedResponse struct {
 }
 
 type TraktWatched struct {
-	Movies []TraktWatchedResponse
-	Shows  []TraktWatchedResponse
+	Movies map[string]*TraktWatchedItem
+	Shows  map[string]map[int16]map[int16]*TraktWatchedResponse
 }
 
 // GetWatched fetches the watched movies and shows from Trakt using the provided config.Config
 // Documentation: https://trakt.docs.apiary.io/#reference/sync/get-watched/get-watched
-func GetWatched(ctx *context.Context, cfg *config.ConfigEntity) (*TraktWatched, error) {
+func GetWatched(ctx *context.Context, cfg *config.ConfigEntity) (TraktWatched, error) {
 
 	movies, err := getWatchedGeneric(ctx, cfg, "movies", false)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch watched movies: %w", err)
+		return TraktWatched{}, fmt.Errorf("failed to fetch watched movies: %w", err)
 	}
 	shows, err := getWatchedGeneric(ctx, cfg, "shows", false)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch watched shows: %w", err)
+		return TraktWatched{}, fmt.Errorf("failed to fetch watched shows: %w", err)
 	}
 
-	return &TraktWatched{
-		Movies: *movies,
-		Shows:  *shows,
+	return TraktWatched{
+		Movies: CreateTraktMovieMap(movies),
+		Shows:  CreateTraktShowMap(shows),
 	}, nil
 }
 
@@ -92,4 +92,46 @@ func getWatchedGeneric(ctx *context.Context, cfg *config.ConfigEntity, mediaType
 	}
 
 	return response, nil
+}
+
+// CreateTraktMovieMap creates a map with IMDb IDs as keys and TraktWatchedItem as values
+func CreateTraktMovieMap(traktItems *[]TraktWatchedResponse) map[string]*TraktWatchedItem {
+	imdbMap := make(map[string]*TraktWatchedItem)
+
+	// Iterate over TraktItems (movies) and populate the map
+	for _, movie := range *traktItems {
+		if movie.Movie.Ids.Imdb != "" {
+			imdbMap[movie.Movie.Ids.Imdb] = &movie.Movie
+		}
+	}
+
+	return imdbMap
+}
+
+// CreateTraktShowMap creates a nested map with IMDb IDs, season numbers, and episode numbers as keys and TraktWatchedResponse as values
+func CreateTraktShowMap(traktItems *[]TraktWatchedResponse) map[string]map[int16]map[int16]*TraktWatchedResponse {
+	traktImdbMap := make(map[string]map[int16]map[int16]*TraktWatchedResponse)
+
+	for _, show := range *traktItems {
+		if show.Show.Ids.Imdb != "" {
+			imdbId := show.Show.Ids.Imdb
+			if _, exists := traktImdbMap[imdbId]; !exists {
+				traktImdbMap[imdbId] = make(map[int16]map[int16]*TraktWatchedResponse)
+			}
+
+			for _, season := range show.Seasons {
+				seasonNumber := season.Number
+				if _, exists := traktImdbMap[imdbId][seasonNumber]; !exists {
+					traktImdbMap[imdbId][seasonNumber] = make(map[int16]*TraktWatchedResponse)
+				}
+
+				for _, episode := range season.Episodes {
+					episodeNumber := episode.Number
+					traktImdbMap[imdbId][seasonNumber][episodeNumber] = &show
+				}
+			}
+		}
+	}
+
+	return traktImdbMap
 }

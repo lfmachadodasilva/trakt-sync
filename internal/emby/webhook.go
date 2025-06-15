@@ -90,17 +90,13 @@ func processEmbyMovie(ctx *context.Context, cfg *config.ConfigEntity, webhook *E
 	}
 
 	fmt.Printf("Processing Emby movie: %s with IMDb ID: %s\n", webhook.Item.Name, imdbId)
-	traktRequest := &trakt.MarkAsWatchedRequest{
-		Movies: []trakt.MarkAsWatchedMovieRequest{
-			{
-				Ids: trakt.MarkAsWatchedIds{
-					Imdb: imdbId,
-				},
-				WatchedAt: webhook.Date,
-			},
-		},
+
+	traktRequest := trakt.MarkAsWatchedMap{}
+	if err := traktRequest.AppendMovie(imdbId, webhook.Date); err != nil {
+		return fmt.Errorf("failed to append Emby movie to trakt request: %w", err)
 	}
-	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest, false); err != nil {
+
+	if err := trakt.MarkItemAsWatched(ctx, cfg, &traktRequest, false); err != nil {
 		return err
 	}
 	fmt.Printf("Marked Emby movie: %s as watched in Trakt with IMDB: %s\n", webhook.Item.Name, imdbId)
@@ -143,27 +139,17 @@ func processEmbyEpisode(ctx *context.Context, cfg *config.ConfigEntity, webhook 
 	}
 
 	fmt.Printf("Processing Emby series: %s with IMDb ID: %s\n", webhook.Item.Name, imdbId)
-	traktRequest := &trakt.MarkAsWatchedRequest{
-		Shows: []trakt.MarkAsWatchedShowRequest{
-			{
-				Ids: trakt.MarkAsWatchedIds{
-					Imdb: imdbId,
-				},
-				Seasons: []trakt.MarkAsWatchedSeasonsRequest{
-					{
-						Number: int16(*webhook.Item.ParentIndexNumber),
-						Episodes: []trakt.MarkAsWatchedEpisodes{
-							{
-								Number:    int16(*webhook.Item.IndexNumber),
-								WatchedAt: webhook.Date,
-							},
-						},
-					},
-				},
-			},
-		},
+
+	seasonNumber := int16(*webhook.Item.ParentIndexNumber)
+	episodeNumber := int16(*webhook.Item.IndexNumber)
+
+	traktRequest := trakt.MarkAsWatchedMap{}
+	if err := traktRequest.AppendTvShow(imdbId, seasonNumber, episodeNumber, webhook.Date); err != nil {
+		return fmt.Errorf("failed to append Emby series to trakt request: %w", err)
 	}
-	if err := trakt.MarkItemAsWatched(ctx, cfg, traktRequest, false); err != nil {
+
+	// Mark the item as watched in Trakt
+	if err := trakt.MarkItemAsWatched(ctx, cfg, &traktRequest, false); err != nil {
 		return err
 	}
 	fmt.Printf("Marked Emby series: %s as watched in Trakt with IMDB: %s\n", webhook.Item.Name, imdbId)

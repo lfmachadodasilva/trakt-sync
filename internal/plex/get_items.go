@@ -29,11 +29,12 @@ type PlexTvshowResponse struct {
 }
 
 type PlexEpisodeResponse struct {
-	Id      string
-	Title   string
-	Season  int16
-	Episode int16
-	Watched bool
+	Id          string
+	Title       string
+	Season      int16
+	Episode     int16
+	Watched     bool
+	WatchedTime time.Time
 }
 
 type PlexItemsResponse struct {
@@ -76,9 +77,6 @@ func GetMovies(ctx *context.Context, cfg *config.ConfigEntity, sdk *plexgo.PlexA
 	})
 	if err != nil {
 		log.Fatal(err)
-	}
-	if responseMovies.Object != nil {
-		// handle response
 	}
 
 	// This function should implement the logic to fetch movies from Plex
@@ -123,6 +121,25 @@ func GetMovies(ctx *context.Context, cfg *config.ConfigEntity, sdk *plexgo.PlexA
 }
 
 func GetTvShows(ctx *context.Context, cfg *config.ConfigEntity, sdk *plexgo.PlexAPI) ([]PlexTvshowResponse, error) {
+
+	responseShows, err := sdk.Library.GetLibrarySectionsAll(*ctx, operations.GetLibrarySectionsAllRequest{
+		SectionKey:           2,
+		Type:                 operations.GetLibrarySectionsAllQueryParamTypeEpisode,
+		IncludeMeta:          operations.GetLibrarySectionsAllQueryParamIncludeMetaEnable.ToPointer(),
+		IncludeGuids:         operations.QueryParamIncludeGuidsEnable.ToPointer(),
+		IncludeAdvanced:      operations.IncludeAdvancedEnable.ToPointer(),
+		IncludeCollections:   operations.QueryParamIncludeCollectionsEnable.ToPointer(),
+		IncludeExternalMedia: operations.QueryParamIncludeExternalMediaEnable.ToPointer(),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if responseShows.Object != nil {
+		log.Printf("Plex response shows: %+v\n", responseShows.Object)
+	} else {
+		log.Println("Plex response shows is nil")
+	}
+
 	var tvShows []PlexTvshowResponse
 	// This function should implement the logic to fetch TV shows from Plex
 	return tvShows, nil

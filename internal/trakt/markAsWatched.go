@@ -23,9 +23,8 @@ type MarkAsWatchedShowRequest struct {
 }
 
 type MarkAsWatchedSeasonsRequest struct {
-	WatchedAt time.Time               `json:"watched_at"`
-	Number    int16                   `json:"number"`
-	Episodes  []MarkAsWatchedEpisodes `json:"episodes,omitempty"`
+	Number   int16                   `json:"number"`
+	Episodes []MarkAsWatchedEpisodes `json:"episodes,omitempty"`
 }
 
 type MarkAsWatchedEpisodes struct {
@@ -45,7 +44,14 @@ type MarkAsWatchedResponse struct {
 	} `json:"added,omitempty"`
 }
 
-func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *MarkAsWatchedRequest, isRetry bool) error {
+type MarkAsWatchedMap struct {
+	Movies map[string]time.Time
+	Shows  map[string]map[int16]map[int16]time.Time
+}
+
+func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *MarkAsWatchedMap, isRetry bool) error {
+
+	markAsWatchedRequest := request.ToMarkAsWatchedRequest()
 
 	preUrl := "%s/sync/history"
 	url := fmt.Sprintf(preUrl, TraktApiUrl)
@@ -57,7 +63,7 @@ func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *
 			AddHeaders: addTraktHeaders,
 			Context:    ctx,
 		},
-		request,
+		markAsWatchedRequest,
 	)
 	if err != nil {
 		if !isRetry && utils.IsAuthError(err) {
@@ -75,4 +81,81 @@ func MarkItemAsWatched(ctx *context.Context, cfg *config.ConfigEntity, request *
 	}
 
 	return err
+}
+
+func (request *MarkAsWatchedMap) AppendMovie(imdbId string, watchedAt time.Time) error {
+
+	if request.Movies == nil {
+		request.Movies = make(map[string]time.Time)
+	}
+
+	if _, exists := request.Movies[imdbId]; !exists {
+		request.Movies[imdbId] = watchedAt
+	}
+
+	return nil
+}
+
+func (request *MarkAsWatchedMap) AppendTvShow(imdbId string, seasonNumber int16, episodeNumber int16, watchedAt time.Time) error {
+
+	if request.Shows == nil {
+		request.Shows = make(map[string]map[int16]map[int16]time.Time)
+	}
+
+	if _, exists := request.Shows[imdbId]; !exists {
+		request.Shows[imdbId] = make(map[int16]map[int16]time.Time)
+	}
+
+	if _, exists := request.Shows[imdbId][seasonNumber]; !exists {
+		request.Shows[imdbId][seasonNumber] = make(map[int16]time.Time)
+	}
+
+	if _, exists := request.Shows[imdbId][seasonNumber][episodeNumber]; !exists {
+		request.Shows[imdbId][seasonNumber][episodeNumber] = watchedAt
+	}
+
+	return nil
+}
+
+func (request *MarkAsWatchedMap) ToMarkAsWatchedRequest() *MarkAsWatchedRequest {
+	markAsWatchedRequest := MarkAsWatchedRequest{
+		Movies: make([]MarkAsWatchedMovieRequest, 0),
+		Shows:  make([]MarkAsWatchedShowRequest, 0),
+	}
+
+	if request.Movies != nil {
+		for imdbId, watchedAt := range request.Movies {
+			markAsWatchedRequest.Movies = append(markAsWatchedRequest.Movies, MarkAsWatchedMovieRequest{
+				Ids: MarkAsWatchedIds{
+					Imdb: imdbId,
+				},
+				WatchedAt: watchedAt,
+			})
+		}
+	}
+
+	if request.Shows != nil {
+		for imdbId, seasons := range request.Shows {
+			showRequest := MarkAsWatchedShowRequest{
+				Ids: MarkAsWatchedIds{
+					Imdb: imdbId,
+				},
+			}
+			for season, episodes := range seasons {
+				seasonRequest := MarkAsWatchedSeasonsRequest{
+					Number: season,
+				}
+				for episode, watchedAt := range episodes {
+					seasonRequest.Episodes = append(seasonRequest.Episodes, MarkAsWatchedEpisodes{
+						Number:    episode,
+						WatchedAt: watchedAt,
+					})
+				}
+				showRequest.Seasons = append(showRequest.Seasons, seasonRequest)
+			}
+			markAsWatchedRequest.Shows = append(markAsWatchedRequest.Shows, showRequest)
+		}
+	}
+
+	return &markAsWatchedRequest
 }
