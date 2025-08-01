@@ -1,0 +1,9 @@
+services:
+  trakt-sync:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: trakt-sync
+    restart: always
+    ports:
+      - "3000:3000"
