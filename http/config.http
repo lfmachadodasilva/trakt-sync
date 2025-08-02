@@ -1,0 +1,6 @@
+### Base URL
+@baseUrl = http://localhost:3000
+
+### Get Config
+GET {{baseUrl}}/api/sync
+Content-Type: application/json
