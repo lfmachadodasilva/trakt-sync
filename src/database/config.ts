@@ -4,14 +4,14 @@ import { Config } from "./model";
 import { TraktConfig } from "@/clients/trakt";
 import { PlexConfig } from "@/clients/plex";
 
-export const getConfig = async (): Promise<Config> => {
-  const db = await getDatabase();
+export const getConfig = (): Config => {
+  const db = getDatabase();
 
-  const cfgRaw = await db.all<{ key: string; value: string }[]>(
-    "select * from config"
-  );
-
-  console.log(cfgRaw);
+  const cfgRaw = db
+    .prepare<{ key: string; value: string }[], { key: string; value: string }>(
+      "SELECT * FROM config"
+    )
+    .all();
 
   const cfg: Config = {
     emby:
@@ -28,19 +28,22 @@ export const getConfig = async (): Promise<Config> => {
       ) as PlexConfig) ?? {},
   };
 
-  console.log(cfg);
-
   return cfg;
 };
 
-export const saveConfig = async (cfg: Config) => {
-  const db = await getDatabase();
+export const saveConfig = (cfg: Config): void => {
+  const db = getDatabase();
 
-  const stmt = await db.prepare(
-    `INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)`
-  );
+  const insertQuery = `INSERT OR REPLACE INTO config (key, value) VALUES ${Object.entries(
+    cfg
+  )
+    .map(() => "(?, ?)")
+    .join(", ")}`;
 
-  Object.entries(cfg).forEach(async ([key, value]) => {
-    await stmt.run(key, JSON.stringify(value) ?? {});
-  });
+  const values = Object.entries(cfg).flatMap(([key, value]) => [
+    key,
+    JSON.stringify(value) ?? {},
+  ]);
+
+  db.prepare(insertQuery).run(...values);
 };

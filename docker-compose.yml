@@ -7,3 +7,7 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    volumes:
+      - ./config:/config # Mount config outside container
+    environment:
+      - CONFIG_PATH=/config # Path used inside container

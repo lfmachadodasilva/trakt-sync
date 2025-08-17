@@ -4,3 +4,7 @@
 ### Get Config
 GET {{baseUrl}}/api/sync
 Content-Type: application/json
+
+### Save Config
+POST {{baseUrl}}/api/sync
+Content-Type: application/json
