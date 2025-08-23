@@ -1,0 +1,28 @@
+### Base URL
+@baseUrl = https://api.trakt.tv
+@version = 2
+@api-key = eb4ede9a384157e9aa60aad8c72c36c0485215659c82ad7b1fe965359a55caf4
+
+### Get watched tv shows
+GET {{baseUrl}}/users/lfmachadodasilva/watched/shows
+Content-Type: application/json
+trakt-api-version: {{version}}
+trakt-api-key: {{api-key}}
+
+### Get watched movies
+GET {{baseUrl}}/users/lfmachadodasilva/watched/movies
+Content-Type: application/json
+trakt-api-version: {{version}}
+trakt-api-key: {{api-key}}
+
+### Get collected tv shows
+GET {{baseUrl}}/users/lfmachadodasilva/collection/shows
+Content-Type: application/json
+trakt-api-version: {{version}}
+trakt-api-key: {{api-key}}
+
+### Get collected movies
+GET {{baseUrl}}/users/lfmachadodasilva/collection/movies
+Content-Type: application/json
+trakt-api-version: {{version}}
+trakt-api-key: {{api-key}}

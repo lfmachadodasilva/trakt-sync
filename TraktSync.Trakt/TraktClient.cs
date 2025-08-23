@@ -38,7 +38,6 @@ public class TraktClient(
 
         try
         {
-            var tmp = $"/users/lfmachadodasilva/watched/{type.ToString().ToLower()}";
             var response = await httpClient.GetAsync($"/users/lfmachadodasilva/watched/{type.ToString().ToLower()}");
             if (!response.IsSuccessStatusCode)
             {
