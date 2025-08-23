@@ -36,6 +36,8 @@ public class EmbyItemResponse
     public EmbyItemDataResponse? Data { get; set; }
     [JsonPropertyName("SeriesId")]
     public string? ParentId { get; set; }
+    [JsonPropertyName("RunTimeTicks")]
+    public long RunTimeTicks { get; set; }
 
     public ICollection<EmbyItemResponse>? Episodes { get; set; }
 }

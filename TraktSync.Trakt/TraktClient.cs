@@ -16,14 +16,34 @@ public class TraktClient(
     public async Task<ICollection<TraktWatchedMoviesResponse>> GetWatchedMoviesAsync() =>
         await GetWatchedAsync<TraktWatchedMoviesResponse>(TraktWatchedType.Movies);
     
-    public Task MarkMovieAsWatchedAsync()
+    public async Task MarkAsWatchedAsync(TraktMarkAsWatchedRequest traktRequest)
     {
-        throw new NotImplementedException();
-    }
-    
-    public Task MarkTvShowsAsWatchedAsync()
-    {
-        throw new NotImplementedException();
+        var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
+        
+        using HttpClient httpClient = new();
+        httpClient.BaseAddress = config.BaseUrl;
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        httpClient.DefaultRequestHeaders.Add("trakt-api-version", config.ApiVersion);
+        httpClient.DefaultRequestHeaders.Add("trakt-api-key", config.ClientId);
+        httpClient.DefaultRequestHeaders.Add("Authorization", config.AccessToken);
+        
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync($"sync/history", traktRequest);
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError(
+                    "Trakt client | Error marking as watched: {StatusCode} - {RequestMessage}",
+                    response.StatusCode, response.RequestMessage);
+                throw new Exception("Trakt client | Error marking as watched");    
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Trakt client | Error marking as watched: {RequestMessage}", ex.Message);
+
+            throw;
+        }
     }
     
     private async Task<ICollection<T>> GetWatchedAsync<T>(TraktWatchedType type)

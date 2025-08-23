@@ -81,4 +81,33 @@ public class EmbyClient(
             throw;
         }
     }
+    
+    public async Task MarkAsWatchedAsync(string itemId)
+    {
+        var config = configHandler.GetAsync()?.Emby ?? throw new NullReferenceException("Emby config is null");
+        
+        using HttpClient httpClient = new();
+        httpClient.BaseAddress = config.BaseUrl;
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        httpClient.DefaultRequestHeaders.Add("X-Emby-Token", config.ApiKey);
+        
+        try
+        {
+            var url = $"/Users/{config.UserId}/PlayedItems/{itemId}";
+            var response = await httpClient.PostAsJsonAsync(url, new {});
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError(
+                    "Emby client | Error marking as watched item: {StatusCode} - {RequestMessage} - {ItemId}",
+                    response.StatusCode, response.RequestMessage, itemId);
+                throw new Exception("Emby client | Error making as watched shows");    
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Emby client | Error getting watched shows: {RequestMessage}", ex.Message);
+
+            throw;
+        }
+    }
 }

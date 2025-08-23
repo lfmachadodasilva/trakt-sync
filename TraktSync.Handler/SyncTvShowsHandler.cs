@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using TraktSync.Emby;
 using TraktSync.Trakt;
+using TraktSync.Trakt.Models;
 
 namespace TraktSync.Handler;
 
@@ -9,7 +10,7 @@ public class SyncTvShowsHandler(
     EmbyClient embyClient,
     ILogger<SyncHandler> logger)
 {
-    public async Task SyncAsync()
+    public async Task SyncAsync(TraktMarkAsWatchedRequest traktRequest)
     {
         logger.LogInformation("Sync tv shows | Starting sync process");
         

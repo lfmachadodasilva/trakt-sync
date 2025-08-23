@@ -1,8 +1,5 @@
 using TraktSync.Components;
-using TraktSync.Emby;
 using TraktSync.Handler;
-using TraktSync.Plex;
-using TraktSync.Trakt;
 
 var builder = WebApplication.CreateBuilder(args);
 
