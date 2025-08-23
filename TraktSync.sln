@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Plex", "TraktSync
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Handler", "TraktSync.Handler\TraktSync.Handler.csproj", "{1359AFF3-4AFA-44FB-BF28-5D5EFB91164C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Config", "TraktSync.Config\TraktSync.Config.csproj", "{08612CDB-9C68-424E-91A1-DEBC16954998}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{1359AFF3-4AFA-44FB-BF28-5D5EFB91164C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1359AFF3-4AFA-44FB-BF28-5D5EFB91164C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1359AFF3-4AFA-44FB-BF28-5D5EFB91164C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08612CDB-9C68-424E-91A1-DEBC16954998}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08612CDB-9C68-424E-91A1-DEBC16954998}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08612CDB-9C68-424E-91A1-DEBC16954998}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08612CDB-9C68-424E-91A1-DEBC16954998}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

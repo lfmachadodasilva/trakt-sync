@@ -2,19 +2,15 @@
 using System.Reflection;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using TraktSync.Config;
 using TraktSync.Emby.Models;
 
 namespace TraktSync.Emby;
 
-public class EmbyClient(ILogger<EmbyClient> logger)
+public class EmbyClient(
+    ConfigHandler configHandler,
+    ILogger<EmbyClient> logger)
 {
-    private readonly EmbyConfig _config = new()
-    {
-        BaseUrl = new Uri("http://192.168.1.13:8096"),
-        ApiKey = "b039ba2b065e4ba1bca2307cce593478",
-        UserId = "aac3a78d9f184ea480fb1629e76aad57"
-    };
-
     public async Task<EmbyResponse> GetTvShowsSync()
     {
         var tvShows = await GetItemsAsync(EmbyItemType.Series);
@@ -27,21 +23,28 @@ public class EmbyClient(ILogger<EmbyClient> logger)
                 tvShow.Episodes ??= new List<EmbyItemResponse>();
                 tvShow.Episodes.Add(episode);
             }
+            else
+            {
+                logger.LogError(
+                    "Emby client | Episode {EpisodeId} has no matching TV show with ID {ParentId}",
+                    episode.Id, episode.ParentId);
+            }
         }
 
         return tvShows;
     }
-        
-    
+
     public async Task<EmbyResponse> GetMoviesSync() =>
         await GetItemsAsync(EmbyItemType.Movie);
     
     private async Task<EmbyResponse> GetItemsAsync(EmbyItemType type)
     {
+        var config = configHandler.GetAsync()?.Emby ?? throw new NullReferenceException("Emby config is null");
+        
         using HttpClient httpClient = new();
-        httpClient.BaseAddress = _config.BaseUrl;
+        httpClient.BaseAddress = config.BaseUrl;
         httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-        httpClient.DefaultRequestHeaders.Add("X-Emby-Token", _config.ApiKey);
+        httpClient.DefaultRequestHeaders.Add("X-Emby-Token", config.ApiKey);
 
         var query = new EmbyRequest
         {
@@ -55,7 +58,7 @@ public class EmbyClient(ILogger<EmbyClient> logger)
                 prop => prop.GetValue(query, null)?.ToString()
             );
 
-        var url = QueryHelpers.AddQueryString($"/Users/{_config.UserId}/Items", queryParams);
+        var url = QueryHelpers.AddQueryString($"/Users/{config.UserId}/Items", queryParams);
 
         try
         {

@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\TraktSync.Config\TraktSync.Config.csproj" />
       <ProjectReference Include="..\TraktSync.Emby\TraktSync.Emby.csproj" />
       <ProjectReference Include="..\TraktSync.Plex\TraktSync.Plex.csproj" />
       <ProjectReference Include="..\TraktSync.Trakt\TraktSync.Trakt.csproj" />

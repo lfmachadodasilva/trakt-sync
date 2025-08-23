@@ -1,18 +1,15 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using TraktSync.Config;
 using TraktSync.Trakt.Models;
 
 namespace TraktSync.Trakt;
 
-public class TraktClient(ILogger<TraktClient> logger)
+public class TraktClient(
+    ConfigHandler configHandler,
+    ILogger<TraktClient> logger)
 {
-    private readonly TraktConfig _config = new()
-    {
-        UserName = "lfmachadodasilva",
-        ClientId = "eb4ede9a384157e9aa60aad8c72c36c0485215659c82ad7b1fe965359a55caf4"
-    };
-    
     public async Task<ICollection<TraktWatchedTvShowResponse>> GetWatchedTvShowsAsync() =>
         await GetWatchedAsync<TraktWatchedTvShowResponse>(TraktWatchedType.Shows);
     
@@ -31,11 +28,13 @@ public class TraktClient(ILogger<TraktClient> logger)
     
     private async Task<ICollection<T>> GetWatchedAsync<T>(TraktWatchedType type)
     {
+        var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
+        
         using HttpClient httpClient = new();
-        httpClient.BaseAddress = _config.BaseUrl;
+        httpClient.BaseAddress = config.BaseUrl;
         httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-        httpClient.DefaultRequestHeaders.Add("trakt-api-version", _config.ApiVersion);
-        httpClient.DefaultRequestHeaders.Add("trakt-api-key", _config.ClientId);
+        httpClient.DefaultRequestHeaders.Add("trakt-api-version", config.ApiVersion);
+        httpClient.DefaultRequestHeaders.Add("trakt-api-key", config.ClientId);
 
         try
         {

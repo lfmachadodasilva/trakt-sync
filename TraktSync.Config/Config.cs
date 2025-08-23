@@ -1,4 +1,4 @@
-namespace TraktSync.Trakt.Models;
+﻿namespace TraktSync.Config;
 
 public class TraktConfig
 {
@@ -14,4 +14,23 @@ public class TraktConfig
     public string? Code { get; set; }
     public DateTime? ExpiresIn { get; set; }
     public DateTime? CreatedAt { get; set; }
+}
+
+public class EmbyConfig
+{
+    public Uri? BaseUrl { get; set; }
+    public string? UserId { get; set; }
+    public string? ApiKey { get; set; }
+}
+
+public class PlexConfig
+{
+    // TODO: Implement Plex config
+}
+
+public class Config
+{
+    public TraktConfig? Trakt { get; set; }
+    public EmbyConfig? Emby { get; set; }
+    public PlexConfig? Plex { get; set; }
 }

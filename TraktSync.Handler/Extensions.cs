@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using TraktSync.Config;
 using TraktSync.Emby;
 using TraktSync.Plex;
 using TraktSync.Trakt;
@@ -12,7 +13,7 @@ public static class Extensions
             .AddSingleton<SyncHandler>()
             .AddSingleton<SyncTvShowsHandler>()
             .AddSingleton<SyncMoviesHandler>()
-            .AddSingleton<ConfigHandler>()
+            .AddConfig()
             .AddTrakt()
             .AddEmby()
             .AddPlex();
