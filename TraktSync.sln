@@ -5,6 +5,14 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync", "TraktSync\TraktSync.csproj", "{912C4F3E-80EA-45FA-9B22-FC1BFC9F327C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Trakt", "TraktSync.Trakt\TraktSync.Trakt.csproj", "{AB29763D-EE88-4EAE-A2F6-8674473A6372}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Emby", "TraktSync.Emby\TraktSync.Emby.csproj", "{BDAFB2DB-3F2D-440D-A72C-48647C2758DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Plex", "TraktSync.Plex\TraktSync.Plex.csproj", "{FB04CB11-AD1B-47F6-81DA-FEB1750E9D6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Handler", "TraktSync.Handler\TraktSync.Handler.csproj", "{1359AFF3-4AFA-44FB-BF28-5D5EFB91164C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +26,21 @@ Global
 		{912C4F3E-80EA-45FA-9B22-FC1BFC9F327C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{912C4F3E-80EA-45FA-9B22-FC1BFC9F327C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{912C4F3E-80EA-45FA-9B22-FC1BFC9F327C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB29763D-EE88-4EAE-A2F6-8674473A6372}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB29763D-EE88-4EAE-A2F6-8674473A6372}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB29763D-EE88-4EAE-A2F6-8674473A6372}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB29763D-EE88-4EAE-A2F6-8674473A6372}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDAFB2DB-3F2D-440D-A72C-48647C2758DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDAFB2DB-3F2D-440D-A72C-48647C2758DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDAFB2DB-3F2D-440D-A72C-48647C2758DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDAFB2DB-3F2D-440D-A72C-48647C2758DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB04CB11-AD1B-47F6-81DA-FEB1750E9D6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB04CB11-AD1B-47F6-81DA-FEB1750E9D6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB04CB11-AD1B-47F6-81DA-FEB1750E9D6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB04CB11-AD1B-47F6-81DA-FEB1750E9D6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1359AFF3-4AFA-44FB-BF28-5D5EFB91164C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1359AFF3-4AFA-44FB-BF28-5D5EFB91164C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1359AFF3-4AFA-44FB-BF28-5D5EFB91164C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1359AFF3-4AFA-44FB-BF28-5D5EFB91164C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
