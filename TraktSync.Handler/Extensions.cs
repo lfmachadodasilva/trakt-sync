@@ -12,6 +12,7 @@ public static class Extensions
             .AddSingleton<SyncHandler>()
             .AddSingleton<SyncTvShowsHandler>()
             .AddSingleton<SyncMoviesHandler>()
+            .AddSingleton<ConfigHandler>()
             .AddTrakt()
             .AddEmby()
             .AddPlex();

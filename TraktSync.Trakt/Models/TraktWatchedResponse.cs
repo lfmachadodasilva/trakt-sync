@@ -10,7 +10,7 @@ public enum TraktWatchedType
 
 public class TraktWatchedIdsResponse
 {
-    [JsonPropertyName("trakt")] 
+    [JsonPropertyName("trakt")]
     public int? Trakt { get; set; }
     [JsonPropertyName("slug")]
     public string? Slug { get; set; }

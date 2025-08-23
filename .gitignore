@@ -35,3 +35,5 @@ msbuild.wrn
 
 # Rider
 .idea/
+*.sln.DotSettings
+*.sln.DotSettings.user
