@@ -4,7 +4,13 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>TraktSync.Main</RootNamespace>
     </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TraktSync.Emby\TraktSync.Emby.csproj" />
+      <ProjectReference Include="..\TraktSync.Handler\TraktSync.Handler.csproj" />
+      <ProjectReference Include="..\TraktSync.Plex\TraktSync.Plex.csproj" />
+      <ProjectReference Include="..\TraktSync.Trakt\TraktSync.Trakt.csproj" />
+    </ItemGroup>
 
 </Project>

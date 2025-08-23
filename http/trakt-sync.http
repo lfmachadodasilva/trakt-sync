@@ -1,0 +1,6 @@
+### Base URL
+@baseUrl = http://localhost:5007
+
+### Sync
+POST {{baseUrl}}/api/sync
+Content-Type: application/json

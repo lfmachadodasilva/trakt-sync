@@ -1,11 +1,15 @@
-using TraktSync.Main.Components;
+using TraktSync.Components;
+using TraktSync.Emby;
+using TraktSync.Handler;
+using TraktSync.Plex;
+using TraktSync.Trakt;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddControllers();
+builder.Services.AddHandler();
 
 var app = builder.Build();
 
