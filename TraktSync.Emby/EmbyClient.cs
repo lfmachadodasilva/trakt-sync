@@ -15,10 +15,25 @@ public class EmbyClient(ILogger<EmbyClient> logger)
         UserId = "aac3a78d9f184ea480fb1629e76aad57"
     };
 
-    public async Task<EmbyResponse> GetTvShows() =>
-        await GetItemsAsync(EmbyItemType.Series);
+    public async Task<EmbyResponse> GetTvShowsSync()
+    {
+        var tvShows = await GetItemsAsync(EmbyItemType.Series);
+        var episodes = await GetItemsAsync(EmbyItemType.Episode);
+        var tvSeriesDic = tvShows.Items?.ToDictionary(x => x.Id, x => x);
+        foreach (var episode in episodes?.Items?.Where(x => !string.IsNullOrEmpty(x.ParentId))!)
+        {
+            if (tvSeriesDic != null && tvSeriesDic.TryGetValue(episode.ParentId!, out var tvShow))
+            {
+                tvShow.Episodes ??= new List<EmbyItemResponse>();
+                tvShow.Episodes.Add(episode);
+            }
+        }
+
+        return tvShows;
+    }
+        
     
-    public async Task<EmbyResponse> GetMovies() =>
+    public async Task<EmbyResponse> GetMoviesSync() =>
         await GetItemsAsync(EmbyItemType.Movie);
     
     private async Task<EmbyResponse> GetItemsAsync(EmbyItemType type)

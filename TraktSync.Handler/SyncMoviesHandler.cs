@@ -14,7 +14,7 @@ public class SyncMoviesHandler(
         logger.LogInformation("Sync movies | Starting sync process");
         
         var traktWatchedMovies = await traktClient.GetWatchedMoviesAsync();
-        var embyMovies = await embyClient.GetMovies();
+        var embyMovies = await embyClient.GetMoviesSync();
         
         logger.LogInformation("Sync movies | Sync process completed");
     }

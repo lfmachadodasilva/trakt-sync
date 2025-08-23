@@ -5,7 +5,7 @@ namespace TraktSync.Emby.Models;
 public class EmbyResponse
 {
     [JsonPropertyName("Items")]
-    public ICollection<EmbyItemResponse> Items { get; set; }
+    public ICollection<EmbyItemResponse>? Items { get; set; }
     [JsonPropertyName("TotalRecordCount")] 
     public int TotalRecordCount { get; set; }
 }
@@ -24,14 +24,18 @@ public class EmbyItemDataResponse
 
 public class EmbyItemResponse
 {
-    [JsonPropertyName("Id")] 
+    [JsonPropertyName("Id")]
     public required string Id { get; set; }
-    [JsonPropertyName("Name")] 
+    [JsonPropertyName("Name")]
     public required string Name { get; set; }
-    [JsonPropertyName("Type")] 
+    [JsonPropertyName("Type")]
     public required string Type { get; set; }
     [JsonPropertyName("ProviderIds")] 
     public EmbyItemIdsResponse? Ids { get; set; }
-    [JsonPropertyName("UserData")] 
+    [JsonPropertyName("UserData")]
     public EmbyItemDataResponse? Data { get; set; }
+    [JsonPropertyName("SeriesId")]
+    public string? ParentId { get; set; }
+
+    public ICollection<EmbyItemResponse>? Episodes { get; set; }
 }

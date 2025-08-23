@@ -15,5 +15,6 @@ public class EmbyRequest
 public enum EmbyItemType
 {
     Movie,
-    Series
+    Series,
+    Episode
 }
