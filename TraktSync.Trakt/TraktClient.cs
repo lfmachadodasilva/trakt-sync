@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Json;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using TraktSync.Config;
 using TraktSync.Trakt.Models;
@@ -41,7 +40,88 @@ public class TraktClient(
         catch (Exception ex)
         {
             logger.LogError("Trakt client | Error marking as watched: {RequestMessage}", ex.Message);
+            throw;
+        }
+    }
+    
+    public async Task<TraktAuthResponse> AuthAsync(string code)
+    {
+        var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
+        config.Code = code;
+        
+        using HttpClient httpClient = new();
+        httpClient.BaseAddress = config.BaseUrl;
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        httpClient.DefaultRequestHeaders.Add("trakt-api-version", config.ApiVersion);
+        httpClient.DefaultRequestHeaders.Add("trakt-api-key", config.ClientId);
+        httpClient.DefaultRequestHeaders.Add("Authorization", config.AccessToken);
 
+        var request = new TraktAuthRequest
+        {
+            Code = config.Code,
+            ClientId = config.ClientId,
+            ClientSecret = config.ClientSecret,
+            RedirectUrl = config.RedirectUrl,
+            GrantType = "authorization_code"
+        };
+        
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync($"sync/history", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError(
+                    "Trakt client | Error marking as watched: {StatusCode} - {RequestMessage}",
+                    response.StatusCode, response.RequestMessage);
+                throw new Exception("Trakt client | Error marking as watched");    
+            }
+            var result = await response.Content.ReadFromJsonAsync<TraktAuthResponse>();
+            return result!;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Trakt client | Error marking as watched: {RequestMessage}", ex.Message);
+            throw;
+        }
+    }
+    
+    public async Task<TraktAuthResponse> AuthRefreshAccessTokenAsync()
+    {
+        var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
+        
+        using HttpClient httpClient = new();
+        httpClient.BaseAddress = config.BaseUrl;
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        httpClient.DefaultRequestHeaders.Add("trakt-api-version", config.ApiVersion);
+        httpClient.DefaultRequestHeaders.Add("trakt-api-key", config.ClientId);
+        httpClient.DefaultRequestHeaders.Add("Authorization", config.AccessToken);
+        
+        var request = new TraktAuthRefreshRequest
+        {
+            ClientId = config.ClientId,
+            ClientSecret = config.ClientSecret,
+            RefreshToken = config.RefreshToken,
+            RedirectUrl = config.RedirectUrl,
+            GrantType = "refresh_token"
+        };
+        
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("/oauth/token", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError(
+                    "Trakt client | Error marking as watched: {StatusCode} - {RequestMessage}",
+                    response.StatusCode, response.RequestMessage);
+                throw new Exception("Trakt client | Error marking as watched");    
+            }
+            
+            var result = await response.Content.ReadFromJsonAsync<TraktAuthResponse>();
+            return result!;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Trakt client | Error marking as watched: {RequestMessage}", ex.Message);
             throw;
         }
     }
@@ -73,7 +153,6 @@ public class TraktClient(
         catch (Exception ex)
         {
             logger.LogError("Trakt client | Error getting watched shows: {RequestMessage}", ex.Message);
-
             throw;
         }
     }

@@ -1,22 +1,45 @@
+using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
+
 namespace TraktSync.Config;
 
-public class ConfigHandler
+public class ConfigHandler(IMemoryCache cache)
 {
+    private const string FilePath = "../data/config.json";
+    
     public Config GetAsync()
     {
-        return new Config
+        return cache.GetOrCreate<Config>("config", entry =>
         {
-            Trakt = new TraktConfig
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+            
+            if (!File.Exists(FilePath))
             {
-                UserName = "lfmachadodasilva",
-                ClientId = "eb4ede9a384157e9aa60aad8c72c36c0485215659c82ad7b1fe965359a55caf4"
-            },
-            Emby = new EmbyConfig
-            {
-                BaseUrl = new Uri("http://192.168.1.13:8096"),
-                ApiKey = "b039ba2b065e4ba1bca2307cce593478",
-                UserId = "aac3a78d9f184ea480fb1629e76aad57"
+                return UpdateConfig(new Config());
             }
-        };
+
+            var json = File.ReadAllText(FilePath);
+            var config = JsonSerializer.Deserialize<Config>(json);
+        
+            cache.Set("config", config, TimeSpan.FromHours(1));
+        
+            return config;
+        });
+    }
+
+    public Config UpdateConfig(Config config)
+    {
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        var directory = Path.GetDirectoryName(FilePath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+        var json = JsonSerializer.Serialize(config, options);
+        File.WriteAllText(FilePath, json);
+        
+        cache.Set("config", config, TimeSpan.FromHours(1));
+        
+        return config;
     }
 }

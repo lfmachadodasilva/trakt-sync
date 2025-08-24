@@ -37,3 +37,5 @@ msbuild.wrn
 .idea/
 *.sln.DotSettings
 *.sln.DotSettings.user
+
+**/data/
