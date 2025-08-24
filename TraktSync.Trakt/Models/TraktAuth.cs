@@ -2,6 +2,16 @@ using System.Text.Json.Serialization;
 
 namespace TraktSync.Trakt.Models;
 
+public class TraktAuthCode
+{
+    [JsonPropertyName("client_id")]
+    public string? ClientId { get; set; }
+    [JsonPropertyName("redirect_uri")]
+    public string? RedirectUrl { get; set; }
+    [JsonPropertyName("response_type")]
+    public string ResponseType { get; set; } = "code";
+}
+
 public class TraktAuthRequest
 {
     [JsonPropertyName("code")]
@@ -39,9 +49,9 @@ public class TraktAuthResponse
     [JsonPropertyName("refresh_token")]
     public string? RefreshToken { get; set; }
     [JsonPropertyName("expires_in")]
-    public DateTime? ExpiresIn { get; set; }
+    public long? ExpiresIn { get; set; }
     [JsonPropertyName("created_at")]
-    public DateTime? CreatedAt { get; set; }
+    public long? CreatedAt { get; set; }
     [JsonPropertyName("scope")]
     public string? Scope { get; set; }
 }

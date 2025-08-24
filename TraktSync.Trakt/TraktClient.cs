@@ -1,4 +1,7 @@
 ﻿using System.Net.Http.Json;
+using System.Reflection;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using TraktSync.Config;
 using TraktSync.Trakt.Models;
@@ -43,22 +46,42 @@ public class TraktClient(
             throw;
         }
     }
+
+    public async Task<string> CodeAsync()
+    {
+        var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
+        
+        using HttpClient httpClient = new();
+        httpClient.BaseAddress = config.BaseUrl;
+
+        var authCode = new TraktAuthCode
+        {
+            ClientId = config.ClientId,
+            RedirectUrl = config.RedirectUrl
+        };
+        
+        var queryParams = authCode
+            .GetType()
+            .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .ToDictionary(
+                prop => prop.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? prop.Name,
+                prop => prop.GetValue(authCode, null)?.ToString()
+            );
+        var url = QueryHelpers.AddQueryString("oauth/authorize", queryParams);
+        return config.BaseUrl + url;
+    }
     
     public async Task<TraktAuthResponse> AuthAsync(string code)
     {
         var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
-        config.Code = code;
         
         using HttpClient httpClient = new();
         httpClient.BaseAddress = config.BaseUrl;
         httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-        httpClient.DefaultRequestHeaders.Add("trakt-api-version", config.ApiVersion);
-        httpClient.DefaultRequestHeaders.Add("trakt-api-key", config.ClientId);
-        httpClient.DefaultRequestHeaders.Add("Authorization", config.AccessToken);
 
         var request = new TraktAuthRequest
         {
-            Code = config.Code,
+            Code = code,
             ClientId = config.ClientId,
             ClientSecret = config.ClientSecret,
             RedirectUrl = config.RedirectUrl,
@@ -67,7 +90,7 @@ public class TraktClient(
         
         try
         {
-            var response = await httpClient.PostAsJsonAsync($"sync/history", request);
+            var response = await httpClient.PostAsJsonAsync("/oauth/token", request);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(

@@ -1,6 +1,22 @@
 ### Base URL
 @baseUrl = http://localhost:5007
 
+### Auth code
+GET {{baseUrl}}/api/trakt/code
+Content-Type: application/json
+
+### Auth token
+POST {{baseUrl}}/api/trakt/auth
+Content-Type: application/json
+
+{
+  "code": "CODE_FROM_PREVIOUS_REQUEST"
+}
+
+### Auth refresh token
+POST {{baseUrl}}/api/trakt/refresh-token
+Content-Type: application/json
+
 ### Sync
 POST {{baseUrl}}/api/sync
 Content-Type: application/json
