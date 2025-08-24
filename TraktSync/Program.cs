@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddEndpointsApiExplorer().AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 builder.Services.AddHandler();
@@ -23,6 +24,7 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+app.UseSwagger().UseSwaggerUI();
 app.MapStaticAssets();
 app.MapControllers();
 app.MapRazorComponents<App>()

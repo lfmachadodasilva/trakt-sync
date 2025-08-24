@@ -7,4 +7,8 @@
       <ProjectReference Include="..\TraktSync.Trakt\TraktSync.Trakt.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
+    </ItemGroup>
+
 </Project>
