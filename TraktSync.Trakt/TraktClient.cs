@@ -18,7 +18,7 @@ public class TraktClient(
     public async Task<ICollection<TraktWatchedMoviesResponse>> GetWatchedMoviesAsync() =>
         await GetWatchedAsync<TraktWatchedMoviesResponse>(TraktWatchedType.Movies);
     
-    public async Task MarkAsWatchedAsync(TraktMarkAsWatchedRequest traktRequest)
+    public async Task MarkAsWatchedAsync(TraktMarkAsWatchedRequest traktRequest, bool refreshToken = true)
     {
         var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
         
@@ -27,13 +27,20 @@ public class TraktClient(
         httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
         httpClient.DefaultRequestHeaders.Add("trakt-api-version", config.ApiVersion);
         httpClient.DefaultRequestHeaders.Add("trakt-api-key", config.ClientId);
-        httpClient.DefaultRequestHeaders.Add("Authorization", config.AccessToken);
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"{config.TokenType} {config.AccessToken}");
         
         try
         {
-            var response = await httpClient.PostAsJsonAsync($"sync/history", traktRequest);
+            var response = await httpClient.PostAsJsonAsync("sync/history", traktRequest);
             if (!response.IsSuccessStatusCode)
             {
+                if (refreshToken)
+                {
+                    await AuthRefreshAccessTokenAsync();
+                    await MarkAsWatchedAsync(traktRequest, false);
+                    return;
+                }
+                
                 logger.LogError(
                     "Trakt client | Error marking as watched: {StatusCode} - {RequestMessage}",
                     response.StatusCode, response.RequestMessage);
@@ -71,20 +78,23 @@ public class TraktClient(
         return config.BaseUrl + url;
     }
     
-    public async Task<TraktAuthResponse> AuthAsync(string code)
+    public async Task AuthAsync(string code)
     {
-        var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
+        var config = configHandler.GetAsync();
+        var configTrakt = config?.Trakt ?? throw new NullReferenceException("Trakt config is null");
         
         using HttpClient httpClient = new();
-        httpClient.BaseAddress = config.BaseUrl;
+        httpClient.BaseAddress = configTrakt.BaseUrl;
         httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        httpClient.DefaultRequestHeaders.Add("trakt-api-version", configTrakt.ApiVersion);
+        httpClient.DefaultRequestHeaders.Add("trakt-api-key", configTrakt.ClientId);
 
         var request = new TraktAuthRequest
         {
             Code = code,
-            ClientId = config.ClientId,
-            ClientSecret = config.ClientSecret,
-            RedirectUrl = config.RedirectUrl,
+            ClientId = configTrakt.ClientId,
+            ClientSecret = configTrakt.ClientSecret,
+            RedirectUrl = configTrakt.RedirectUrl,
             GrantType = "authorization_code"
         };
         
@@ -99,7 +109,16 @@ public class TraktClient(
                 throw new Exception("Trakt client | Error marking as watched");    
             }
             var result = await response.Content.ReadFromJsonAsync<TraktAuthResponse>();
-            return result!;
+            
+            if (result is null)
+            {
+                throw new NullReferenceException("Trakt auth response is null");
+            }
+            
+            configTrakt.AccessToken = result.AccessToken;
+            configTrakt.RefreshToken = result.RefreshToken;
+            configTrakt.TokenType = result.TokenType;
+            configHandler.UpdateConfig(config);
         }
         catch (Exception ex)
         {
@@ -108,23 +127,23 @@ public class TraktClient(
         }
     }
     
-    public async Task<TraktAuthResponse> AuthRefreshAccessTokenAsync()
+    public async Task AuthRefreshAccessTokenAsync()
     {
-        var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
+        var config = configHandler.GetAsync();
+        var configTrakt = config?.Trakt ?? throw new NullReferenceException("Trakt config is null");
         
         using HttpClient httpClient = new();
-        httpClient.BaseAddress = config.BaseUrl;
+        httpClient.BaseAddress = configTrakt.BaseUrl;
         httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-        httpClient.DefaultRequestHeaders.Add("trakt-api-version", config.ApiVersion);
-        httpClient.DefaultRequestHeaders.Add("trakt-api-key", config.ClientId);
-        httpClient.DefaultRequestHeaders.Add("Authorization", config.AccessToken);
+        httpClient.DefaultRequestHeaders.Add("trakt-api-version", configTrakt.ApiVersion);
+        httpClient.DefaultRequestHeaders.Add("trakt-api-key", configTrakt.ClientId);
         
         var request = new TraktAuthRefreshRequest
         {
-            ClientId = config.ClientId,
-            ClientSecret = config.ClientSecret,
-            RefreshToken = config.RefreshToken,
-            RedirectUrl = config.RedirectUrl,
+            ClientId = configTrakt.ClientId,
+            ClientSecret = configTrakt.ClientSecret,
+            RefreshToken = configTrakt.RefreshToken,
+            RedirectUrl = configTrakt.RedirectUrl,
             GrantType = "refresh_token"
         };
         
@@ -134,13 +153,22 @@ public class TraktClient(
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(
-                    "Trakt client | Error marking as watched: {StatusCode} - {RequestMessage}",
+                    "Trakt client | Error refreshing trakt token: {StatusCode} - {RequestMessage}",
                     response.StatusCode, response.RequestMessage);
-                throw new Exception("Trakt client | Error marking as watched");    
+                throw new Exception("Trakt client | Error refreshing trakt token");
             }
             
             var result = await response.Content.ReadFromJsonAsync<TraktAuthResponse>();
-            return result!;
+            
+            if (result is null)
+            {
+                throw new NullReferenceException("Trakt auth response is null");
+            }
+            
+            configTrakt.AccessToken = result.AccessToken;
+            configTrakt.RefreshToken = result.RefreshToken;
+            configTrakt.TokenType = result.TokenType;
+            configHandler.UpdateConfig(config);
         }
         catch (Exception ex)
         {

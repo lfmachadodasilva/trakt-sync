@@ -20,6 +20,8 @@ public class EmbyItemDataResponse
 {
     [JsonPropertyName("Played")]
     public bool Played { get; set; }
+    [JsonPropertyName("LastPlayedDate")]
+    public DateTime? LastPlayedDate { get; set; }
 }
 
 public class EmbyItemResponse

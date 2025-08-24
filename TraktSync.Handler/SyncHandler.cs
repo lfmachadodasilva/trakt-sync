@@ -16,7 +16,7 @@ public class SyncHandler(
 
         TraktMarkAsWatchedRequest traktRequest = new();
         
-        await syncTvShowsHandler.SyncAsync(traktRequest);
+        // await syncTvShowsHandler.SyncAsync(traktRequest);
         await syncMoviesHandler.SyncAsync(traktRequest);
         
         logger.LogInformation("Sync | Starting trakt process");

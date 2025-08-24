@@ -16,10 +16,11 @@ public class SyncMoviesHandler(
         
         var traktWatchedMovies = await traktClient.GetWatchedMoviesAsync();
         var embyMovies = await embyClient.GetMoviesSync();
-
+        
         var traktMoviesDic = traktWatchedMovies
             .Where(w => !string.IsNullOrEmpty(w.Movie?.Ids?.Imdb))
-            .ToDictionary(x => x.Movie?.Ids?.Imdb ?? string.Empty, x => x);
+            .GroupBy(x => x.Movie?.Ids?.Imdb ?? string.Empty)
+            .ToDictionary(x => x.Key, x => x.Last());
 
         traktRequest.Movies ??= [];
         
@@ -40,13 +41,16 @@ public class SyncMoviesHandler(
             }
             else
             {
-                // mark as watched in Trakt
-                traktRequest.Movies.Add(new TraktMarkAsWatchedMovieRequest
+                if (embyMovie.Data?.Played == true)
                 {
-                    Ids = new TraktMarkAsWatchedIdsRequest { Imdb = embyMovie.Ids?.Imdb },
-                    WatchedAt = new DateTime(embyMovie.RunTimeTicks)
-                });
-                logger.LogInformation("Sync movies | Marked movie {Movie} as watched on trakt", embyMovie.Name);
+                    // mark as watched in Trakt
+                    traktRequest.Movies.Add(new TraktMarkAsWatchedMovieRequest
+                    {
+                        Ids = new TraktMarkAsWatchedIdsRequest { Imdb = embyMovie.Ids?.Imdb },
+                        WatchedAt = embyMovie.Data?.LastPlayedDate ?? DateTime.UtcNow
+                    });
+                    logger.LogInformation("Sync movies | Marked movie {Movie} as watched on trakt", embyMovie.Name);
+                }
             }
         }
         

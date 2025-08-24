@@ -24,40 +24,14 @@ public class TraktController(
     [HttpPost("auth")]
     public async Task<IActionResult> AuthAsync([FromBody] TraktAuthCode request)
     {
-        var response = await traktClient.AuthAsync(request.Code);
-        
-        var config = configHandler.GetAsync();
-        if (config.Trakt != null)
-        {
-            config.Trakt.AccessToken = response.AccessToken;
-            config.Trakt.RefreshToken = response.RefreshToken;
-            configHandler.UpdateConfig(config);
-        }
-        else
-        {
-            throw new NullReferenceException("Trakt config is null");
-        }
-        
+        await traktClient.AuthAsync(request.Code);
         return Ok();
     }
     
     [HttpPost("refresh-token")]
     public async Task<IActionResult> AuthRefreshTokenAsync()
     {
-        var response = await traktClient.AuthRefreshAccessTokenAsync();
-        
-        var config = configHandler.GetAsync();
-        if (config.Trakt != null)
-        {
-            config.Trakt.AccessToken = response.AccessToken;
-            config.Trakt.RefreshToken = response.RefreshToken;
-            configHandler.UpdateConfig(config);
-        }
-        else
-        {
-            throw new NullReferenceException("Trakt config is null");
-        }
-        
+        await traktClient.AuthRefreshAccessTokenAsync();
         return Ok();
     }
 }
