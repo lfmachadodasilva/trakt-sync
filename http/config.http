@@ -15,18 +15,16 @@ Content-Type: application/json
     "ApiVersion": "2",
     "RedirectUrl": "urn:ietf:wg:oauth:2.0:oob",
     "UserName": "lfmachadodasilva",
-    "ClientId": "eb4ede9a384157e9aa60aad8c72c36c0485215659c82ad7b1fe965359a55caf4",
-    "ClientSecret": null,
-    "AccessToken": null,
-    "RefreshToken": null,
-    "Code": null,
-    "ExpiresIn": null,
-    "CreatedAt": null
+    "ClientId": "CLIENT_ID_HERE",
+    "ClientSecret": "CLIENT_SECRET_HERE",
+    "AccessToken": "ACCESS_TOKEN_HERE",
+    "RefreshToken": "REFRESH_TOKEN_HERE",
+    "TokenType": "Bearer"
   },
   "Emby": {
     "BaseUrl": "http://192.168.1.13:8096",
-    "UserId": "aac3a78d9f184ea480fb1629e76aad57",
-    "ApiKey": "b039ba2b065e4ba1bca2307cce593478"
+    "UserId": "USER_ID_HERE",
+    "ApiKey": "API_KEY_HERE"
   },
   "Plex": null
 }
