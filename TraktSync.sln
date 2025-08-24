@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Handler", "TraktS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Config", "TraktSync.Config\TraktSync.Config.csproj", "{08612CDB-9C68-424E-91A1-DEBC16954998}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraktSync.Handler.Tests", "TraktSync.Handler.Tests\TraktSync.Handler.Tests.csproj", "{76A030DB-469A-47AD-B258-AA27BC970937}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{08612CDB-9C68-424E-91A1-DEBC16954998}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08612CDB-9C68-424E-91A1-DEBC16954998}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08612CDB-9C68-424E-91A1-DEBC16954998}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76A030DB-469A-47AD-B258-AA27BC970937}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76A030DB-469A-47AD-B258-AA27BC970937}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76A030DB-469A-47AD-B258-AA27BC970937}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76A030DB-469A-47AD-B258-AA27BC970937}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

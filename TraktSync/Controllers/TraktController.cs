@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using TraktSync.Config;
 using TraktSync.Trakt;
 
 namespace TraktSync.Controllers;
@@ -11,13 +10,13 @@ public class TraktAuthCode
 
 [ApiController]
 [Route("api/[controller]")]
-public class TraktController(
-    TraktClient traktClient, ConfigHandler configHandler) : ControllerBase
+public class TraktController(TraktClient traktClient) : ControllerBase
 {
     [HttpGet("code")]
     public async Task<IActionResult> CodeAsync()
     {
-        var response = await traktClient.CodeAsync();
+        var response = traktClient.GetCodeUrl();
+        await Task.CompletedTask;
         return Ok(response);
     }
     

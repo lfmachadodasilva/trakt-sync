@@ -20,7 +20,7 @@ public class SyncTvShowsHandler(
         var embyTvShows = await embyClient.GetTvShowsSync();
         
         var traktTvShowsDic = new Dictionary<string, Dictionary<short, HashSet<short>>>();
-        foreach (var tvShow in traktWatchedTvShows)
+        foreach (var tvShow in traktWatchedTvShows ?? [])
         {
             var imdbId = tvShow?.Show?.Ids?.Imdb ?? string.Empty;
             
@@ -48,7 +48,7 @@ public class SyncTvShowsHandler(
             }
         }
         
-        foreach (var embyTvShow in embyTvShows.Items ?? [])
+        foreach (var embyTvShow in embyTvShows?.Items ?? [])
         {
             var imdb = embyTvShow.Ids?.Imdb ?? string.Empty;
             

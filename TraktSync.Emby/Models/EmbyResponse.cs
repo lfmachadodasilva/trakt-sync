@@ -31,7 +31,7 @@ public class EmbyItemResponse
     [JsonPropertyName("Name")]
     public required string Name { get; set; }
     [JsonPropertyName("Type")]
-    public required string Type { get; set; }
+    public string? Type { get; set; }
     [JsonPropertyName("ProviderIds")] 
     public EmbyItemIdsResponse? Ids { get; set; }
     [JsonPropertyName("UserData")]

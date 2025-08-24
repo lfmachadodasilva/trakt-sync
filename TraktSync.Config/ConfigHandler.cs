@@ -7,9 +7,9 @@ public class ConfigHandler(IMemoryCache cache)
 {
     private const string FilePath = "../data/config.json";
     
-    public Config GetAsync()
+    public Config? GetAsync()
     {
-        return cache.GetOrCreate<Config>("config", entry =>
+        return cache.GetOrCreate<Config?>("config", entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
             

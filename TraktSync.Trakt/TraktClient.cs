@@ -13,7 +13,7 @@ public interface ITraktClient
     Task<ICollection<TraktWatchedTvShowResponse>> GetWatchedTvShowsAsync();
     Task<ICollection<TraktWatchedMoviesResponse>> GetWatchedMoviesAsync();
     Task MarkAsWatchedAsync(TraktMarkAsWatchedRequest traktRequest, bool refreshToken = true);
-    Task<string> CodeAsync();
+    string GetCodeUrl();
     Task AuthAsync(string code);
     Task AuthRefreshAccessTokenAsync();
 }
@@ -66,7 +66,7 @@ public class TraktClient(
         }
     }
 
-    public async Task<string> CodeAsync()
+    public string GetCodeUrl()
     {
         var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
         
