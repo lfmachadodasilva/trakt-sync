@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using TraktSync.Trakt;
 
@@ -5,6 +6,8 @@ namespace TraktSync.Controllers;
 
 public class TraktAuthCode
 {
+    [Required]
+    [MaxLength(8)]
     public required string Code { get; set; }
 }
 
@@ -13,6 +16,7 @@ public class TraktAuthCode
 public class TraktController(TraktClient traktClient) : ControllerBase
 {
     [HttpGet("code")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<IActionResult> CodeAsync()
     {
         var response = traktClient.GetCodeUrl();
@@ -21,6 +25,7 @@ public class TraktController(TraktClient traktClient) : ControllerBase
     }
     
     [HttpPost("auth")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> AuthAsync([FromBody] TraktAuthCode request)
     {
         await traktClient.AuthAsync(request.Code);
@@ -28,6 +33,7 @@ public class TraktController(TraktClient traktClient) : ControllerBase
     }
     
     [HttpPost("refresh-token")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> AuthRefreshTokenAsync()
     {
         await traktClient.AuthRefreshAccessTokenAsync();
