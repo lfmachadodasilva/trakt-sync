@@ -1,0 +1,19 @@
+### Base URL
+@baseUrl = http://192.168.1.13:8096
+@userId = USER_ID_HERE
+@apiKey = API_KEY_HERE
+
+### Get episodes
+GET {{baseUrl}}/Users/{{userId}}/Items?IncludeItemTypes=Episode&Recursive=true&Fields=ProviderIds
+Content-Type: application/json
+X-Emby-Token: {{apiKey}}
+
+### Get series
+GET {{baseUrl}}/Users/{{userId}}/Items?IncludeItemTypes=Series&Recursive=true&Fields=ProviderIds
+Content-Type: application/json
+X-Emby-Token: {{apiKey}}
+
+### Get movie
+GET {{baseUrl}}/Users/{{userId}}/Items?IncludeItemTypes=movie&Recursive=true&Fields=ProviderIds
+Content-Type: application/json
+X-Emby-Token: {{apiKey}}
