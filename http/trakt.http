@@ -1,7 +1,7 @@
 ### Base URL
 @baseUrl = https://api.trakt.tv
 @version = 2
-@api-key = eb4ede9a384157e9aa60aad8c72c36c0485215659c82ad7b1fe965359a55caf4
+@api-key = API_KEY_HERE
 
 ### Get watched tv shows
 GET {{baseUrl}}/users/lfmachadodasilva/watched/shows
