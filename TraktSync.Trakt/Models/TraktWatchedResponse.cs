@@ -28,12 +28,22 @@ public class TraktWatchedItemResponse
     public TraktWatchedIdsResponse? Ids { get; set; }
 }
 
+public class TraktWatchedEpisodeResponse
+{
+    [JsonPropertyName("number")]
+    public short? Number { get; set; }
+    [JsonPropertyName("plays")]
+    public int? Plays { get; set; }
+    [JsonPropertyName("last_watched_at")]
+    public DateTime? LastWatchedAt { get; set; }
+}
+
 public class TraktWatchedSeasonResponse
 {
     [JsonPropertyName("number")]
     public short? Number { get; set; }
-    [JsonPropertyName("last_watched_at")]
-    public DateTime? LastWatchedAt { get; set; }
+    [JsonPropertyName("episodes")]
+    public ICollection<TraktWatchedEpisodeResponse>? Episodes { get; set; }
 }
 
 public abstract class TraktWatchedBaseResponse

@@ -29,6 +29,8 @@ public class ConfigHandler(IMemoryCache cache)
 
     public Config UpdateConfig(Config config)
     {
+        ArgumentNullException.ThrowIfNull(config, nameof(config));
+        
         var options = new JsonSerializerOptions { WriteIndented = true };
         var directory = Path.GetDirectoryName(FilePath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))

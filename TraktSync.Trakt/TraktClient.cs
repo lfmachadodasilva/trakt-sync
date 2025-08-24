@@ -8,9 +8,19 @@ using TraktSync.Trakt.Models;
 
 namespace TraktSync.Trakt;
 
+public interface ITraktClient
+{
+    Task<ICollection<TraktWatchedTvShowResponse>> GetWatchedTvShowsAsync();
+    Task<ICollection<TraktWatchedMoviesResponse>> GetWatchedMoviesAsync();
+    Task MarkAsWatchedAsync(TraktMarkAsWatchedRequest traktRequest, bool refreshToken = true);
+    Task<string> CodeAsync();
+    Task AuthAsync(string code);
+    Task AuthRefreshAccessTokenAsync();
+}
+    
 public class TraktClient(
     ConfigHandler configHandler,
-    ILogger<TraktClient> logger)
+    ILogger<TraktClient> logger) : ITraktClient
 {
     public async Task<ICollection<TraktWatchedTvShowResponse>> GetWatchedTvShowsAsync() =>
         await GetWatchedAsync<TraktWatchedTvShowResponse>(TraktWatchedType.Shows);
@@ -20,6 +30,8 @@ public class TraktClient(
     
     public async Task MarkAsWatchedAsync(TraktMarkAsWatchedRequest traktRequest, bool refreshToken = true)
     {
+        ArgumentNullException.ThrowIfNull(traktRequest);
+            
         var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
         
         using HttpClient httpClient = new();
@@ -80,6 +92,8 @@ public class TraktClient(
     
     public async Task AuthAsync(string code)
     {
+        ArgumentException.ThrowIfNullOrEmpty(code);
+        
         var config = configHandler.GetAsync();
         var configTrakt = config?.Trakt ?? throw new NullReferenceException("Trakt config is null");
         

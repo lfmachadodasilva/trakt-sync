@@ -19,7 +19,7 @@ public class TraktMarkAsWatchedMovieRequest
 public class TraktMarkAsWatchedEpisodeRequest
 {
     [JsonPropertyName("number")]
-    public int? Number { get; set; }
+    public short? Number { get; set; }
     [JsonPropertyName("watched_at")]
     public DateTime? WatchedAt { get; set; }
 }
@@ -27,7 +27,7 @@ public class TraktMarkAsWatchedEpisodeRequest
 public class TraktMarkAsWatchedSeasonRequest
 {
     [JsonPropertyName("number")]
-    public int? Number { get; set; }
+    public short? Number { get; set; }
     [JsonPropertyName("episodes")]
     public ICollection<TraktMarkAsWatchedEpisodeRequest>? Episodes { get; set; }
 }

@@ -7,9 +7,16 @@ using TraktSync.Emby.Models;
 
 namespace TraktSync.Emby;
 
+public interface IEmbyClient
+{
+    Task<EmbyResponse> GetTvShowsSync();
+    Task<EmbyResponse> GetMoviesSync();
+    Task MarkAsWatchedAsync(string itemId);
+}
+
 public class EmbyClient(
     ConfigHandler configHandler,
-    ILogger<EmbyClient> logger)
+    ILogger<EmbyClient> logger) : IEmbyClient
 {
     public async Task<EmbyResponse> GetTvShowsSync()
     {

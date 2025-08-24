@@ -40,6 +40,10 @@ public class EmbyItemResponse
     public string? ParentId { get; set; }
     [JsonPropertyName("RunTimeTicks")]
     public long RunTimeTicks { get; set; }
+    [JsonPropertyName("IndexNumber")]
+    public short? Episode { get; set; }
+    [JsonPropertyName("ParentIndexNumber")]
+    public short? Season { get; set; }
 
     public ICollection<EmbyItemResponse>? Episodes { get; set; }
 }

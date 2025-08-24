@@ -6,12 +6,14 @@ using TraktSync.Trakt.Models;
 namespace TraktSync.Handler;
 
 public class SyncMoviesHandler(
-    TraktClient traktClient,
-    EmbyClient embyClient,
+    ITraktClient traktClient,
+    IEmbyClient embyClient,
     ILogger<SyncHandler> logger)
 {
     public async Task SyncAsync(TraktMarkAsWatchedRequest traktRequest)
     {
+        ArgumentNullException.ThrowIfNull(traktRequest, nameof(traktRequest));
+        
         logger.LogInformation("Sync movies | Starting sync process");
         
         var traktWatchedMovies = await traktClient.GetWatchedMoviesAsync();

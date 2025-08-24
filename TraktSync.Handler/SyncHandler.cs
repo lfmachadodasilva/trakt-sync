@@ -7,7 +7,7 @@ namespace TraktSync.Handler;
 public class SyncHandler(
     SyncTvShowsHandler syncTvShowsHandler, 
     SyncMoviesHandler syncMoviesHandler,
-    TraktClient traktClient,
+    ITraktClient traktClient,
     ILogger<SyncHandler> logger)
 {
     public async Task SyncAsync()
@@ -16,7 +16,7 @@ public class SyncHandler(
 
         TraktMarkAsWatchedRequest traktRequest = new();
         
-        // await syncTvShowsHandler.SyncAsync(traktRequest);
+        await syncTvShowsHandler.SyncAsync(traktRequest);
         await syncMoviesHandler.SyncAsync(traktRequest);
         
         logger.LogInformation("Sync | Starting trakt process");

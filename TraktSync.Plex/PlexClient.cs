@@ -1,5 +1,9 @@
 ﻿namespace TraktSync.Plex;
 
-public class PlexClient
+public interface IPlexClient
+{
+}
+
+public class PlexClient : IPlexClient
 {
 }
