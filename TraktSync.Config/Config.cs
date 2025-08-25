@@ -36,7 +36,11 @@ public class EmbyConfig
 
 public class PlexConfig
 {
-    // TODO: Implement Plex config
+    [Required] [MaxLength(1024)]
+    public required Uri BaseUrl { get; set; }
+    [Required]
+    [MaxLength(64)]
+    public required string ApiKey { get; set; }
 }
 
 public class Config

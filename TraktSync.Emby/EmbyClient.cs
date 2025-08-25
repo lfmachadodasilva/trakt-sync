@@ -84,7 +84,6 @@ public class EmbyClient(
         catch (Exception ex)
         {
             logger.LogError("Emby client | Error getting watched shows: {RequestMessage}", ex.Message);
-
             throw;
         }
     }
