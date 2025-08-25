@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <ItemGroup>
-      <ProjectReference Include="..\TraktSync.Emby\TraktSync.Emby.csproj" />
       <ProjectReference Include="..\TraktSync.Handler\TraktSync.Handler.csproj" />
-      <ProjectReference Include="..\TraktSync.Plex\TraktSync.Plex.csproj" />
       <ProjectReference Include="..\TraktSync.Trakt\TraktSync.Trakt.csproj" />
     </ItemGroup>
 
