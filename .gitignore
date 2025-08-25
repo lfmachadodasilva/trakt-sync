@@ -39,3 +39,4 @@ msbuild.wrn
 *.sln.DotSettings.user
 
 **/data/
+publish/
