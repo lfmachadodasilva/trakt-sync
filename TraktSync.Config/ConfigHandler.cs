@@ -5,7 +5,7 @@ namespace TraktSync.Config;
 
 public class ConfigHandler(IMemoryCache cache)
 {
-    private const string FilePath = "../data/config.json";
+    private const string FilePath = "./data/config.json";
     
     public Config? GetAsync()
     {

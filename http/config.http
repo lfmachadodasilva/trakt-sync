@@ -1,5 +1,5 @@
 ### Base URL
-@baseUrl = http://localhost:5007
+@baseUrl = http://localhost:5005
 
 ### Get config
 GET {{baseUrl}}/api/config
@@ -26,5 +26,8 @@ Content-Type: application/json
     "UserId": "USER_ID_HERE",
     "ApiKey": "API_KEY_HERE"
   },
-  "Plex": null
+  "Plex": {
+    "BaseUrl": "http://192.168.1.13:8096",
+    "ApiKey": "API_KEY_HERE"
+  }
 }

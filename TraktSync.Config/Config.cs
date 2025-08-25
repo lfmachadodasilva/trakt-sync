@@ -24,7 +24,6 @@ public class TraktConfig
 public class EmbyConfig
 {
     [Required]
-    [MaxLength(1024)]
     public required Uri BaseUrl { get; set; }
     [Required]
     [MaxLength(32)]
@@ -36,7 +35,7 @@ public class EmbyConfig
 
 public class PlexConfig
 {
-    [Required] [MaxLength(1024)]
+    [Required]
     public required Uri BaseUrl { get; set; }
     [Required]
     [MaxLength(64)]
