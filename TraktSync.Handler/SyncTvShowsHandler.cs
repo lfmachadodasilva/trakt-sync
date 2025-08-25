@@ -1,13 +1,17 @@
 using Microsoft.Extensions.Logging;
 using TraktSync.Emby;
+using TraktSync.Plex;
 using TraktSync.Trakt;
 using TraktSync.Trakt.Models;
 
 namespace TraktSync.Handler;
 
+using TraktTvShowsDictionary = Dictionary<string, Dictionary<short, HashSet<short>>>;
+
 public class SyncTvShowsHandler(
     ITraktClient traktClient,
     IEmbyClient embyClient,
+    IPlexClient plexClient,
     ILogger<SyncHandler> logger)
 {
     public async Task SyncAsync(TraktMarkAsWatchedRequest traktRequest)
@@ -17,36 +21,19 @@ public class SyncTvShowsHandler(
         logger.LogInformation("Sync tv shows | Starting sync process");
         
         var traktWatchedTvShows = await traktClient.GetWatchedTvShowsAsync();
-        var embyTvShows = await embyClient.GetTvShowsSync();
+        var traktTvShowsDic = ToDictionary(traktWatchedTvShows);
         
-        var traktTvShowsDic = new Dictionary<string, Dictionary<short, HashSet<short>>>();
-        foreach (var tvShow in traktWatchedTvShows ?? [])
-        {
-            var imdbId = tvShow?.Show?.Ids?.Imdb ?? string.Empty;
-            
-            if (!traktTvShowsDic.TryGetValue(imdbId, out var seasonsDic))
-            {
-                seasonsDic = new Dictionary<short, HashSet<short>>();
-                traktTvShowsDic[imdbId] = seasonsDic;
-            }
-            
-            foreach (var season in tvShow?.Seasons ?? [])
-            {
-                var seasonNumber = season.Number ?? 0;
-                
-                if (!seasonsDic.TryGetValue(seasonNumber, out var episodesSet))
-                {
-                    episodesSet = [];
-                    seasonsDic[seasonNumber] = episodesSet;
-                }
-                
-                foreach (var episode in season.Episodes ?? [])
-                {
-                    var episodeNumber = episode.Number ?? 0;
-                    episodesSet.Add(episodeNumber);
-                }
-            }
-        }
+        await SyncEmbyAsync(traktRequest, traktTvShowsDic);
+        await SyncPlexAsync(traktRequest, traktTvShowsDic);
+        
+        logger.LogInformation("Sync tv shows | Sync process completed");
+    }
+
+    private async Task SyncEmbyAsync(
+        TraktMarkAsWatchedRequest traktRequest,
+        TraktTvShowsDictionary traktTvShowsDic)
+    {
+        var embyTvShows = await embyClient.GetTvShowsSync();
         
         foreach (var embyTvShow in embyTvShows?.Items ?? [])
         {
@@ -87,7 +74,72 @@ public class SyncTvShowsHandler(
                 }
             }
         }
+    }
+
+    private async Task SyncPlexAsync(
+        TraktMarkAsWatchedRequest traktRequest,
+        TraktTvShowsDictionary traktTvShowsDic)
+    {
+        var plexTvShows = await plexClient.GetTvShowsSync();
         
-        logger.LogInformation("Sync tv shows | Sync process completed");
+        foreach (var tvShow in plexTvShows ?? [])
+        {
+            var imdb = tvShow.Imdb ?? string.Empty;
+            foreach (var seasons in tvShow.Children ?? [])
+            {
+                foreach (var episode in seasons.Children ?? [])
+                {
+                    var playedPlex = episode.Played ?? false;
+                    var playedTrakt = traktTvShowsDic.TryGetValue(imdb ?? string.Empty, out _);
+                    
+                    if (playedTrakt && !playedPlex)
+                    {
+                        // mark as watched in plex
+                        await plexClient.MarkAsWatchedAsync(episode.Id ?? string.Empty);
+                    }
+                    else if (!playedTrakt && playedPlex)
+                    {
+                        traktRequest.AddMarkAsWatchedRequest(
+                            imdb ?? string.Empty,
+                            (short) (episode.Season ?? 0),
+                            (short) (episode.Episode ?? 0),
+                            episode.PlayedAt ?? DateTime.Now);
+                    }
+                }
+            }
+        }
+    }
+
+    private static TraktTvShowsDictionary ToDictionary(ICollection<TraktWatchedTvShowResponse> traktWatchedTvShows)
+    {
+        var traktTvShowsDic = new TraktTvShowsDictionary();
+        foreach (var tvShow in traktWatchedTvShows ?? [])
+        {
+            var imdbId = tvShow?.Show?.Ids?.Imdb ?? string.Empty;
+            
+            if (!traktTvShowsDic.TryGetValue(imdbId, out var seasonsDic))
+            {
+                seasonsDic = new Dictionary<short, HashSet<short>>();
+                traktTvShowsDic[imdbId] = seasonsDic;
+            }
+            
+            foreach (var season in tvShow?.Seasons ?? [])
+            {
+                var seasonNumber = season.Number ?? 0;
+                
+                if (!seasonsDic.TryGetValue(seasonNumber, out var episodesSet))
+                {
+                    episodesSet = [];
+                    seasonsDic[seasonNumber] = episodesSet;
+                }
+                
+                foreach (var episode in season.Episodes ?? [])
+                {
+                    var episodeNumber = episode.Number ?? 0;
+                    episodesSet.Add(episodeNumber);
+                }
+            }
+        }
+        return traktTvShowsDic;
     }
 }

@@ -1,0 +1,20 @@
+@baseUrl = http://192.168.1.13:32400
+@api-key = API_KEY_HERE
+
+### Get watched tv shows sessions
+GET {{baseUrl}}/library/sections/2/all
+Content-Type: application/json
+Accept: application/json
+X-Plex-Token: {{api-key}}
+
+### Get watched tv shows ?includeMeta=1&includeGuids=1&includeAdvanced=1&includeCollections=1
+GET {{baseUrl}}/library/metadata/5110/children 
+Content-Type: application/json
+Accept: application/json
+X-Plex-Token: {{api-key}}
+
+### Get watched tv shows
+GET {{baseUrl}}/library/sections/2/all?includeMeta=1&includeGuids=1&includeAdvanced=1&includeCollections=1&includeExternalMedia=0&X-Plex-Container-Start=0&X-Plex-Container-Size=50
+Content-Type: application/json
+Accept: application/json
+X-Plex-Token: {{api-key}}

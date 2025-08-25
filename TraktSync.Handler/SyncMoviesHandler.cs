@@ -71,7 +71,7 @@ public class SyncMoviesHandler(
 
         foreach (var plexMovie in plexMovies?.Object?.MediaContainer?.Metadata ?? [])
         {
-            var imdb = plexMovie?.Guids?.FirstOrDefault(x => x.Id.StartsWith("imdb://"))?.Id.Replace("imdb://", string.Empty);
+            var imdb = plexMovie?.Guids?.Select(x => x.Id)?.GetImdb();
             var playedPlex = plexMovie?.ViewCount > 0;
             var playedTrakt = traktMoviesDic.TryGetValue(imdb ?? string.Empty, out var traktMovie);
 

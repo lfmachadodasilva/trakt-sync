@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using TraktSync.Emby;
 using TraktSync.Emby.Models;
+using TraktSync.Plex;
 using TraktSync.Trakt;
 using TraktSync.Trakt.Models;
 
@@ -51,10 +52,12 @@ public class SyncMoviesEmby
                     }
                 }
             });
+        var plexClientMock = new Mock<IPlexClient>();
         var loggerMock = new Mock<ILogger<SyncHandler>>();
         fixture.Register(() => loggerMock.Object);
         fixture.Register(() => traktClientMock.Object);
         fixture.Register(() => embyClientMock.Object);
+        fixture.Register(() => plexClientMock.Object);
         var syncHandler = fixture.Create<SyncHandler>();
 
         // Act
