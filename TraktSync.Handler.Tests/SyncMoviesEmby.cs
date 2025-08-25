@@ -105,9 +105,11 @@ public class SyncMoviesEmby
                 }
             });
         var loggerMock = new Mock<ILogger<SyncHandler>>();
+        var plexClientMock = new Mock<IPlexClient>();
         fixture.Register(() => loggerMock.Object);
         fixture.Register(() => traktClientMock.Object);
         fixture.Register(() => embyClientMock.Object);
+        fixture.Register(() => plexClientMock.Object);
         var syncHandler = fixture.Create<SyncHandler>();
 
         // Act
