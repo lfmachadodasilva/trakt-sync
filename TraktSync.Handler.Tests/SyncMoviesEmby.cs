@@ -18,7 +18,7 @@ public class SyncMoviesEmby
         const string imdbId = "imdb1";
         const string embyId = "1";
         var traktClientMock = new Mock<ITraktClient>();
-        traktClientMock.Setup(x => x.GetWatchedMoviesAsync())
+        traktClientMock.Setup(x => x.GetWatchedMoviesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<TraktWatchedMoviesResponse>
             {
                 new()
@@ -34,7 +34,7 @@ public class SyncMoviesEmby
             .Verifiable();
         var embyClientMock = new Mock<IEmbyClient>();
         embyClientMock
-            .Setup(x => x.GetMoviesSync())
+            .Setup(x => x.GetMoviesSync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new EmbyResponse
             {
                 TotalRecordCount = 1,
@@ -65,12 +65,13 @@ public class SyncMoviesEmby
         
         // Assert
         embyClientMock.Verify(
-            x => x.MarkAsWatchedAsync(It.Is<string>(y => y == embyId)),
+            x => x.MarkAsWatchedAsync(It.Is<string>(y => y == embyId), It.IsAny<CancellationToken>()),
             Times.Once);
         traktClientMock.Verify(
             x => x.MarkAsWatchedAsync(
                 It.Is<TraktMarkAsWatchedRequest>(y => y.Movies.Any(z => z.Ids != null && z.Ids.Imdb == imdbId)),
-                It.IsAny<bool>()),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
     }
     
@@ -81,12 +82,12 @@ public class SyncMoviesEmby
         const string imdbId = "imdb1";
         const string embyId = "1";
         var traktClientMock = new Mock<ITraktClient>();
-        traktClientMock.Setup(x => x.GetWatchedMoviesAsync())
+        traktClientMock.Setup(x => x.GetWatchedMoviesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<TraktWatchedMoviesResponse>())
             .Verifiable();
         var embyClientMock = new Mock<IEmbyClient>();
         embyClientMock
-            .Setup(x => x.GetMoviesSync())
+            .Setup(x => x.GetMoviesSync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new EmbyResponse
             {
                 TotalRecordCount = 1,
@@ -117,12 +118,13 @@ public class SyncMoviesEmby
         
         // Assert
         embyClientMock.Verify(
-            x => x.MarkAsWatchedAsync(It.Is<string>(y => y == embyId)),
+            x => x.MarkAsWatchedAsync(It.Is<string>(y => y == embyId), It.IsAny<CancellationToken>()),
             Times.Never);
         traktClientMock.Verify(
             x => x.MarkAsWatchedAsync(
                 It.Is<TraktMarkAsWatchedRequest>(y => y.Movies.Any(z => z.Ids != null && z.Ids.Imdb == imdbId)),
-                It.IsAny<bool>()),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }

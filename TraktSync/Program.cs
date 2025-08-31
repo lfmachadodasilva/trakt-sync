@@ -1,4 +1,5 @@
 using MudBlazor.Services;
+using TickerQ.DependencyInjection;
 using TraktSync.Components;
 using TraktSync.Handler;
 
@@ -14,6 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 builder.Services.AddHandler();
 builder.Services.AddMudServices();
+builder.Services.AddTickerQ();
 
 var app = builder.Build();
 
@@ -34,5 +36,6 @@ app.MapStaticAssets();
 app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+app.UseTickerQ();
 
 app.Run();

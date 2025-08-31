@@ -14,7 +14,9 @@ public class SyncTvShowsHandler(
     IPlexClient plexClient,
     ILogger<SyncHandler> logger)
 {
-    public async Task SyncAsync(TraktMarkAsWatchedRequest traktRequest)
+    public async Task SyncAsync(
+        TraktMarkAsWatchedRequest traktRequest,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(traktRequest, nameof(traktRequest));
         
@@ -23,17 +25,18 @@ public class SyncTvShowsHandler(
         var traktWatchedTvShows = await traktClient.GetWatchedTvShowsAsync();
         var traktTvShowsDic = ToDictionary(traktWatchedTvShows);
         
-        await SyncEmbyAsync(traktRequest, traktTvShowsDic);
-        await SyncPlexAsync(traktRequest, traktTvShowsDic);
+        await SyncEmbyAsync(traktRequest, traktTvShowsDic, cancellationToken);
+        await SyncPlexAsync(traktRequest, traktTvShowsDic, cancellationToken);
         
         logger.LogInformation("Sync tv shows | Sync process completed");
     }
 
     private async Task SyncEmbyAsync(
         TraktMarkAsWatchedRequest traktRequest,
-        TraktTvShowsDictionary traktTvShowsDic)
+        TraktTvShowsDictionary traktTvShowsDic,
+        CancellationToken cancellationToken = default)
     {
-        var tvShows = await embyClient.GetTvShowsSync();
+        var tvShows = await embyClient.GetTvShowsSync(cancellationToken);
         
         foreach (var tvShow in tvShows?.Items ?? [])
         {
@@ -69,9 +72,10 @@ public class SyncTvShowsHandler(
 
     private async Task SyncPlexAsync(
         TraktMarkAsWatchedRequest traktRequest,
-        TraktTvShowsDictionary traktTvShowsDic)
+        TraktTvShowsDictionary traktTvShowsDic,
+        CancellationToken cancellationToken = default)
     {
-        var tvShows = await plexClient.GetTvShowsSync();
+        var tvShows = await plexClient.GetTvShowsSync(cancellationToken);
         
         foreach (var tvShow in tvShows ?? [])
         {

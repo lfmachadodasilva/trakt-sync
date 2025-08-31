@@ -10,15 +10,15 @@ public class SyncHandler(
     ITraktClient traktClient,
     ILogger<SyncHandler> logger)
 {
-    public async Task SyncAsync()
+    public async Task SyncAsync(CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Sync | Starting sync process");
 
         TraktMarkAsWatchedRequest traktRequest = new();
         
-        await syncMoviesHandler.SyncAsync(traktRequest);
-        await syncTvShowsHandler.SyncAsync(traktRequest);
-        await traktClient.MarkAsWatchedAsync(traktRequest);
+        await syncMoviesHandler.SyncAsync(traktRequest, cancellationToken);
+        await syncTvShowsHandler.SyncAsync(traktRequest, cancellationToken);
+        await traktClient.MarkAsWatchedAsync(traktRequest, cancellationToken: cancellationToken);
 
         logger.LogInformation("Sync | Sync process completed");
     }

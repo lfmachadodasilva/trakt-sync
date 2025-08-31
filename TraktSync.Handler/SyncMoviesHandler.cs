@@ -12,7 +12,9 @@ public class SyncMoviesHandler(
     IPlexClient plexClient,
     ILogger<SyncHandler> logger)
 {
-    public async Task SyncAsync(TraktMarkAsWatchedRequest traktRequest)
+    public async Task SyncAsync(
+        TraktMarkAsWatchedRequest traktRequest,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(traktRequest, nameof(traktRequest));
         
@@ -25,15 +27,16 @@ public class SyncMoviesHandler(
             .ToDictionary(x => x.Key, x => x.Last());
         traktRequest.Movies ??= [];
 
-        await SyncPlexAsync(traktRequest, traktMoviesDic);
-        await SyncEmbyAsync(traktRequest, traktMoviesDic);
+        await SyncPlexAsync(traktRequest, traktMoviesDic, cancellationToken);
+        await SyncEmbyAsync(traktRequest, traktMoviesDic, cancellationToken);
         
         logger.LogInformation("Sync movies | Sync process completed");
     }
     
     private async Task SyncEmbyAsync(
         TraktMarkAsWatchedRequest traktRequest,
-        Dictionary<string,TraktWatchedMoviesResponse> traktMoviesDic)
+        Dictionary<string,TraktWatchedMoviesResponse> traktMoviesDic,
+        CancellationToken cancellationToken = default)
     {
         var movies = await embyClient.GetMoviesSync();
 
@@ -65,9 +68,10 @@ public class SyncMoviesHandler(
 
     private async Task SyncPlexAsync(
         TraktMarkAsWatchedRequest traktRequest,
-        Dictionary<string,TraktWatchedMoviesResponse> traktMoviesDic)
+        Dictionary<string,TraktWatchedMoviesResponse> traktMoviesDic,
+        CancellationToken cancellationToken = default)
     {
-        var movies = await plexClient.GetMoviesSync();
+        var movies = await plexClient.GetMoviesSync(cancellationToken);
 
         foreach (var movie in movies?.Object?.MediaContainer?.Metadata ?? [])
         {

@@ -9,16 +9,16 @@ namespace TraktSync.Emby;
 
 public interface IEmbyClient
 {
-    Task<EmbyResponse?> GetTvShowsSync();
-    Task<EmbyResponse?> GetMoviesSync();
-    Task MarkAsWatchedAsync(string itemId);
+    Task<EmbyResponse?> GetTvShowsSync(CancellationToken cancellationToken = default);
+    Task<EmbyResponse?> GetMoviesSync(CancellationToken cancellationToken = default);
+    Task MarkAsWatchedAsync(string itemId, CancellationToken cancellationToken = default);
 }
 
 public class EmbyClient(
     ConfigHandler configHandler,
     ILogger<EmbyClient> logger) : IEmbyClient
 {
-    public async Task<EmbyResponse?> GetTvShowsSync()
+    public async Task<EmbyResponse?> GetTvShowsSync(CancellationToken cancellationToken = default)
     {
         var tvShows = await GetItemsAsync(EmbyItemType.Series);
         var episodes = await GetItemsAsync(EmbyItemType.Episode);
@@ -42,10 +42,10 @@ public class EmbyClient(
         return tvShows;
     }
 
-    public async Task<EmbyResponse?> GetMoviesSync() =>
-        await GetItemsAsync(EmbyItemType.Movie);
+    public async Task<EmbyResponse?> GetMoviesSync(CancellationToken cancellationToken = default) =>
+        await GetItemsAsync(EmbyItemType.Movie, cancellationToken);
     
-    private async Task<EmbyResponse?> GetItemsAsync(EmbyItemType type)
+    private async Task<EmbyResponse?> GetItemsAsync(EmbyItemType type, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -70,7 +70,7 @@ public class EmbyClient(
 
             var url = QueryHelpers.AddQueryString($"/Users/{config.UserId}/Items", queryParams);
             
-            var response = await httpClient.GetAsync(url);
+            var response = await httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(
@@ -79,7 +79,7 @@ public class EmbyClient(
                 throw new Exception("Emby client | Error getting watched shows");    
             }
             
-            var result = await response.Content.ReadFromJsonAsync<EmbyResponse>();
+            var result = await response.Content.ReadFromJsonAsync<EmbyResponse>(cancellationToken);
             return result!;
         }
         catch (Exception ex)
@@ -89,7 +89,7 @@ public class EmbyClient(
         }
     }
     
-    public async Task MarkAsWatchedAsync(string itemId)
+    public async Task MarkAsWatchedAsync(string itemId, CancellationToken cancellationToken = default)
     {
         var config = configHandler.GetAsync()?.Emby ?? throw new NullReferenceException("Emby config is null");
         
@@ -101,7 +101,7 @@ public class EmbyClient(
         try
         {
             var url = $"/Users/{config.UserId}/PlayedItems/{itemId}";
-            var response = await httpClient.PostAsJsonAsync(url, new {});
+            var response = await httpClient.PostAsJsonAsync(url, new {}, cancellationToken: cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(

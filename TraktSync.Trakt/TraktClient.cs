@@ -10,25 +10,31 @@ namespace TraktSync.Trakt;
 
 public interface ITraktClient
 {
-    Task<ICollection<TraktWatchedTvShowResponse>> GetWatchedTvShowsAsync();
-    Task<ICollection<TraktWatchedMoviesResponse>> GetWatchedMoviesAsync();
-    Task MarkAsWatchedAsync(TraktMarkAsWatchedRequest traktRequest, bool refreshToken = true);
+    Task<ICollection<TraktWatchedTvShowResponse>> GetWatchedTvShowsAsync(CancellationToken cancellationToken = default);
+    Task<ICollection<TraktWatchedMoviesResponse>> GetWatchedMoviesAsync(CancellationToken cancellationToken = default);
+    Task MarkAsWatchedAsync(
+        TraktMarkAsWatchedRequest traktRequest,
+        bool refreshToken = true,
+        CancellationToken cancellationToken = default);
     string GetCodeUrl();
-    Task AuthAsync(string code);
-    Task AuthRefreshAccessTokenAsync();
+    Task AuthAsync(string code, CancellationToken cancellationToken = default);
+    Task AuthRefreshAccessTokenAsync(CancellationToken cancellationToken = default);
 }
     
 public class TraktClient(
     ConfigHandler configHandler,
     ILogger<TraktClient> logger) : ITraktClient
 {
-    public async Task<ICollection<TraktWatchedTvShowResponse>> GetWatchedTvShowsAsync() =>
-        await GetWatchedAsync<TraktWatchedTvShowResponse>(TraktWatchedType.Shows);
+    public async Task<ICollection<TraktWatchedTvShowResponse>> GetWatchedTvShowsAsync(CancellationToken cancellationToken = default) =>
+        await GetWatchedAsync<TraktWatchedTvShowResponse>(TraktWatchedType.Shows, cancellationToken);
     
-    public async Task<ICollection<TraktWatchedMoviesResponse>> GetWatchedMoviesAsync() =>
-        await GetWatchedAsync<TraktWatchedMoviesResponse>(TraktWatchedType.Movies);
+    public async Task<ICollection<TraktWatchedMoviesResponse>> GetWatchedMoviesAsync(CancellationToken cancellationToken = default) =>
+        await GetWatchedAsync<TraktWatchedMoviesResponse>(TraktWatchedType.Movies, cancellationToken);
     
-    public async Task MarkAsWatchedAsync(TraktMarkAsWatchedRequest traktRequest, bool refreshToken = true)
+    public async Task MarkAsWatchedAsync(
+        TraktMarkAsWatchedRequest traktRequest,
+        bool refreshToken = true,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(traktRequest);
             
@@ -43,13 +49,13 @@ public class TraktClient(
         
         try
         {
-            var response = await httpClient.PostAsJsonAsync("sync/history", traktRequest);
+            var response = await httpClient.PostAsJsonAsync("sync/history", traktRequest, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 if (refreshToken)
                 {
-                    await AuthRefreshAccessTokenAsync();
-                    await MarkAsWatchedAsync(traktRequest, false);
+                    await AuthRefreshAccessTokenAsync(cancellationToken);
+                    await MarkAsWatchedAsync(traktRequest, false, cancellationToken);
                     return;
                 }
                 
@@ -90,7 +96,7 @@ public class TraktClient(
         return config.BaseUrl + url;
     }
     
-    public async Task AuthAsync(string code)
+    public async Task AuthAsync(string code, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(code);
         
@@ -114,7 +120,7 @@ public class TraktClient(
         
         try
         {
-            var response = await httpClient.PostAsJsonAsync("/oauth/token", request);
+            var response = await httpClient.PostAsJsonAsync("/oauth/token", request, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(
@@ -122,7 +128,7 @@ public class TraktClient(
                     response.StatusCode, response.RequestMessage);
                 throw new Exception("Trakt client | Error marking as watched");    
             }
-            var result = await response.Content.ReadFromJsonAsync<TraktAuthResponse>();
+            var result = await response.Content.ReadFromJsonAsync<TraktAuthResponse>(cancellationToken);
             
             if (result is null)
             {
@@ -141,7 +147,7 @@ public class TraktClient(
         }
     }
     
-    public async Task AuthRefreshAccessTokenAsync()
+    public async Task AuthRefreshAccessTokenAsync(CancellationToken cancellationToken = default)
     {
         var config = configHandler.GetAsync();
         var configTrakt = config?.Trakt ?? throw new NullReferenceException("Trakt config is null");
@@ -163,7 +169,7 @@ public class TraktClient(
         
         try
         {
-            var response = await httpClient.PostAsJsonAsync("/oauth/token", request);
+            var response = await httpClient.PostAsJsonAsync("/oauth/token", request, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(
@@ -172,7 +178,7 @@ public class TraktClient(
                 throw new Exception("Trakt client | Error refreshing trakt token");
             }
             
-            var result = await response.Content.ReadFromJsonAsync<TraktAuthResponse>();
+            var result = await response.Content.ReadFromJsonAsync<TraktAuthResponse>(cancellationToken);
             
             if (result is null)
             {
@@ -191,7 +197,9 @@ public class TraktClient(
         }
     }
     
-    private async Task<ICollection<T>> GetWatchedAsync<T>(TraktWatchedType type)
+    private async Task<ICollection<T>> GetWatchedAsync<T>(
+        TraktWatchedType type,
+        CancellationToken cancellationToken = default)
     {
         var config = configHandler.GetAsync()?.Trakt ?? throw new NullReferenceException("Trakt config is null");
         
@@ -203,7 +211,7 @@ public class TraktClient(
 
         try
         {
-            var response = await httpClient.GetAsync($"/users/lfmachadodasilva/watched/{type.ToString().ToLower()}");
+            var response = await httpClient.GetAsync($"/users/lfmachadodasilva/watched/{type.ToString().ToLower()}", cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(
@@ -212,7 +220,7 @@ public class TraktClient(
                 throw new Exception("Trakt client | Error getting watched shows");    
             }
             
-            var result = await response.Content.ReadFromJsonAsync<ICollection<T>>();
+            var result = await response.Content.ReadFromJsonAsync<ICollection<T>>(cancellationToken);
             return result!;
         }
         catch (Exception ex)

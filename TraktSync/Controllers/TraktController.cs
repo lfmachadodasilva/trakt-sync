@@ -26,20 +26,22 @@ public class TraktController(TraktClient traktClient) : ControllerBase
     
     [HttpPost("auth")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> AuthAsync([FromBody, Required] TraktAuthCode request)
+    public async Task<IActionResult> AuthAsync(
+        [FromBody, Required] TraktAuthCode request,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.Code);
         
-        await traktClient.AuthAsync(request.Code);
+        await traktClient.AuthAsync(request.Code, cancellationToken);
         return Ok();
     }
     
     [HttpPost("refresh-token")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> AuthRefreshTokenAsync()
+    public async Task<IActionResult> AuthRefreshTokenAsync(CancellationToken cancellationToken = default)
     {
-        await traktClient.AuthRefreshAccessTokenAsync();
+        await traktClient.AuthRefreshAccessTokenAsync(cancellationToken);
         return Ok();
     }
 }

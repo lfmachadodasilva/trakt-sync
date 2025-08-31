@@ -9,16 +9,16 @@ namespace TraktSync.Plex;
 
 public interface IPlexClient
 {
-    Task<ICollection<PlexTvShow>?> GetTvShowsSync();
-    Task<GetLibrarySectionsAllResponse?> GetMoviesSync();
-    Task MarkAsWatchedAsync(string itemId);
+    Task<ICollection<PlexTvShow>?> GetTvShowsSync(CancellationToken cancellationToken = default);
+    Task<GetLibrarySectionsAllResponse?> GetMoviesSync(CancellationToken cancellationToken = default);
+    Task MarkAsWatchedAsync(string itemId, CancellationToken cancellationToken = default);
 }
 
 public class PlexClient(
     ConfigHandler configHandler,
     ILogger<PlexClient> logger) : IPlexClient
 {
-    public async Task<GetLibrarySectionsAllResponse?> GetMoviesSync()
+    public async Task<GetLibrarySectionsAllResponse?> GetMoviesSync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -47,7 +47,7 @@ public class PlexClient(
         }
     }
     
-    public async Task<ICollection<PlexTvShow>?> GetTvShowsSync()
+    public async Task<ICollection<PlexTvShow>?> GetTvShowsSync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -81,7 +81,7 @@ public class PlexClient(
                 };
                 tvShows.Add(plexTvShow);
                 
-                var seasons = await GetChildrenAsync(tvShow.RatingKey ?? string.Empty);
+                var seasons = await GetChildrenAsync(tvShow.RatingKey ?? string.Empty, cancellationToken);
 
                 foreach (var season in seasons?.MediaContainer?.Metadata ?? [])
                 {
@@ -95,7 +95,7 @@ public class PlexClient(
                     };
                     plexTvShow.Children.Add(plexSeason);
                     
-                    var episodes = await GetChildrenAsync(season?.RatingKey ?? string.Empty);
+                    var episodes = await GetChildrenAsync(season?.RatingKey ?? string.Empty, cancellationToken);
                     foreach (var episode in episodes?.MediaContainer?.Metadata ?? [])
                     {
                         var plexEpisode = new PlexTvShow
@@ -124,7 +124,9 @@ public class PlexClient(
         }
     }
     
-    private async Task<GetMetadataChildrenResponseBody> GetChildrenAsync(string plexId)
+    private async Task<GetMetadataChildrenResponseBody> GetChildrenAsync(
+        string plexId,
+        CancellationToken cancellationToken = default)
     {
         var config = configHandler.GetAsync()?.Plex ?? throw new NullReferenceException("Plex config is null");
         
@@ -135,7 +137,7 @@ public class PlexClient(
 
         try
         {
-            var response = await httpClient.GetAsync($"/library/metadata/{plexId}/children");
+            var response = await httpClient.GetAsync($"/library/metadata/{plexId}/children", cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(
@@ -144,7 +146,7 @@ public class PlexClient(
                 throw new Exception("Emby client | Error getting watched shows");    
             }
             
-            var result = await response.Content.ReadFromJsonAsync<GetMetadataChildrenResponseBody>();
+            var result = await response.Content.ReadFromJsonAsync<GetMetadataChildrenResponseBody>(cancellationToken);
             return result!;
         }
         catch (Exception ex)
@@ -154,7 +156,7 @@ public class PlexClient(
         }
     }
     
-    public async Task MarkAsWatchedAsync(string itemId)
+    public async Task MarkAsWatchedAsync(string itemId, CancellationToken cancellationToken = default)
     {
         var config = configHandler.GetAsync()?.Plex ?? throw new NullReferenceException("Plex config is null");
         
@@ -169,7 +171,9 @@ public class PlexClient(
         try
         {
             // await sdk.Media.MarkPlayedAsync(key: itemId);
-            var response = await httpClient.GetAsync($"/:/scrobble?key={itemId}&identifier=com.plexapp.plugins.library");
+            var response = await httpClient.GetAsync(
+                $"/:/scrobble?key={itemId}&identifier=com.plexapp.plugins.library",
+                cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError(

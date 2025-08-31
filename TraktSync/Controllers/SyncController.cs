@@ -9,9 +9,9 @@ public class SyncController(SyncHandler syncHandler) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> SyncAsync()
+    public async Task<IActionResult> SyncAsync(CancellationToken cancellationToken = default)
     {
-        await syncHandler.SyncAsync();
+        await syncHandler.SyncAsync(cancellationToken);
         return Ok();
     }
 }
