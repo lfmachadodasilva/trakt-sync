@@ -109,6 +109,7 @@ public class PlexClient(
                                 DateTimeOffset.FromUnixTimeSeconds(episode.LastViewedAt ?? 0).UtcDateTime : null,
                             Played = (episode?.ViewCount ?? 0) > 0
                         };
+                        plexEpisode.Name = $"{plexTvShow.Name}|{episode?.Title ?? string.Empty}|S{plexEpisode.Season:00}E{plexEpisode.Episode:00}";
                         plexSeason.Children.Add(plexEpisode);
                     }
                 }

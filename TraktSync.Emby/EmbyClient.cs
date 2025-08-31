@@ -28,6 +28,7 @@ public class EmbyClient(
             if (tvSeriesDic != null && tvSeriesDic.TryGetValue(episode.ParentId!, out var tvShow))
             {
                 tvShow.Episodes ??= new List<EmbyItemResponse>();
+                episode.Name = $"{tvShow.Name}|{episode.Name}|S{episode.Season:00}E{episode.Episode:00}";
                 tvShow.Episodes.Add(episode);
             }
             else

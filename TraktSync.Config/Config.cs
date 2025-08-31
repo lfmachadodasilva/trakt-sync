@@ -9,10 +9,10 @@ public class TraktConfig
     public string RedirectUrl { get; set; } = "urn:ietf:wg:oauth:2.0:oob";
     [Required]
     [MaxLength(64)]
-    public required string ClientId { get; set; }
+    public string ClientId { get; set; } = "CLIENT_ID";
     [Required]
     [MaxLength(64)]
-    public required string ClientSecret { get; set; }
+    public string ClientSecret { get; set; } = "CLIENT_SECRET";
     [MaxLength(64)]
     public string? AccessToken { get; set; }
     [MaxLength(64)]
@@ -24,27 +24,28 @@ public class TraktConfig
 public class EmbyConfig
 {
     [Required]
-    public required Uri BaseUrl { get; set; }
+    public Uri BaseUrl { get; set; } = new("https://localhost:8096");
     [Required]
     [MaxLength(32)]
-    public required string UserId { get; set; }
+    public string UserId { get; set; } = "USER_IDE";
     [Required]
     [MaxLength(32)]
-    public required string ApiKey { get; set; }
+    public string ApiKey { get; set; } = "API_KEY";
 }
 
 public class PlexConfig
 {
     [Required]
-    public required Uri BaseUrl { get; set; }
+    public Uri BaseUrl { get; set; } = new("https://localhost:32400");
     [Required]
     [MaxLength(64)]
-    public required string ApiKey { get; set; }
+    public string ApiKey { get; set; } = "API_KEY";
 }
 
 public class Config
 {
-    public TraktConfig? Trakt { get; set; }
-    public EmbyConfig? Emby { get; set; }
-    public PlexConfig? Plex { get; set; }
+    [Required]
+    public TraktConfig Trakt { get; set; } = new();
+    public EmbyConfig? Emby { get; set; } = new();
+    public PlexConfig? Plex { get; set; } = new();
 }

@@ -18,10 +18,7 @@ public class SyncHandler(
         
         await syncMoviesHandler.SyncAsync(traktRequest);
         await syncTvShowsHandler.SyncAsync(traktRequest);
-        
-        logger.LogInformation("Sync | Starting trakt process");
         await traktClient.MarkAsWatchedAsync(traktRequest);
-        logger.LogInformation("Sync | Sync trakt completed");
 
         logger.LogInformation("Sync | Sync process completed");
     }

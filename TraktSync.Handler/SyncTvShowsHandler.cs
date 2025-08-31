@@ -38,39 +38,30 @@ public class SyncTvShowsHandler(
         foreach (var embyTvShow in embyTvShows?.Items ?? [])
         {
             var imdb = embyTvShow.Ids?.Imdb ?? string.Empty;
-            
-            traktTvShowsDic.TryGetValue(imdb, out var traktSeasonDic);
-            
             foreach (var episode in embyTvShow.Episodes ?? [])
             {
-                if (traktSeasonDic?.GetValueOrDefault(episode.Season ?? 0)?
-                        .Contains(episode.Episode ?? 0) == true)
+                var playedEmby = episode.Data?.Played ?? false;
+                var playedTrakt = traktTvShowsDic.TryGetValue(imdb ?? string.Empty, out var s) && 
+                                  s.TryGetValue(episode.Season ?? 0, out var e) &&
+                                  e.Contains(episode.Episode ?? 0);
+                
+                if (playedTrakt && !playedEmby)
                 {
-                    if (episode.Data?.Played == true)
-                    {
-                        // do nothing, already marked as watched
-                    }
-                    else
-                    {
-                        // mark as watched in Emby
-                        await embyClient.MarkAsWatchedAsync(episode.Id);
-                        logger.LogInformation(
-                            "Sync tv shows | Marked episode {Episode} as watched on emby", episode.Name);
-                    }
+                    // mark as watched in Emby
+                    await embyClient.MarkAsWatchedAsync(episode.Id);
+                    logger.LogInformation(
+                        "Sync tv shows | Marked episode {Episode} as watched on emby", episode.Name);
                 }
-                else
+                else if (!playedEmby && playedTrakt)
                 {
-                    if (episode.Data?.Played == true)
-                    {
-                        // mark as watched in Trakt
-                        traktRequest.AddMarkAsWatchedRequest(
-                            embyTvShow.Ids?.Imdb ?? string.Empty,
-                            episode.Season ?? 0,
-                            episode.Episode ?? 0,
-                            episode.Data?.LastPlayedDate ?? DateTime.UtcNow);
-                        logger.LogInformation(
-                            "Sync tv shows | Marked episode {Episode} as watched on trakt", episode.Name);
-                    }
+                    // mark as watched in Trakt
+                    traktRequest.AddMarkAsWatchedRequest(
+                        embyTvShow.Ids?.Imdb ?? string.Empty,
+                        episode.Season ?? 0,
+                        episode.Episode ?? 0,
+                        episode.Data?.LastPlayedDate ?? DateTime.UtcNow);
+                    logger.LogInformation(
+                        "Sync tv shows | Marked episode {Episode} as watched on trakt", episode.Name);
                 }
             }
         }
@@ -90,7 +81,9 @@ public class SyncTvShowsHandler(
                 foreach (var episode in seasons.Children ?? [])
                 {
                     var playedPlex = episode.Played ?? false;
-                    var playedTrakt = traktTvShowsDic.TryGetValue(imdb ?? string.Empty, out _);
+                    var playedTrakt = traktTvShowsDic.TryGetValue(imdb ?? string.Empty, out var s) && 
+                                      s.TryGetValue((short)(episode.Season ?? 0), out var e) &&
+                                      e.Contains((short)(episode.Episode ?? 0));
                     
                     if (playedTrakt && !playedPlex)
                     {
