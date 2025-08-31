@@ -3,8 +3,7 @@ name: trakt-sync build
 on:
   push:
     branches:
-      - "*"
-      - "renovate/**"
+      - "**"
     tags:
       - "v*"
 
