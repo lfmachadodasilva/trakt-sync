@@ -33,12 +33,12 @@ public class SyncTvShowsHandler(
         TraktMarkAsWatchedRequest traktRequest,
         TraktTvShowsDictionary traktTvShowsDic)
     {
-        var embyTvShows = await embyClient.GetTvShowsSync();
+        var tvShows = await embyClient.GetTvShowsSync();
         
-        foreach (var embyTvShow in embyTvShows?.Items ?? [])
+        foreach (var tvShow in tvShows?.Items ?? [])
         {
-            var imdb = embyTvShow.Ids?.Imdb ?? string.Empty;
-            foreach (var episode in embyTvShow.Episodes ?? [])
+            var imdb = tvShow.Ids?.Imdb ?? string.Empty;
+            foreach (var episode in tvShow.Episodes ?? [])
             {
                 var playedEmby = episode.Data?.Played ?? false;
                 var playedTrakt = traktTvShowsDic.TryGetValue(imdb ?? string.Empty, out var s) && 
@@ -56,7 +56,7 @@ public class SyncTvShowsHandler(
                 {
                     // mark as watched in Trakt
                     traktRequest.AddMarkAsWatchedRequest(
-                        embyTvShow.Ids?.Imdb ?? string.Empty,
+                        tvShow.Ids?.Imdb ?? string.Empty,
                         episode.Season ?? 0,
                         episode.Episode ?? 0,
                         episode.Data?.LastPlayedDate ?? DateTime.UtcNow);
@@ -71,9 +71,9 @@ public class SyncTvShowsHandler(
         TraktMarkAsWatchedRequest traktRequest,
         TraktTvShowsDictionary traktTvShowsDic)
     {
-        var plexTvShows = await plexClient.GetTvShowsSync();
+        var tvShows = await plexClient.GetTvShowsSync();
         
-        foreach (var tvShow in plexTvShows ?? [])
+        foreach (var tvShow in tvShows ?? [])
         {
             var imdb = tvShow.Imdb ?? string.Empty;
             foreach (var seasons in tvShow.Children ?? [])

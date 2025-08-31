@@ -35,18 +35,18 @@ public class SyncMoviesHandler(
         TraktMarkAsWatchedRequest traktRequest,
         Dictionary<string,TraktWatchedMoviesResponse> traktMoviesDic)
     {
-        var embyMovies = await embyClient.GetMoviesSync();
+        var movies = await embyClient.GetMoviesSync();
 
-        foreach (var embyMovie in embyMovies.Items ?? [])
+        foreach (var movie in movies.Items ?? [])
         {
-            var imdb = embyMovie.Ids?.Imdb ?? string.Empty;
-            var playedEmby = embyMovie.Data?.Played == true;
+            var imdb = movie.Ids?.Imdb ?? string.Empty;
+            var playedEmby = movie.Data?.Played == true;
             var playedTrakt = traktMoviesDic.TryGetValue(imdb, out var traktMovie);
 
             if (playedTrakt && !playedEmby)
             {
                 // mark as watched in Emby
-                await embyClient.MarkAsWatchedAsync(embyMovie.Id);
+                await embyClient.MarkAsWatchedAsync(movie.Id);
                 logger.LogInformation("Sync movies | Marked movie {Movie} as watched on emby",
                     traktMovie?.Movie?.Title);
             }
@@ -55,10 +55,10 @@ public class SyncMoviesHandler(
                 // mark as watched in Trakt
                 traktRequest.Movies.Add(new TraktMarkAsWatchedMovieRequest
                 {
-                    Ids = new TraktMarkAsWatchedIdsRequest {Imdb = embyMovie.Ids?.Imdb},
-                    WatchedAt = embyMovie.Data?.LastPlayedDate ?? DateTime.UtcNow
+                    Ids = new TraktMarkAsWatchedIdsRequest {Imdb = movie.Ids?.Imdb},
+                    WatchedAt = movie.Data?.LastPlayedDate ?? DateTime.UtcNow
                 });
-                logger.LogInformation("Sync movies | Marked movie {Movie} as watched on trakt", embyMovie.Name);
+                logger.LogInformation("Sync movies | Marked movie {Movie} as watched on trakt", movie.Name);
             }
         }
     }
@@ -67,18 +67,18 @@ public class SyncMoviesHandler(
         TraktMarkAsWatchedRequest traktRequest,
         Dictionary<string,TraktWatchedMoviesResponse> traktMoviesDic)
     {
-        var plexMovies = await plexClient.GetMoviesSync();
+        var movies = await plexClient.GetMoviesSync();
 
-        foreach (var plexMovie in plexMovies?.Object?.MediaContainer?.Metadata ?? [])
+        foreach (var movie in movies?.Object?.MediaContainer?.Metadata ?? [])
         {
-            var imdb = plexMovie?.Guids?.Select(x => x.Id)?.GetImdb();
-            var playedPlex = plexMovie?.ViewCount > 0;
+            var imdb = movie?.Guids?.Select(x => x.Id)?.GetImdb();
+            var playedPlex = movie?.ViewCount > 0;
             var playedTrakt = traktMoviesDic.TryGetValue(imdb ?? string.Empty, out var traktMovie);
 
             if (playedTrakt && !playedPlex)
             {
                 // mark as watched in plex
-                await plexClient.MarkAsWatchedAsync(plexMovie?.RatingKey ?? string.Empty);
+                await plexClient.MarkAsWatchedAsync(movie?.RatingKey ?? string.Empty);
                 logger.LogInformation("Sync movies | Marked movie {Movie} as watched on emby", traktMovie?.Movie?.Title);
             }
             else if (!playedTrakt && playedPlex)
@@ -86,9 +86,9 @@ public class SyncMoviesHandler(
                 traktRequest.Movies.Add(new TraktMarkAsWatchedMovieRequest
                 {
                     Ids = new TraktMarkAsWatchedIdsRequest { Imdb = imdb },
-                    WatchedAt = DateTimeOffset.FromUnixTimeSeconds(plexMovie?.LastViewedAt ?? 0).UtcDateTime 
+                    WatchedAt = DateTimeOffset.FromUnixTimeSeconds(movie?.LastViewedAt ?? 0).UtcDateTime 
                 });
-                logger.LogInformation("Sync movies | Marked movie {Movie} as watched on plex", plexMovie?.OriginalTitle);
+                logger.LogInformation("Sync movies | Marked movie {Movie} as watched on plex", movie?.OriginalTitle);
             }
         }
     }
