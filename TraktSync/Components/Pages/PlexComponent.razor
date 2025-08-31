@@ -1,0 +1,33 @@
+@using TraktSync.Config
+
+<MudForm>
+    <MudGrid Spacing="4">
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField
+                T="Uri"
+                Label="@nameof(Config.Plex.BaseUrl)"
+                @bind-Value="Config.Plex!.BaseUrl"
+                Immediate
+                Clearable/>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField
+                T="string"
+                Label="@nameof(Config.Plex.ApiKey)"
+                @bind-Value="Config.Plex!.ApiKey"
+                Immediate
+                Clearable/>
+        </MudItem>
+    </MudGrid>
+    <MudStack Row Justify="Justify.FlexEnd" Class="mt-4">
+        <MudSpacer/>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@Save">Save</MudButton>
+    </MudStack>
+</MudForm>
+
+@code {
+    [Parameter] public required Config Config { get; set; }
+    [Parameter] public required EventCallback<Config> OnChangeConfig { get; set; }
+    
+    private async Task Save() => await OnChangeConfig.InvokeAsync(Config);
+}

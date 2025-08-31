@@ -1,30 +1,34 @@
 ﻿@page "/"
 @using TraktSync.Config
-@using TraktSync.Trakt
+@using TraktSync.Handler
 
-@inject IJSRuntime JsRuntime
 @inject ISnackbar Snackbar
-@inject ITraktClient TraktClient
 @inject ConfigHandler ConfigHandler
+@inject SyncHandler SyncHandler
 
 <PageTitle>Trakt sync</PageTitle>
 
-<MudText Typo="Typo.h2">Welcome to trakt sync</MudText>
+<MudText Typo="Typo.h2">Trakt sync</MudText>
 
 <MudExpansionPanels MultiExpansion>
     <MudExpansionPanel Text="Trakt" Expanded>
         <TraktComponent Config="_config" OnChangeConfig="UpdateSync"/>
     </MudExpansionPanel>
     <MudExpansionPanel Text="Emby">
-        Panel Two Content
+        <EmbyComponent Config="_config" OnChangeConfig="UpdateSync"/>
     </MudExpansionPanel>
     <MudExpansionPanel Text="Plex">
-        Panel Three Content
+        <PlexComponent Config="_config" OnChangeConfig="UpdateSync"/>
     </MudExpansionPanel>
 </MudExpansionPanels>
+<MudStack Row Justify="Justify.FlexEnd" Class="mt-4">
+    <MudSpacer/>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@Sync" Disabled="_isSyncing">Sync</MudButton>
+</MudStack>
 
 @code {
     private Config _config = new();
+    private bool _isSyncing;
 
     protected override async Task OnInitializedAsync()
     {
@@ -34,15 +38,48 @@
         }
         catch
         {
+            Snackbar.Add("Fail to load config!", Severity.Error);
             _config = new Config();
         }
 
         await Task.CompletedTask;
     }
 
-    public void UpdateSync(Config config)
+    private void UpdateSync(Config config)
     {
         _config = config;
+
+        try
+        {
+            ConfigHandler.UpdateConfig(_config);
+            StateHasChanged();
+            
+            Snackbar.Add("Config saved!", Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Fail to save!", Severity.Error);   
+        }
+    }
+    
+    private async Task Sync()
+    {
         StateHasChanged();
+        _isSyncing = true;
+        
+        try
+        {
+            await SyncHandler.SyncAsync();
+            Snackbar.Add("Synced!", Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Sync failed!", Severity.Error);
+        }
+        finally
+        {
+            _isSyncing = false;
+            StateHasChanged();
+        }
     }
 }

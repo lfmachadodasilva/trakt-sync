@@ -1,0 +1,52 @@
+@using TraktSync.Config
+
+@inject IJSRuntime JsRuntime
+
+<MudForm>
+    <MudGrid Spacing="4">
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField
+                T="Uri"
+                Label="@nameof(Config.Emby.BaseUrl)"
+                @bind-Value="Config.Emby!.BaseUrl"
+                Immediate
+                Clearable/>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField
+                T="string"
+                Label="@nameof(Config.Emby.ApiKey)"
+                @bind-Value="Config.Emby!.ApiKey"
+                Immediate
+                Clearable/>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField
+                T="string"
+                Label="@nameof(Config.Emby.UserId)"
+                @bind-Value="Config.Emby!.UserId"
+                Immediate
+                Clearable
+                Adornment="Adornment.End"
+                AdornmentIcon="@Icons.Material.Filled.People"
+                OnAdornmentClick="@OpenEmbyUsers"/>
+        </MudItem>
+    </MudGrid>
+    <MudStack Row Justify="Justify.FlexEnd" Class="mt-4">
+        <MudSpacer/>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@Save">Save</MudButton>
+    </MudStack>
+</MudForm>
+
+@code {
+    [Parameter] public required Config Config { get; set; }
+    [Parameter] public required EventCallback<Config> OnChangeConfig { get; set; }
+    
+    private async Task Save() => await OnChangeConfig.InvokeAsync(Config);
+    
+    private void OpenEmbyUsers()
+    {
+        var url = $"{Config?.Emby?.BaseUrl}web/index.html#!/users";
+        JsRuntime.InvokeVoidAsync("open", url, "_blank");
+    }
+}

@@ -4,7 +4,6 @@
 @inject IJSRuntime JsRuntime
 @inject ISnackbar Snackbar
 @inject ITraktClient TraktClient
-@inject ConfigHandler ConfigHandler
 
 <MudForm>
     <MudGrid Spacing="4">
@@ -20,6 +19,7 @@
                 T="string"
                 Label="@nameof(Config.Trakt.ClientId)"
                 @bind-Value="Config.Trakt.ClientId"
+                Immediate
                 Clearable/>
         </MudItem>
         <MudItem xs="12" sm="6" md="4">
@@ -27,6 +27,7 @@
                 T="string"
                 Label="@nameof(Config.Trakt.ClientSecret)"
                 @bind-Value="Config.Trakt.ClientSecret"
+                Immediate
                 Clearable/>
         </MudItem>
         @if (string.IsNullOrEmpty(Config.Trakt.AccessToken) ||
@@ -48,7 +49,7 @@
     </MudGrid>
     <MudStack Row Justify="Justify.FlexEnd" Class="mt-4">
         <MudSpacer/>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@SaveTrakt">Save</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@Save">Save</MudButton>
     </MudStack>
 </MudForm>
 
@@ -75,17 +76,5 @@
         JsRuntime.InvokeVoidAsync("open", url, "_blank");
     }
 
-    private void SaveTrakt()
-    {
-        try
-        {
-            var config = ConfigHandler.UpdateConfig(Config);
-            OnChangeConfig.InvokeAsync(config);
-            Snackbar.Add("Config saved!", Severity.Success);
-        }
-        catch
-        {
-            Snackbar.Add("Fail to save", Severity.Error);   
-        }
-    }
+    private void Save() => OnChangeConfig.InvokeAsync(Config);
 }
