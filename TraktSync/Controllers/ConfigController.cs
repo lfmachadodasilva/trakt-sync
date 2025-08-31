@@ -9,8 +9,7 @@ public class ConfigController(ConfigHandler configHandler) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(Config.Config), StatusCodes.Status200OK)]
-    public IActionResult GetAsync() =>
-        Ok(configHandler.GetAsync());
+    public IActionResult GetAsync() => Ok(configHandler.GetAsync());
     
     [HttpPost]
     [ProducesResponseType(typeof(Config.Config), StatusCodes.Status200OK)]

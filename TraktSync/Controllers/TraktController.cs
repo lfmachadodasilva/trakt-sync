@@ -8,7 +8,7 @@ public class TraktAuthCode
 {
     [Required]
     [MaxLength(8)]
-    public required string Code { get; set; }
+    public required string? Code { get; set; }
 }
 
 [ApiController]
@@ -26,8 +26,11 @@ public class TraktController(TraktClient traktClient) : ControllerBase
     
     [HttpPost("auth")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> AuthAsync([FromBody] TraktAuthCode request)
+    public async Task<IActionResult> AuthAsync([FromBody, Required] TraktAuthCode request)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request.Code);
+        
         await traktClient.AuthAsync(request.Code);
         return Ok();
     }

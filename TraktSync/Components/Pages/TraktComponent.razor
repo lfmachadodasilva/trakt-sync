@@ -1,0 +1,91 @@
+@using TraktSync.Config
+@using TraktSync.Trakt
+
+@inject IJSRuntime JsRuntime
+@inject ISnackbar Snackbar
+@inject ITraktClient TraktClient
+@inject ConfigHandler ConfigHandler
+
+<MudForm>
+    <MudGrid Spacing="4">
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField
+                T="Uri"
+                Label="@nameof(Config.Trakt.BaseUrl)"
+                @bind-Value="Config.Trakt.BaseUrl"
+                Clearable/>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField
+                T="string"
+                Label="@nameof(Config.Trakt.ClientId)"
+                @bind-Value="Config.Trakt.ClientId"
+                Clearable/>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField
+                T="string"
+                Label="@nameof(Config.Trakt.ClientSecret)"
+                @bind-Value="Config.Trakt.ClientSecret"
+                Clearable/>
+        </MudItem>
+        @if (string.IsNullOrEmpty(Config.Trakt.AccessToken) ||
+             string.IsNullOrEmpty(Config.Trakt.RefreshToken))
+        {
+            <MudItem xs="12" sm="6" md="4" Style="display: inline-block">
+                <MudTextField
+                    T="string"
+                    Label="Code"
+                    Adornment="Adornment.End"
+                    AdornmentIcon="@Icons.Material.Filled.Link"
+                    OnAdornmentClick="@OpenTraktCode"
+                    @bind-Value="_code"
+                    Immediate
+                    Clearable/>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@AuthTrakt">Auth</MudButton>
+            </MudItem>
+        }
+    </MudGrid>
+    <MudStack Row Justify="Justify.FlexEnd" Class="mt-4">
+        <MudSpacer/>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@SaveTrakt">Save</MudButton>
+    </MudStack>
+</MudForm>
+
+@code {
+    [Parameter] public required Config Config { get; set; }
+    [Parameter] public required EventCallback<Config> OnChangeConfig { get; set; }
+    
+    private string? _code;
+    
+    private async Task AuthTrakt()
+    {
+        if (string.IsNullOrEmpty(_code))
+        {
+            Snackbar.Add("You must provide code first!", Severity.Error);
+            return;
+        }
+
+        await TraktClient.AuthAsync(_code);
+    }
+
+    private void OpenTraktCode()
+    {
+        var url = TraktClient.GetCodeUrl();
+        JsRuntime.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    private void SaveTrakt()
+    {
+        try
+        {
+            var config = ConfigHandler.UpdateConfig(Config);
+            OnChangeConfig.InvokeAsync(config);
+            Snackbar.Add("Config saved!", Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Fail to save", Severity.Error);   
+        }
+    }
+}

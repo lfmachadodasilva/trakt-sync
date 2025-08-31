@@ -1,9 +1,48 @@
 ﻿@page "/"
+@using TraktSync.Config
+@using TraktSync.Trakt
 
-<PageTitle>Home</PageTitle>
+@inject IJSRuntime JsRuntime
+@inject ISnackbar Snackbar
+@inject ITraktClient TraktClient
+@inject ConfigHandler ConfigHandler
 
-<h1>Hello, world!</h1>
+<PageTitle>Trakt sync</PageTitle>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary">test</MudButton>
+<MudText Typo="Typo.h2">Welcome to trakt sync</MudText>
 
-Welcome to your new app.
+<MudExpansionPanels MultiExpansion>
+    <MudExpansionPanel Text="Trakt" Expanded>
+        <TraktComponent Config="_config" OnChangeConfig="UpdateSync"/>
+    </MudExpansionPanel>
+    <MudExpansionPanel Text="Emby">
+        Panel Two Content
+    </MudExpansionPanel>
+    <MudExpansionPanel Text="Plex">
+        Panel Three Content
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+@code {
+    private Config _config = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _config = ConfigHandler.GetAsync() ?? new Config();
+        }
+        catch
+        {
+            _config = new Config();
+        }
+
+        await Task.CompletedTask;
+    }
+
+    public void UpdateSync(Config config)
+    {
+        _config = config;
+        StateHasChanged();
+    }
+}

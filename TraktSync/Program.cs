@@ -5,7 +5,10 @@ using TraktSync.Handler;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services
+    .AddRazorComponents()
+    .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents();
 builder.Services.AddEndpointsApiExplorer().AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
