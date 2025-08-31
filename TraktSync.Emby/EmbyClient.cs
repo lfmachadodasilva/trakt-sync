@@ -9,8 +9,8 @@ namespace TraktSync.Emby;
 
 public interface IEmbyClient
 {
-    Task<EmbyResponse> GetTvShowsSync();
-    Task<EmbyResponse> GetMoviesSync();
+    Task<EmbyResponse?> GetTvShowsSync();
+    Task<EmbyResponse?> GetMoviesSync();
     Task MarkAsWatchedAsync(string itemId);
 }
 
@@ -18,11 +18,11 @@ public class EmbyClient(
     ConfigHandler configHandler,
     ILogger<EmbyClient> logger) : IEmbyClient
 {
-    public async Task<EmbyResponse> GetTvShowsSync()
+    public async Task<EmbyResponse?> GetTvShowsSync()
     {
         var tvShows = await GetItemsAsync(EmbyItemType.Series);
         var episodes = await GetItemsAsync(EmbyItemType.Episode);
-        var tvSeriesDic = tvShows.Items?.ToDictionary(x => x.Id, x => x);
+        var tvSeriesDic = tvShows?.Items?.ToDictionary(x => x.Id, x => x);
         foreach (var episode in episodes?.Items?.Where(x => !string.IsNullOrEmpty(x.ParentId))!)
         {
             if (tvSeriesDic != null && tvSeriesDic.TryGetValue(episode.ParentId!, out var tvShow))
@@ -42,34 +42,34 @@ public class EmbyClient(
         return tvShows;
     }
 
-    public async Task<EmbyResponse> GetMoviesSync() =>
+    public async Task<EmbyResponse?> GetMoviesSync() =>
         await GetItemsAsync(EmbyItemType.Movie);
     
-    private async Task<EmbyResponse> GetItemsAsync(EmbyItemType type)
+    private async Task<EmbyResponse?> GetItemsAsync(EmbyItemType type)
     {
-        var config = configHandler.GetAsync()?.Emby ?? throw new NullReferenceException("Emby config is null");
-        
-        using HttpClient httpClient = new();
-        httpClient.BaseAddress = config.BaseUrl;
-        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-        httpClient.DefaultRequestHeaders.Add("X-Emby-Token", config.ApiKey);
-
-        var query = new EmbyRequest
-        {
-            IncludeItemTypes = type.ToString()
-        };
-        var queryParams = query
-            .GetType()
-            .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-            .ToDictionary(
-                prop => prop.Name,
-                prop => prop.GetValue(query, null)?.ToString()
-            );
-
-        var url = QueryHelpers.AddQueryString($"/Users/{config.UserId}/Items", queryParams);
-
         try
         {
+            var config = configHandler.GetAsync()?.Emby ?? throw new NullReferenceException("Emby config is null");
+        
+            using HttpClient httpClient = new();
+            httpClient.BaseAddress = config.BaseUrl;
+            httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            httpClient.DefaultRequestHeaders.Add("X-Emby-Token", config.ApiKey);
+
+            var query = new EmbyRequest
+            {
+                IncludeItemTypes = type.ToString()
+            };
+            var queryParams = query
+                .GetType()
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .ToDictionary(
+                    prop => prop.Name,
+                    prop => prop.GetValue(query, null)?.ToString()
+                );
+
+            var url = QueryHelpers.AddQueryString($"/Users/{config.UserId}/Items", queryParams);
+            
             var response = await httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
             {
@@ -85,7 +85,7 @@ public class EmbyClient(
         catch (Exception ex)
         {
             logger.LogError("Emby client | Error getting watched shows: {RequestMessage}", ex.Message);
-            throw;
+            return null;
         }
     }
     

@@ -9,8 +9,8 @@ namespace TraktSync.Plex;
 
 public interface IPlexClient
 {
-    Task<ICollection<PlexTvShow>> GetTvShowsSync();
-    Task<GetLibrarySectionsAllResponse> GetMoviesSync();
+    Task<ICollection<PlexTvShow>?> GetTvShowsSync();
+    Task<GetLibrarySectionsAllResponse?> GetMoviesSync();
     Task MarkAsWatchedAsync(string itemId);
 }
 
@@ -18,54 +18,54 @@ public class PlexClient(
     ConfigHandler configHandler,
     ILogger<PlexClient> logger) : IPlexClient
 {
-    public async Task<GetLibrarySectionsAllResponse> GetMoviesSync()
+    public async Task<GetLibrarySectionsAllResponse?> GetMoviesSync()
     {
-        var config = configHandler.GetAsync()?.Plex ?? throw new NullReferenceException("Plex config is null");
-        
-        using var client = new SpeakeasyHttpClient2();
-        var sdk = new PlexAPI(accessToken: config.ApiKey, serverUrl: config.BaseUrl.ToString(), client: client);
-        var request = new GetLibrarySectionsAllRequest
-        {
-            SectionKey = 1,
-            Type = GetLibrarySectionsAllQueryParamType.Movie,
-            IncludeGuids = QueryParamIncludeGuids.Enable,
-            IncludeAdvanced = IncludeAdvanced.Enable,
-            IncludeCollections = QueryParamIncludeCollections.Enable,
-            IncludeExternalMedia = QueryParamIncludeExternalMedia.Disable,
-            IncludeMeta = GetLibrarySectionsAllQueryParamIncludeMeta.Enable
-        };
-
         try
         {
+            var config = configHandler.GetAsync()?.Plex ?? throw new NullReferenceException("Plex config is null");
+        
+            using var client = new SpeakeasyHttpClient2();
+            var sdk = new PlexAPI(accessToken: config.ApiKey, serverUrl: config.BaseUrl.ToString(), client: client);
+            var request = new GetLibrarySectionsAllRequest
+            {
+                SectionKey = 1,
+                Type = GetLibrarySectionsAllQueryParamType.Movie,
+                IncludeGuids = QueryParamIncludeGuids.Enable,
+                IncludeAdvanced = IncludeAdvanced.Enable,
+                IncludeCollections = QueryParamIncludeCollections.Enable,
+                IncludeExternalMedia = QueryParamIncludeExternalMedia.Disable,
+                IncludeMeta = GetLibrarySectionsAllQueryParamIncludeMeta.Enable
+            };
+            
             var result = await sdk.Library.GetLibrarySectionsAllAsync(request);
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError("Plex client | Error getting watched movies: {RequestMessage}", ex.Message);
-            throw;
+            logger.LogError(ex, "Plex client | Error getting watched movies");
+            return null;
         }
     }
     
-    public async Task<ICollection<PlexTvShow>> GetTvShowsSync()
+    public async Task<ICollection<PlexTvShow>?> GetTvShowsSync()
     {
-        var config = configHandler.GetAsync()?.Plex ?? throw new NullReferenceException("Plex config is null");
-        
-        using var client = new SpeakeasyHttpClient2();
-        var sdk = new PlexAPI(accessToken: config.ApiKey, serverUrl: config.BaseUrl.ToString(), client: client);
-        var request = new GetLibrarySectionsAllRequest
-        {
-            SectionKey = 2,
-            Type = GetLibrarySectionsAllQueryParamType.Episode,
-            IncludeGuids = QueryParamIncludeGuids.Enable,
-            IncludeAdvanced = IncludeAdvanced.Enable,
-            IncludeCollections = QueryParamIncludeCollections.Enable,
-            IncludeExternalMedia = QueryParamIncludeExternalMedia.Disable,
-            IncludeMeta = GetLibrarySectionsAllQueryParamIncludeMeta.Enable
-        };
-
         try
         {
+            var config = configHandler.GetAsync()?.Plex ?? throw new NullReferenceException("Plex config is null");
+        
+            using var client = new SpeakeasyHttpClient2();
+            var sdk = new PlexAPI(accessToken: config.ApiKey, serverUrl: config.BaseUrl.ToString(), client: client);
+            var request = new GetLibrarySectionsAllRequest
+            {
+                SectionKey = 2,
+                Type = GetLibrarySectionsAllQueryParamType.Episode,
+                IncludeGuids = QueryParamIncludeGuids.Enable,
+                IncludeAdvanced = IncludeAdvanced.Enable,
+                IncludeCollections = QueryParamIncludeCollections.Enable,
+                IncludeExternalMedia = QueryParamIncludeExternalMedia.Disable,
+                IncludeMeta = GetLibrarySectionsAllQueryParamIncludeMeta.Enable
+            };
+            
             ICollection<PlexTvShow> tvShows = [];
             var response = await sdk.Library.GetLibrarySectionsAllAsync(request);
             
@@ -119,8 +119,8 @@ public class PlexClient(
         }
         catch (Exception ex)
         {
-            logger.LogError("Plex client | Error getting watched movies: {RequestMessage}", ex.Message);
-            throw;
+            logger.LogError(ex, "Plex client | Error getting watched movies");
+            return null;
         }
     }
     

@@ -37,7 +37,7 @@ public class SyncMoviesHandler(
     {
         var movies = await embyClient.GetMoviesSync();
 
-        foreach (var movie in movies.Items ?? [])
+        foreach (var movie in movies?.Items ?? [])
         {
             var imdb = movie.Ids?.Imdb ?? string.Empty;
             var playedEmby = movie.Data?.Played == true;
