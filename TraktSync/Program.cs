@@ -1,3 +1,4 @@
+using MudBlazor.Services;
 using TraktSync.Components;
 using TraktSync.Handler;
 
@@ -9,6 +10,7 @@ builder.Services.AddEndpointsApiExplorer().AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 builder.Services.AddHandler();
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 
