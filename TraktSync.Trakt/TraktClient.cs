@@ -47,21 +47,25 @@ public class TraktClient(
         httpClient.DefaultRequestHeaders.Add("trakt-api-key", config.ClientId);
         httpClient.DefaultRequestHeaders.Add("Authorization", $"{config.TokenType} {config.AccessToken}");
         
+        logger.LogInformation("Trakt client | Marking as watched: {Config}",
+            System.Text.Json.JsonSerializer.Serialize(config));
+        
         try
         {
             var response = await httpClient.PostAsJsonAsync("sync/history", traktRequest, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
+                logger.LogError(
+                    "Trakt client | Error marking as watched: {StatusCode} - {RequestMessage}",
+                    response.StatusCode, response.RequestMessage);
+                
                 if (refreshToken)
                 {
                     await AuthRefreshAccessTokenAsync(cancellationToken);
                     await MarkAsWatchedAsync(traktRequest, false, cancellationToken);
                     return;
                 }
-                
-                logger.LogError(
-                    "Trakt client | Error marking as watched: {StatusCode} - {RequestMessage}",
-                    response.StatusCode, response.RequestMessage);
+
                 throw new Exception("Trakt client | Error marking as watched");    
             }
         }
