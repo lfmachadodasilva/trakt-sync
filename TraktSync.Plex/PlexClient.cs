@@ -119,7 +119,7 @@ public class PlexClient(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Plex client | Error getting watched movies");
+            logger.LogError(ex, "Plex client | Error getting watched tv shows");
             return null;
         }
     }

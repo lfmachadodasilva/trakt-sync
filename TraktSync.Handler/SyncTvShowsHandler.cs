@@ -22,7 +22,7 @@ public class SyncTvShowsHandler(
         
         logger.LogInformation("Sync tv shows | Starting sync process");
         
-        var traktWatchedTvShows = await traktClient.GetWatchedTvShowsAsync();
+        var traktWatchedTvShows = await traktClient.GetWatchedTvShowsAsync(cancellationToken);
         var traktTvShowsDic = ToDictionary(traktWatchedTvShows);
         
         await SyncEmbyAsync(traktRequest, traktTvShowsDic, cancellationToken);
@@ -51,11 +51,11 @@ public class SyncTvShowsHandler(
                 if (playedTrakt && !playedEmby)
                 {
                     // mark as watched in Emby
-                    await embyClient.MarkAsWatchedAsync(episode.Id);
+                    await embyClient.MarkAsWatchedAsync(episode.Id, cancellationToken);
                     logger.LogInformation(
                         "Sync tv shows | Marked episode {Episode} as watched on emby", episode.Name);
                 }
-                else if (!playedEmby && playedTrakt)
+                else if (!playedTrakt && playedEmby)
                 {
                     // mark as watched in Trakt
                     traktRequest.AddMarkAsWatchedRequest(
@@ -92,7 +92,7 @@ public class SyncTvShowsHandler(
                     if (playedTrakt && !playedPlex)
                     {
                         // mark as watched in plex
-                        await plexClient.MarkAsWatchedAsync(episode.Id ?? string.Empty);
+                        await plexClient.MarkAsWatchedAsync(episode.Id ?? string.Empty, cancellationToken);
                     }
                     else if (!playedTrakt && playedPlex)
                     {

@@ -3,5 +3,11 @@
   "extends": ["config:recommended"],
   "rangeStrategy": "bump",
   "automerge": true,
-  "automergeType": "pr"
+  "automergeType": "pr",
+  "packageRules": [
+    {
+      "matchManagers": ["nuget"],
+      "enabled": true
+    }
+  ]
 }
