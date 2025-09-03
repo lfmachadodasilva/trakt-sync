@@ -20,7 +20,7 @@ public class SyncMoviesHandler(
         
         logger.LogInformation("Sync movies | Starting sync process");
         
-        var traktWatchedMovies = await traktClient.GetWatchedMoviesAsync();
+        var traktWatchedMovies = await traktClient.GetWatchedMoviesAsync(cancellationToken);
         var traktMoviesDic = traktWatchedMovies
             .Where(w => !string.IsNullOrEmpty(w.Movie?.Ids?.Imdb))
             .GroupBy(x => x.Movie?.Ids?.Imdb ?? string.Empty)
@@ -38,7 +38,7 @@ public class SyncMoviesHandler(
         Dictionary<string,TraktWatchedMoviesResponse> traktMoviesDic,
         CancellationToken cancellationToken = default)
     {
-        var movies = await embyClient.GetMoviesSync();
+        var movies = await embyClient.GetMoviesSync(cancellationToken);
 
         foreach (var movie in movies?.Items ?? [])
         {
@@ -49,7 +49,7 @@ public class SyncMoviesHandler(
             if (playedTrakt && !playedEmby)
             {
                 // mark as watched in Emby
-                await embyClient.MarkAsWatchedAsync(movie.Id);
+                await embyClient.MarkAsWatchedAsync(movie.Id, cancellationToken);
                 logger.LogInformation("Sync movies | Marked movie {Movie} as watched on emby",
                     traktMovie?.Movie?.Title);
             }
@@ -82,7 +82,7 @@ public class SyncMoviesHandler(
             if (playedTrakt && !playedPlex)
             {
                 // mark as watched in plex
-                await plexClient.MarkAsWatchedAsync(movie?.RatingKey ?? string.Empty);
+                await plexClient.MarkAsWatchedAsync(movie?.RatingKey ?? string.Empty, cancellationToken);
                 logger.LogInformation("Sync movies | Marked movie {Movie} as watched on emby", traktMovie?.Movie?.Title);
             }
             else if (!playedTrakt && playedPlex)

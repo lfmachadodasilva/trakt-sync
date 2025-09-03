@@ -26,9 +26,12 @@
     <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@Sync" Disabled="_isSyncing">Sync</MudButton>
 </MudStack>
 
+@implements IAsyncDisposable
+
 @code {
     private Config _config = new();
     private bool _isSyncing;
+    private readonly CancellationTokenSource _cts = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -62,15 +65,25 @@
         }
     }
     
+    public async ValueTask DisposeAsync()
+    {
+        await _cts.CancelAsync();
+        _cts.Dispose();
+        await Task.CompletedTask;
+    }
+
     private async Task Sync()
     {
         StateHasChanged();
         _isSyncing = true;
-        
         try
         {
-            await SyncHandler.SyncAsync();
+            await SyncHandler.SyncAsync(_cts.Token);
             Snackbar.Add("Synced!", Severity.Success);
+        }
+        catch (OperationCanceledException)
+        {
+            Snackbar.Add("Sync cancelled!", Severity.Warning);
         }
         catch
         {
