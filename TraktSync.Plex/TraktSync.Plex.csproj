@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="LukeHagar.PlexAPI.SDK" Version="0.16.1" />
+        <PackageReference Include="LukeHagar.PlexAPI.SDK" Version="0.20.2" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.13" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.13" />
     </ItemGroup>
