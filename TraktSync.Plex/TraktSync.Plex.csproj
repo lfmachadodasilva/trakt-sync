@@ -2,8 +2,8 @@
 
     <ItemGroup>
         <PackageReference Include="LukeHagar.PlexAPI.SDK" Version="0.16.1" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.13" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.13" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
     </ItemGroup>
 
     <ItemGroup>
